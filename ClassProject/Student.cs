@@ -225,5 +225,31 @@ namespace ClassProject
                 return count > 0;
             }
         }
+        public static DataTable SearchStudents(string keyword, string connectionString)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT MSSV, LastName, FirstName, DateOfBirth, Gender, Phone, Email 
+                         FROM Students 
+                         WHERE CAST(MSSV AS NVARCHAR) LIKE @key 
+                         OR FirstName LIKE @key 
+                         OR LastName LIKE @key";
+                try
+                {
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@key", "%" + keyword.Trim() + "%");
+
+                    SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                    conn.Open();
+                    adapter.Fill(dt);
+                }
+                catch (SqlException ex)
+                {
+                    throw new Exception("Lỗi truy vấn Database: " + ex.Message);
+                }
+            }
+            return dt;
+        }
     }
 }
