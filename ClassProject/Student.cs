@@ -170,16 +170,16 @@ namespace ClassProject
         public DataTable getStudents(SqlCommand command)
         {
             My_DB db = new My_DB();
+            DataTable table = new DataTable();
 
+            // Đảm bảo Connection được mở và gán đúng
             using (SqlConnection conn = db.GetConnection())
             {
                 command.Connection = conn;
                 SqlDataAdapter adapter = new SqlDataAdapter(command);
-                DataTable table = new DataTable();
-
                 adapter.Fill(table);
-                return table;
             }
+            return table;
         }
         public bool AddStudent(string connectionString)
         {
