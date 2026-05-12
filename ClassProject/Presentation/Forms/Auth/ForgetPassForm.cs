@@ -45,13 +45,10 @@ namespace ClassProject.Presentation.Forms
             _otp = new Random().Next(100000, 999999).ToString();
             _verifiedEmail = email;
 
-            // Gửi email
-            if (SendOTPEmail(email, _otp))
-            {
-                MessageBox.Show("OTP đã được gửi đến email của bạn!", "Success",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                SetOTPSectionVisible(true);
-            }
+            // Thay vì gửi email thật thì hiện mã OTP random sau khi nhấn nút OTP
+            MessageBox.Show($"[CHẾ ĐỘ TEST]\nMã OTP đã được gửi đến: {email}\nMã của bạn là: {_otp}",
+                    "Mock OTP System", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            SetOTPSectionVisible(true);
         }
 
         private void btnReset_Click(object sender, EventArgs e)
