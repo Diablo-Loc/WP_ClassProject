@@ -162,5 +162,15 @@ namespace ClassProject
         {
             return Regex.IsMatch(phone, @"^[0-9]{10}$");
         }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void pnlBackground_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }
