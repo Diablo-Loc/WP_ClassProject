@@ -44,14 +44,15 @@ namespace ClassProject
             ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
             SuspendLayout();
             // 
-            // pctBoxLogo
+            // picLogo
             // 
+            picLogo.BackColor = Color.Transparent;
             picLogo.BackgroundImageLayout = ImageLayout.Center;
             picLogo.BorderStyle = BorderStyle.FixedSingle;
             picLogo.Image = Properties.Resources.Login_ico;
             picLogo.Location = new Point(0, 0);
             picLogo.Margin = new Padding(3, 2, 3, 2);
-            picLogo.Name = "pctBoxLogo";
+            picLogo.Name = "picLogo";
             picLogo.Size = new Size(95, 82);
             picLogo.SizeMode = PictureBoxSizeMode.Zoom;
             picLogo.TabIndex = 13;
