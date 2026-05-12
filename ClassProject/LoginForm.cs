@@ -79,7 +79,9 @@ namespace ClassProject
                         {
                             MessageBox.Show("Đăng nhập Admin thành công!");
 
-                            AddStudentForm f = new AddStudentForm(userId);
+                            //AddStudentForm f = new AddStudentForm(userId);
+                            //StudentListForm f = new StudentListForm();
+                            MainForm f = new MainForm();
                             f.Show();
 
                             this.Hide();

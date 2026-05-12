@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using ClassProject.DataAccess.Db;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic.ApplicationServices;
 using System;
 using System.Collections.Generic;
@@ -166,6 +167,20 @@ namespace ClassProject
                    $"Ảnh       : {(Picture != null ? "Có" : "Chưa có")}";
         }
 
+        public DataTable getStudents(SqlCommand command)
+        {
+            My_DB db = new My_DB();
+
+            using (SqlConnection conn = db.GetConnection())
+            {
+                command.Connection = conn;
+                SqlDataAdapter adapter = new SqlDataAdapter(command);
+                DataTable table = new DataTable();
+
+                adapter.Fill(table);
+                return table;
+            }
+        }
         public bool AddStudent(string connectionString)
         {
             SqlConnection conn = null;
@@ -223,6 +238,47 @@ namespace ClassProject
                 conn.Open();
                 int count = (int)cmd.ExecuteScalar();
                 return count > 0;
+            }
+        }
+        public bool deleteStudent(int id)
+        {
+            My_DB db = new My_DB();
+            using (SqlConnection conn = db.GetConnection())
+            {
+                SqlCommand command = new SqlCommand("DELETE FROM Students WHERE MSSV = @id", conn);
+                command.Parameters.AddWithValue("@id", id);
+
+                conn.Open();
+                int result = command.ExecuteNonQuery();
+                return result == 1;
+            }
+        }
+        public bool UpdateStudent()
+        {
+            My_DB db = new My_DB();
+            string sql = @"UPDATE Students 
+                   SET FirstName=@fn, LastName=@ln, DateOfBirth=@db, Gender=@gr, 
+                       Phone=@ph, Address=@ad, Hometown=@ht, Email=@em, Picture=@pc 
+                   WHERE MSSV=@mssv";
+
+            // Thêm dấu () sau GetConnection
+            using (SqlConnection conn = db.GetConnection())
+            {
+                SqlCommand command = new SqlCommand(sql, conn);
+                command.Parameters.AddWithValue("@mssv", this.Mssv);
+                command.Parameters.AddWithValue("@fn", this.FirstName);
+                command.Parameters.AddWithValue("@ln", this.LastName);
+                command.Parameters.AddWithValue("@db", this.DateOfBirth);
+                command.Parameters.AddWithValue("@gr", this.Gender);
+                command.Parameters.AddWithValue("@ph", this.Phone);
+                command.Parameters.AddWithValue("@ad", this.Address ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@ht", this.Hometown ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@em", this.Email);
+                command.Parameters.AddWithValue("@pc", this.Picture ?? (object)DBNull.Value);
+
+                conn.Open();
+                bool result = (command.ExecuteNonQuery() == 1);
+                return result;
             }
         }
     }
