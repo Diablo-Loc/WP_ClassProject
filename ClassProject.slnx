@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="My_DB.cs" />
+  </Folder>
+  <Project Path="ClassProject/ClassProject.csproj" />
+</Solution>
