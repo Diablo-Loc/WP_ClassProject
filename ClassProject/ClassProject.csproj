@@ -30,4 +30,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Presentation\Controls\" />
+  </ItemGroup>
+
 </Project>

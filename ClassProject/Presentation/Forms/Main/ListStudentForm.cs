@@ -1,4 +1,4 @@
-﻿using ClassProject;
+﻿using ClassProject.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
 

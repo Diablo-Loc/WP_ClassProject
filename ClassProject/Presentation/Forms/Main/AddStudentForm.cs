@@ -1,4 +1,5 @@
 ﻿using ClassProject.DataAccess.Db;
+using ClassProject.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic.ApplicationServices;
 using System;

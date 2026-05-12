@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 //using ClassProject.DataAccess.Repositories;
 
-namespace ClassProject.Business.Services
+namespace ClassProject.Models
 {
     internal class UserService
     {
