@@ -30,7 +30,6 @@
         {
             picStudent = new PictureBox();
             btnChooseImage = new Button();
-            lbMSSV = new Label();
             lbFirstName = new Label();
             lbLastName = new Label();
             lbDateOfBirth = new Label();
@@ -47,13 +46,12 @@
             txtEmail = new TextBox();
             cboGender = new ComboBox();
             lblHometown = new Label();
+            lbMSSV = new Label();
             lbEmail = new Label();
             lbAddress = new Label();
             txtHometown = new TextBox();
-            pnlBackground = new Panel();
             picLogo = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)picStudent).BeginInit();
-            pnlBackground.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
             SuspendLayout();
             // 
@@ -77,17 +75,6 @@
             btnChooseImage.UseVisualStyleBackColor = true;
             btnChooseImage.Click += btnChooseImage_Click;
             // 
-            // lbMSSV
-            // 
-            lbMSSV.AutoSize = true;
-            lbMSSV.BackColor = Color.White;
-            lbMSSV.Font = new Font("Segoe UI", 12F);
-            lbMSSV.Location = new Point(418, 64);
-            lbMSSV.Name = "lbMSSV";
-            lbMSSV.Size = new Size(52, 21);
-            lbMSSV.TabIndex = 2;
-            lbMSSV.Text = "MSSV";
-            // 
             // lbFirstName
             // 
             lbFirstName.AutoSize = true;
@@ -103,7 +90,7 @@
             // 
             lbLastName.AutoSize = true;
             lbLastName.Font = new Font("Segoe UI", 12F);
-            lbLastName.Location = new Point(419, 136);
+            lbLastName.Location = new Point(418, 136);
             lbLastName.Name = "lbLastName";
             lbLastName.Size = new Size(33, 21);
             lbLastName.TabIndex = 4;
@@ -113,7 +100,7 @@
             // 
             lbDateOfBirth.AutoSize = true;
             lbDateOfBirth.Font = new Font("Segoe UI", 12F);
-            lbDateOfBirth.Location = new Point(419, 173);
+            lbDateOfBirth.Location = new Point(418, 175);
             lbDateOfBirth.Name = "lbDateOfBirth";
             lbDateOfBirth.Size = new Size(80, 21);
             lbDateOfBirth.TabIndex = 5;
@@ -123,7 +110,7 @@
             // 
             lbPhone.AutoSize = true;
             lbPhone.Font = new Font("Segoe UI", 12F);
-            lbPhone.Location = new Point(419, 214);
+            lbPhone.Location = new Point(418, 208);
             lbPhone.Name = "lbPhone";
             lbPhone.Size = new Size(101, 21);
             lbPhone.TabIndex = 6;
@@ -133,7 +120,7 @@
             // 
             lbGender.AutoSize = true;
             lbGender.Font = new Font("Segoe UI", 12F);
-            lbGender.Location = new Point(420, 308);
+            lbGender.Location = new Point(420, 312);
             lbGender.Name = "lbGender";
             lbGender.Size = new Size(70, 21);
             lbGender.TabIndex = 8;
@@ -203,7 +190,7 @@
             // 
             // txtEmail
             // 
-            txtEmail.Location = new Point(553, 340);
+            txtEmail.Location = new Point(553, 342);
             txtEmail.Name = "txtEmail";
             txtEmail.Size = new Size(200, 23);
             txtEmail.TabIndex = 19;
@@ -212,7 +199,7 @@
             // 
             cboGender.FormattingEnabled = true;
             cboGender.Items.AddRange(new object[] { "Nam", "Nữ", "Khác" });
-            cboGender.Location = new Point(553, 305);
+            cboGender.Location = new Point(553, 310);
             cboGender.Name = "cboGender";
             cboGender.Size = new Size(198, 23);
             cboGender.TabIndex = 20;
@@ -227,12 +214,23 @@
             lblHometown.TabIndex = 21;
             lblHometown.Text = "HomeTown";
             // 
+            // lbMSSV
+            // 
+            lbMSSV.AutoSize = true;
+            lbMSSV.BackColor = Color.White;
+            lbMSSV.Font = new Font("Segoe UI", 12F);
+            lbMSSV.Location = new Point(418, 68);
+            lbMSSV.Name = "lbMSSV";
+            lbMSSV.Size = new Size(52, 21);
+            lbMSSV.TabIndex = 2;
+            lbMSSV.Text = "MSSV";
+            // 
             // lbEmail
             // 
             lbEmail.AutoSize = true;
             lbEmail.BackColor = Color.White;
             lbEmail.Font = new Font("Segoe UI", 12F);
-            lbEmail.Location = new Point(420, 340);
+            lbEmail.Location = new Point(420, 342);
             lbEmail.Name = "lbEmail";
             lbEmail.Size = new Size(48, 21);
             lbEmail.TabIndex = 17;
@@ -256,27 +254,12 @@
             txtHometown.Size = new Size(200, 23);
             txtHometown.TabIndex = 22;
             // 
-            // pnlBackground
-            // 
-            pnlBackground.BackColor = Color.FromArgb(90, 0, 0, 0);
-            pnlBackground.Controls.Add(picLogo);
-            pnlBackground.Controls.Add(txtHometown);
-            pnlBackground.Controls.Add(lbAddress);
-            pnlBackground.Controls.Add(lbEmail);
-            pnlBackground.Controls.Add(lbMSSV);
-            pnlBackground.Dock = DockStyle.Fill;
-            pnlBackground.Location = new Point(0, 0);
-            pnlBackground.Name = "pnlBackground";
-            pnlBackground.Size = new Size(800, 450);
-            pnlBackground.TabIndex = 23;
-            pnlBackground.Paint += panel1_Paint;
-            // 
             // picLogo
             // 
             picLogo.BackColor = Color.FromArgb(100, 0, 0, 0);
             picLogo.BackgroundImage = Properties.Resources.Login_ico;
             picLogo.BackgroundImageLayout = ImageLayout.Stretch;
-            picLogo.Location = new Point(60, 291);
+            picLogo.Location = new Point(61, 291);
             picLogo.Name = "picLogo";
             picLogo.Size = new Size(117, 120);
             picLogo.TabIndex = 23;
@@ -289,10 +272,15 @@
             BackgroundImage = Properties.Resources.createSV;
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(800, 450);
+            Controls.Add(txtHometown);
+            Controls.Add(picLogo);
+            Controls.Add(lbEmail);
             Controls.Add(lblHometown);
             Controls.Add(cboGender);
+            Controls.Add(lbAddress);
             Controls.Add(txtEmail);
             Controls.Add(dtpDateOfBirth);
+            Controls.Add(lbMSSV);
             Controls.Add(txtAddress);
             Controls.Add(txtPhone);
             Controls.Add(txtLastName);
@@ -307,13 +295,10 @@
             Controls.Add(lbFirstName);
             Controls.Add(btnChooseImage);
             Controls.Add(picStudent);
-            Controls.Add(pnlBackground);
             Name = "AddStudentForm";
             Text = "AddStudentForm";
             Load += AddStudentForm_Load;
             ((System.ComponentModel.ISupportInitialize)picStudent).EndInit();
-            pnlBackground.ResumeLayout(false);
-            pnlBackground.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)picLogo).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -323,7 +308,6 @@
 
         private PictureBox picStudent;
         private Button btnChooseImage;
-        private Label lbMSSV;
         private Label lbFirstName;
         private Label lbLastName;
         private Label lbDateOfBirth;
@@ -341,10 +325,10 @@
         private TextBox txtEmail;
         private ComboBox cboGender;
         private Label lblHometown;
+        private Label lbMSSV;
         private Label lbEmail;
         private Label lbAddress;
         private TextBox txtHometown;
-        private Panel pnlBackground;
         private PictureBox picLogo;
     }
 }

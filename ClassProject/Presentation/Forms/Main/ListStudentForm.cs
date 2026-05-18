@@ -100,6 +100,7 @@ namespace ClassProject
             }
         }
 
+
         private void txtSearch_Enter(object sender, EventArgs e)
         {
             if (txtSearch.Text == "Nhập mã SV, họ hoặc tên để tìm...")
@@ -117,7 +118,7 @@ namespace ClassProject
             }
         }
 
-        private void btnUpdate_Click(object sender, EventArgs e)
+        private void btnRefresh_Click(object sender, EventArgs e)
         {
             txtSearch.Clear();
             fillGrid();
@@ -146,6 +147,27 @@ namespace ClassProject
             AddStudentForm addStudentForm = new AddStudentForm(0);
             addStudentForm.Show();
             fillGrid();
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            if (dgvStudents.CurrentRow == null)
+            {
+                MessageBox.Show("Vui lòng chọn một sinh viên từ danh sách để chỉnh sửa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                int mssv = Convert.ToInt32(dgvStudents.CurrentRow.Cells["Mssv"].Value);
+                AddStudentForm editForm = new AddStudentForm(mssv);
+                editForm.ShowDialog();
+                fillGrid();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Có lỗi xảy ra khi mở form chỉnh sửa: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

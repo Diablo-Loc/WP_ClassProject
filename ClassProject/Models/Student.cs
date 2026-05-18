@@ -253,7 +253,7 @@ namespace ClassProject.Models
                 return result == 1;
             }
         }
-        public bool UpdateStudent()
+        public bool UpdateStudent(string connectionString)
         {
             My_DB db = new My_DB();
             string sql = @"UPDATE Students 
