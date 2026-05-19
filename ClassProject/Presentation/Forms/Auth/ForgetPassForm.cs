@@ -45,9 +45,20 @@ namespace ClassProject.Presentation.Forms
             _otp = new Random().Next(100000, 999999).ToString();
             _verifiedEmail = email;
 
-            // Thay vì gửi email thật thì hiện mã OTP random sau khi nhấn nút OTP
-            MessageBox.Show($"[CHẾ ĐỘ TEST]\nMã OTP đã được gửi đến: {email}\nMã của bạn là: {_otp}",
-                    "Mock OTP System", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Thử gửi email thật trước
+            bool isMailSent = SendOTPEmail(email, _otp);
+
+            if (isMailSent)
+            {
+                MessageBox.Show($"Mã OTP đã được gửi thành công đến email: {email}.\nVui lòng kiểm tra hộp thư (hoặc thư rác)!",
+                    "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                // [CHẾ ĐỘ DỰ PHÒNG]: Nếu là gmail ảo hoặc cấu hình sai hệ thống gửi, tự động bật chế độ chống cháy
+                MessageBox.Show($"[CHẾ ĐỘ TEST - EMAIL ẢO HOẶC SAI CẤU HÌNH GMAIL GỬI]\nHệ thống không thể kết nối server để gửi mail.\nMã OTP của bạn là: {_otp}",
+                    "Mock OTP System (Fallback)", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
             SetOTPSectionVisible(true);
         }
 
@@ -132,18 +143,24 @@ namespace ClassProject.Presentation.Forms
         {
             try
             {
-                // Đọc từ app.config
-                string senderEmail = System.Configuration.ConfigurationManager.AppSettings["SenderEmail"];
-                string senderPassword = System.Configuration.ConfigurationManager.AppSettings["SenderAppPassword"];
+                string senderEmail = "24110077@student.hcmute.edu.vn";
+                string senderPassword = "xxxx yyyy zzzz qqqq"; // Mật khẩu ứng dụng 16 ký tự của Google
+
+                // Kiểm tra nếu chưa điền thông tin thật thì ép trả về false để bật chế độ Mock Test ngay
+                if (string.IsNullOrEmpty(senderEmail) || senderEmail == "24110077@student.hcmute.edu.vn")
+                {
+                    return false;
+                }
 
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("ClassProject", senderEmail));
+                //Đảm bảo senderEmail không bị null
+                message.From.Add(new MailboxAddress("ClassProject Systems", senderEmail));
                 message.To.Add(new MailboxAddress("", toEmail));
-                message.Subject = "Mã OTP đặt lại mật khẩu";
-                message.Body = new TextPart("plain")
-                {
-                    Text = $"Mã OTP của bạn là: {otp}\n\nMã này chỉ có hiệu lực trong 5 phút."
-                };
+                message.Subject = "HCMUTE SYSTEM - RESET PASSWORD OTP";
+
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.TextBody = $"Mã OTP đặt lại mật khẩu của bạn là: {otp}\n\nMã này chỉ có hiệu lực trong vòng 5 phút. Vui lòng tuyệt đối không chia sẻ mã này cho bất kỳ ai!";
+                message.Body = bodyBuilder.ToMessageBody();
 
                 using (var client = new SmtpClient())
                 {
@@ -153,12 +170,14 @@ namespace ClassProject.Presentation.Forms
                     client.Disconnect(true);
                 }
 
-                return true;
+                return true; // Gửi mail thật thành công
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi gửi email: " + ex.Message, "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Ghi nhận lỗi ra cửa sổ Output để bạn dễ kiểm tra lý do lỗi (Ví dụ: sai mật khẩu, mất mạng...)
+                System.Diagnostics.Debug.WriteLine("Lỗi gửi mail chi tiết: " + ex.Message);
+
+                // Trả về false thay vì hiện lỗi crash, giúp kích hoạt MessageBox hiện mã OTP dự phòng
                 return false;
             }
         }

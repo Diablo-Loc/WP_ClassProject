@@ -43,6 +43,26 @@ namespace ClassProject.Presentation.Forms
 
                 return;
             }
+            if (cboPosition.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a Position (Admin/Student/HR)", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            int selectedRoleId = 1; // Mặc định là Student cho an toàn
+            string selectedText = cboPosition.SelectedItem.ToString();
+
+            if (selectedText == "Admin")
+            {
+                selectedRoleId = 0;
+            }
+            else if (selectedText == "Student")
+            {
+                selectedRoleId = 1;
+            }
+            else if (selectedText == "HR")
+            {
+                selectedRoleId = 2;
+            }
 
             if (!email.Contains("@") || !email.Contains("."))
             {
@@ -183,9 +203,10 @@ namespace ClassProject.Presentation.Forms
 
         private void lblBacktoLogin_Click(object sender, EventArgs e)
         {
-            LoginForm f = new  LoginForm();
+            LoginForm f = new LoginForm();
             f.Show();
             this.Hide();
         }
+
     }
 }
