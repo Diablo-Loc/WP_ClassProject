@@ -66,15 +66,44 @@ namespace ClassProject
 
                 // GỌI REPOSITORY: Truy vấn bộ lọc kép kết hợp cả Từ khóa + Giới tính
                 DataTable dt = studentRepo.SearchStudents(keyword, gender);
-                dgvStudents.DataSource = dt;
+                DataView dv = dt.DefaultView;
 
+                if (cbSort != null && cbSort.SelectedIndex > 0)
+                {
+                    if (cbSort.Text == "Tên sinh viên")
+                    {
+                        // Sắp xếp theo Tên (FirstName) trước, nếu trùng thì xếp theo Họ (LastName)
+                        dv.Sort = "FirstName ASC, LastName ASC";
+                    }
+                    else if (cbSort.Text == "Mã số sinh viên (MSSV)" || cbSort.Text == "MSSV")
+                    {
+                        // Sắp xếp theo MSSV tăng dần
+                        dv.Sort = "MSSV ASC";
+                    }
+                }
+                else
+                {
+                    // Mặc định không sắp xếp (giữ nguyên thứ tự từ SQL trả về)
+                    dv.Sort = "";
+                }
+                dgvStudents.DataSource = dv;
+                if (lblTotalFooter != null)
+                {
+                    lblTotalFooter.Text = $"Tổng số sinh viên trong danh sách: {dv.Count}";
+                }
                 // Định dạng lưới hiển thị
                 FormatDataGridView();
             }
+
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi hiển thị: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void cbSort_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            fillGrid(); // Người dùng đổi kiểu xếp -> tải lại lưới tự động đảo vị trí
         }
 
         // Hàm phụ dùng chung để định dạng thẩm mỹ và Việt hóa tiêu đề lưới

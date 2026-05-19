@@ -33,12 +33,15 @@
             txtSearch = new TextBox();
             dgvStudents = new DataGridView();
             pnl = new Panel();
+            btnImportExcel = new Button();
             btnExportExcel = new Button();
             btnUpdate = new Button();
             btnDelete = new Button();
             btnInsert = new Button();
             cboFilterGender = new ComboBox();
-            btnImportExcel = new Button();
+            lblXapXepTheo = new Label();
+            cbSort = new ComboBox();
+            lblTotalFooter = new Label();
             btnRefresh = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvStudents).BeginInit();
             pnl.SuspendLayout();
@@ -47,7 +50,7 @@
             // btnRefresh
             // 
             btnRefresh.FlatStyle = FlatStyle.Flat;
-            btnRefresh.Location = new Point(793, 3);
+            btnRefresh.Location = new Point(869, 3);
             btnRefresh.Margin = new Padding(2, 3, 2, 3);
             btnRefresh.Name = "btnRefresh";
             btnRefresh.Size = new Size(107, 43);
@@ -61,7 +64,7 @@
             txtDanhsachsinhvien.AutoSize = true;
             txtDanhsachsinhvien.Cursor = Cursors.No;
             txtDanhsachsinhvien.Font = new Font("Segoe UI", 20F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            txtDanhsachsinhvien.Location = new Point(21, 40);
+            txtDanhsachsinhvien.Location = new Point(11, 18);
             txtDanhsachsinhvien.Margin = new Padding(2, 0, 2, 0);
             txtDanhsachsinhvien.Name = "txtDanhsachsinhvien";
             txtDanhsachsinhvien.Size = new Size(400, 46);
@@ -72,10 +75,10 @@
             // 
             txtSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             txtSearch.ForeColor = SystemColors.WindowFrame;
-            txtSearch.Location = new Point(447, 48);
+            txtSearch.Location = new Point(498, 29);
             txtSearch.Margin = new Padding(2, 3, 2, 3);
             txtSearch.Name = "txtSearch";
-            txtSearch.Size = new Size(330, 27);
+            txtSearch.Size = new Size(244, 27);
             txtSearch.TabIndex = 2;
             txtSearch.Text = "Nhập mã SV, họ hoặc tên để tìm...";
             txtSearch.TextChanged += txtSearch_TextChanged;
@@ -90,13 +93,13 @@
             dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvStudents.BackgroundColor = Color.White;
             dgvStudents.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvStudents.Location = new Point(0, 93);
+            dgvStudents.Location = new Point(0, 83);
             dgvStudents.Margin = new Padding(2, 3, 2, 3);
             dgvStudents.Name = "dgvStudents";
             dgvStudents.ReadOnly = true;
             dgvStudents.RowHeadersWidth = 62;
             dgvStudents.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvStudents.Size = new Size(913, 448);
+            dgvStudents.Size = new Size(996, 448);
             dgvStudents.TabIndex = 3;
             // 
             // pnl
@@ -111,14 +114,25 @@
             pnl.Location = new Point(0, 559);
             pnl.Margin = new Padding(2, 3, 2, 3);
             pnl.Name = "pnl";
-            pnl.Size = new Size(913, 51);
+            pnl.Size = new Size(996, 51);
             pnl.TabIndex = 4;
             pnl.Click += btnImportExcel_Click;
+            // 
+            // btnImportExcel
+            // 
+            btnImportExcel.FlatStyle = FlatStyle.Flat;
+            btnImportExcel.Location = new Point(628, 3);
+            btnImportExcel.Margin = new Padding(2, 3, 2, 3);
+            btnImportExcel.Name = "btnImportExcel";
+            btnImportExcel.Size = new Size(107, 43);
+            btnImportExcel.TabIndex = 5;
+            btnImportExcel.Text = "ImportExcel";
+            btnImportExcel.UseVisualStyleBackColor = true;
             // 
             // btnExportExcel
             // 
             btnExportExcel.FlatStyle = FlatStyle.Flat;
-            btnExportExcel.Location = new Point(674, 3);
+            btnExportExcel.Location = new Point(750, 3);
             btnExportExcel.Margin = new Padding(2, 3, 2, 3);
             btnExportExcel.Name = "btnExportExcel";
             btnExportExcel.Size = new Size(107, 43);
@@ -165,37 +179,64 @@
             // 
             // cboFilterGender
             // 
+            cboFilterGender.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cboFilterGender.FormattingEnabled = true;
             cboFilterGender.Items.AddRange(new object[] { "Tất cả", "Nam", "Nữ" });
-            cboFilterGender.Location = new Point(793, 48);
+            cboFilterGender.Location = new Point(747, 29);
             cboFilterGender.Name = "cboFilterGender";
-            cboFilterGender.Size = new Size(108, 28);
+            cboFilterGender.Size = new Size(81, 28);
             cboFilterGender.TabIndex = 5;
             cboFilterGender.SelectedIndexChanged += cboFilterGender_SelectedIndexChanged;
             // 
-            // btnImportExcel
+            // lblXapXepTheo
             // 
-            btnImportExcel.FlatStyle = FlatStyle.Flat;
-            btnImportExcel.Location = new Point(552, 5);
-            btnImportExcel.Margin = new Padding(2, 3, 2, 3);
-            btnImportExcel.Name = "btnImportExcel";
-            btnImportExcel.Size = new Size(107, 43);
-            btnImportExcel.TabIndex = 5;
-            btnImportExcel.Text = "ImportExcel";
-            btnImportExcel.UseVisualStyleBackColor = true;
+            lblXapXepTheo.AutoSize = true;
+            lblXapXepTheo.Font = new Font("Segoe UI", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblXapXepTheo.Location = new Point(835, 32);
+            lblXapXepTheo.Name = "lblXapXepTheo";
+            lblXapXepTheo.Size = new Size(114, 23);
+            lblXapXepTheo.TabIndex = 6;
+            lblXapXepTheo.Text = "Sắp xếp theo:";
+            // 
+            // cbSort
+            // 
+            cbSort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            cbSort.FormattingEnabled = true;
+            cbSort.Items.AddRange(new object[] { "Mặc định", "Tên sinh viên", "Mã số sinh viên (MSSV)" });
+            cbSort.Location = new Point(951, 32);
+            cbSort.Name = "cbSort";
+            cbSort.Size = new Size(33, 28);
+            cbSort.TabIndex = 7;
+            cbSort.SelectedIndexChanged += cbSort_SelectedIndexChanged;
+            // 
+            // lblTotalFooter
+            // 
+            lblTotalFooter.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblTotalFooter.AutoSize = true;
+            lblTotalFooter.Font = new Font("Segoe UI", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblTotalFooter.Location = new Point(0, 533);
+            lblTotalFooter.Name = "lblTotalFooter";
+            lblTotalFooter.Size = new Size(53, 23);
+            lblTotalFooter.TabIndex = 8;
+            lblTotalFooter.Text = "Tổng:";
             // 
             // ListStudentForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(913, 611);
+            ClientSize = new Size(996, 611);
+            Controls.Add(lblTotalFooter);
+            Controls.Add(cbSort);
+            Controls.Add(lblXapXepTheo);
             Controls.Add(cboFilterGender);
             Controls.Add(pnl);
             Controls.Add(dgvStudents);
             Controls.Add(txtSearch);
             Controls.Add(txtDanhsachsinhvien);
+            DoubleBuffered = true;
             Margin = new Padding(2, 3, 2, 3);
             Name = "ListStudentForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Form1";
             Load += ListStudentForm_Load;
             ((System.ComponentModel.ISupportInitialize)dgvStudents).EndInit();
@@ -217,5 +258,8 @@
         private ComboBox cboFilterGender;
         private Button btnExportExcel;
         private Button btnImportExcel;
+        private Label lblXapXepTheo;
+        private ComboBox cbSort;
+        private Label lblTotalFooter;
     }
 }
