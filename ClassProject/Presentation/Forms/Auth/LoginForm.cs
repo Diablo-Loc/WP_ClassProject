@@ -1,7 +1,10 @@
 using ClassProject.DataAccess.Db;
 using BCrypt.Net;
 using ClassProject.Presentation.Forms;
+using ClassProject.Presentation.Forms.Main; // Đảm bảo nạp đúng namespace của MainForm
 using Microsoft.Data.SqlClient;
+using System;
+using System.Windows.Forms;
 
 namespace ClassProject
 {
@@ -24,7 +27,7 @@ namespace ClassProject
 
             if (username == "" || password == "")
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ Username và Password!");
+                MessageBox.Show("Vui lòng nhập đầy đủ Username và Password!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -36,7 +39,7 @@ namespace ClassProject
                 {
                     conn.Open();
 
-                    // Lấy password hash từ DB thay vì so sánh thẳng
+                    // Lấy password hash từ DB
                     string query = "SELECT Id, Password, RoleId FROM Users WHERE Username = @user";
 
                     SqlCommand cmd = new SqlCommand(query, conn);
@@ -48,7 +51,6 @@ namespace ClassProject
                     int userId = 0;
                     int roleId = -1;
 
-                    
                     if (reader.Read())
                     {
                         hashedPassword = reader["Password"].ToString();
@@ -58,9 +60,10 @@ namespace ClassProject
 
                     reader.Close();
 
-                    // Kiểm tra username tồn tại và verify password
+                    // Kiểm tra username tồn tại và verify password qua BCrypt
                     if (hashedPassword != null && BCrypt.Net.BCrypt.Verify(password, hashedPassword))
                     {
+                        // Lưu trạng thái Remember Me
                         if (chkRememberMe.Checked)
                         {
                             Properties.Settings.Default.Username = username;
@@ -75,31 +78,36 @@ namespace ClassProject
                         }
                         Properties.Settings.Default.Save();
 
-                        if (roleId == 0)
+                        // THÔNG BÁO THÀNH CÔNG THEO QUYỀN
+                        string roleName = roleId == 0 ? "Admin" : (roleId == 1 ? "Sinh viên" : "Giảng viên");
+                        MessageBox.Show($"Đăng nhập tài khoản {roleName} thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        this.Hide();
+
+                        // Truyền cả roleId và userId sang để MainForm xử lý phân quyền và mở form con
+                        using (MainForm mainForm = new MainForm(roleId, userId))
                         {
-                            MessageBox.Show("Đăng nhập Admin thành công!");
-
-                            //AddStudentForm f = new AddStudentForm(userId);
-                            ListStudentForm f = new ListStudentForm();
-                            f.Show();
-
-                            this.Hide();
+                            mainForm.ShowDialog();
                         }
-                        else
+
+                        // Khi tắt MainForm (hoặc bấm Đăng xuất), quay trở lại hiện Form Login
+                        if (Application.OpenForms.Count > 0)
                         {
-                            MessageBox.Show("Đăng nhập thành công!");
+                            this.Show();
+                            txtPassword.Clear();
+                            txtPassword.Focus();
                         }
                     }
                     else
                     {
-                        MessageBox.Show("Sai tài khoản hoặc mật khẩu!");
+                        MessageBox.Show("Sai tài khoản hoặc mật khẩu!", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         txtPassword.Clear();
                         txtPassword.Focus();
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Lỗi kết nối DB: " + ex.Message);
+                    MessageBox.Show("Lỗi kết nối DB: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

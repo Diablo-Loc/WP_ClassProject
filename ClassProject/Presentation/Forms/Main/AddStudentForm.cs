@@ -1,4 +1,5 @@
 ﻿using ClassProject.DataAccess.Db;
+using ClassProject.DataAccess.Repositories;
 using ClassProject.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic.ApplicationServices;
@@ -17,210 +18,199 @@ namespace ClassProject
     public partial class AddStudentForm : Form
     {
         byte[] studentImage = null;
-        private int currentUserId;
-        public AddStudentForm(int userId)
+        private int targetMssv;
+        private StudentRepository studentRepo;
+        private My_DB db = new My_DB();
+
+        // Constructor nhận vào mssv (nếu = 0 là THÊM MỚI, nếu > 0 là CHỈNH SỬA)
+        public AddStudentForm(int mssv)
         {
             InitializeComponent();
-            currentUserId = userId;
+            targetMssv = mssv;
+
+            // Khởi tạo tầng xử lý dữ liệu thông qua Repository
+            string connString = db.GetConnection().ConnectionString;
+            studentRepo = new StudentRepository(connString);
         }
 
         private void AddStudentForm_Load(object sender, EventArgs e)
         {
-            // Nếu currentUserId > 0, nghĩa là form đang mở ở chế độ SỬA SINH VIÊN
-            if (currentUserId > 0)
+            // Chế độ CHỈNH SỬA SINH VIÊN (Sạch bóng SQL, gọi dữ liệu qua Repo)
+            if (targetMssv > 0)
             {
                 this.Text = "Chỉnh sửa thông tin sinh viên";
-                btnAdd.Text = "Cập nhật"; 
-                txtMSSV.Text = currentUserId.ToString();
-                txtMSSV.ReadOnly = true; // Khóa không cho sửa mã SV (khóa chính)
+                btnAdd.Text = "Cập nhật";
+                txtMSSV.Text = targetMssv.ToString();
+                txtMSSV.ReadOnly = true; // Khóa trường khóa chính
 
-                My_DB db = new My_DB();
-                using (SqlConnection conn = db.GetConnection())
+                try
                 {
-                    try
+                    // Lấy thực thể student thuần từ tầng Repo
+                    Student sv = studentRepo.GetStudentByMssv(targetMssv);
+
+                    if (sv != null)
                     {
-                        conn.Open();
-                        string query = "SELECT FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Picture FROM Students WHERE Mssv = @mssv";
-                        SqlCommand cmd = new SqlCommand(query, conn);
-                        cmd.Parameters.AddWithValue("@mssv", currentUserId);
+                        txtFirstName.Text = sv.FirstName;
+                        txtLastName.Text = sv.LastName;
+                        dtpDateOfBirth.Value = sv.DateOfBirth;
+                        cboGender.Text = sv.Gender;
+                        txtPhone.Text = sv.Phone;
+                        txtAddress.Text = sv.Address;
+                        txtHometown.Text = sv.Hometown;
+                        txtEmail.Text = sv.Email;
 
-                        SqlDataReader reader = cmd.ExecuteReader();
-                        if (reader.Read())
+                        if (sv.Picture != null)
                         {
-                            txtFirstName.Text = reader["FirstName"].ToString();
-                            txtLastName.Text = reader["LastName"].ToString();
-                            dtpDateOfBirth.Value = Convert.ToDateTime(reader["DateOfBirth"]);
-                            cboGender.Text = reader["Gender"].ToString();
-                            txtPhone.Text = reader["Phone"].ToString();
-                            txtAddress.Text = reader["Address"].ToString();
-                            txtHometown.Text = reader["Hometown"].ToString();
-                            txtEmail.Text = reader["Email"].ToString();
-
-                            if (reader["Picture"] != DBNull.Value)
+                            studentImage = sv.Picture;
+                            using (MemoryStream ms = new MemoryStream(studentImage))
                             {
-                                studentImage = (byte[])reader["Picture"];
-                                using (MemoryStream ms = new MemoryStream(studentImage))
-                                {
-                                    picStudent.Image = Image.FromStream(ms);
-                                }
-                            }
-                            else
-                            {
-                                picStudent.Image = null;
-                                studentImage = null;
+                                picStudent.Image = Image.FromStream(ms);
                             }
                         }
-                        reader.Close();
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        MessageBox.Show("Lỗi tải thông tin sinh viên: " + ex.Message);
+                        MessageBox.Show("Không tìm thấy dữ liệu sinh viên này!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        this.Close();
                     }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi tải thông tin: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
         private void btnChooseImage_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-
-            ofd.Filter = "Image Files|*.jpg;*.png;*.jpeg";
-
-            if (ofd.ShowDialog() == DialogResult.OK)
+            using (OpenFileDialog ofd = new OpenFileDialog())
             {
-                picStudent.Image = Image.FromFile(ofd.FileName);
-
-                MemoryStream ms = new MemoryStream();
-
-                picStudent.Image.Save(ms, picStudent.Image.RawFormat);
-
-                studentImage = ms.ToArray();
+                ofd.Filter = "Image Files|*.jpg;*.png;*.jpeg";
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    picStudent.Image = Image.FromFile(ofd.FileName);
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        picStudent.Image.Save(ms, picStudent.Image.RawFormat);
+                        studentImage = ms.ToArray();
+                    }
+                }
             }
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            // ==========================================
-            // 1. KIỂM TRA DỮ LIỆU ĐẦU VÀO (VALIDATION)
-            // ==========================================
-            if (txtMSSV.Text.Trim() == "") { MessageBox.Show("Nhập MSSV"); return; }
-            if (!int.TryParse(txtMSSV.Text, out _)) { MessageBox.Show("MSSV phải là số"); return; }
-            if (txtLastName.Text.Trim() == "") { MessageBox.Show("Nhập tên"); return; }
-            if (dtpDateOfBirth.Value > DateTime.Now) { MessageBox.Show("Ngày sinh không hợp lệ!", "Cảnh báo"); return; }
-            if (!IsValidEmail(txtEmail.Text)) { MessageBox.Show("Email không hợp lệ"); return; }
-            if (!IsValidPhone(txtPhone.Text)) { MessageBox.Show("Số điện thoại không hợp lệ"); return; }
-            if (studentImage == null) { MessageBox.Show("Chọn ảnh"); return; }
+            // 1. Kiểm tra nhanh định dạng cơ bản trước khi nạp vào Model
+            if (string.IsNullOrWhiteSpace(txtMSSV.Text)) { MessageBox.Show("Nhập MSSV"); return; }
+            if (!int.TryParse(txtMSSV.Text, out int mssv)) { MessageBox.Show("MSSV phải là số"); return; }
+            if (string.IsNullOrWhiteSpace(txtLastName.Text)) { MessageBox.Show("Nhập họ sinh viên"); return; }
+            if (string.IsNullOrWhiteSpace(txtFirstName.Text)) { MessageBox.Show("Nhập tên sinh viên"); return; }
+            if (!IsValidEmail(txtEmail.Text)) { MessageBox.Show("Email không đúng định dạng!"); return; }
+            if (!IsValidPhone(txtPhone.Text)) { MessageBox.Show("Số điện thoại phải gồm 10 số!"); return; }
+            if (studentImage == null) { MessageBox.Show("Vui lòng chọn ảnh thẻ sinh viên!"); return; }
 
-            // ==========================================
-            // 2. XỬ LÝ DATABASE CHÍNH XÁC
-            // ==========================================
-            My_DB db = new My_DB();
-
-            using (SqlConnection conn = db.GetConnection())
+            try
             {
-                try
+                // 2. Nạp dữ liệu vào Model để Model tự kiểm tra logic nghiệp vụ (Validation trong set)
+                Student sv = new Student();
+                sv.UserId = mssv; // Tạm gán UserId trùng MSSV
+                sv.Mssv = mssv;
+                sv.FirstName = txtFirstName.Text.Trim();
+                sv.LastName = txtLastName.Text.Trim();
+                sv.DateOfBirth = dtpDateOfBirth.Value;
+                sv.Gender = cboGender.Text;
+                sv.Phone = txtPhone.Text.Trim();
+                sv.Address = txtAddress.Text.Trim();
+                sv.Hometown = txtHometown.Text.Trim();
+                sv.Email = txtEmail.Text.Trim();
+                sv.Picture = studentImage;
+
+                // 3. Thực thi thông qua Tầng Repository tách biệt
+                if (targetMssv > 0)
                 {
-                    conn.Open();
-
-                    // Khởi tạo đối tượng Student từ thông tin trên form
-                    Student sv = new Student(
-                        int.Parse(txtMSSV.Text),
-                        txtFirstName.Text,
-                        txtLastName.Text,
-                        dtpDateOfBirth.Value,
-                        cboGender.Text,
-                        txtPhone.Text,
-                        txtAddress.Text,
-                        txtHometown.Text,
-                        txtEmail.Text,
-                        studentImage
-                    );
-
-                    // TÁCH BIỆT HOÀN TOÀN CÁC NHÁNH BẰNG IF-ELSE
-                    if (currentUserId > 0)
+                    // --- CHẾ ĐỘ CẬP NHẬT ---
+                    if (studentRepo.UpdateStudent(sv))
                     {
-                        // ---------------------------------------------------------
-                        // CHẾ ĐỘ SỬA: CHỈ gọi UpdateStudent (Tuyệt đối không gọi AddStudent)
-                        // ---------------------------------------------------------
-                        if (sv.UpdateStudent(conn.ConnectionString))
-                        {
-                            MessageBox.Show("Cập nhật thông tin sinh viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            this.DialogResult = DialogResult.OK;
-                            this.Close();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Cập nhật thất bại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
+                        MessageBox.Show("Cập nhật thông tin sinh viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.DialogResult = DialogResult.OK; // Đánh dấu thành công để Form cha tự reload lưới
+                        this.Close();
                     }
                     else
                     {
-                        // ---------------------------------------------------------
-                        // CHẾ ĐỘ THÊM MỚI: Kiểm tra trùng mã rồi mới gọi AddStudent
-                        // ---------------------------------------------------------
-                        if (sv.IsMssvExist(int.Parse(txtMSSV.Text), conn.ConnectionString))
-                        {
-                            MessageBox.Show("Mã số sinh viên này đã tồn tại!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
-
-                        if (sv.AddStudent(conn.ConnectionString))
-                        {
-                            MessageBox.Show("Thêm sinh viên thành công", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            btnClear.PerformClick();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Thêm thất bại", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
+                        MessageBox.Show("Cập nhật thất bại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show("Lỗi DB: " + ex.Message, "Thông báo lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // --- CHẾ ĐỘ THÊM MỚI ---
+                    if (studentRepo.IsMssvExist(sv.Mssv))
+                    {
+                        MessageBox.Show("Mã số sinh viên này đã tồn tại trong hệ thống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    if (studentRepo.AddStudent(sv))
+                    {
+                        MessageBox.Show("Thêm mới sinh viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.DialogResult = DialogResult.OK; // Đánh dấu để Form danh sách biết có dữ liệu mới
+                        btnClear.PerformClick();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Thêm mới thất bại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                // Bắt toàn bộ các lỗi Business Logic do Model ném ra (Ví dụ: ảnh > 5MB, chặn ngày tương lai,...)
+                MessageBox.Show("Dữ liệu không hợp lệ: " + ex.Message, "Lỗi kiểm tra", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
         private void btnClear_Click(object sender, EventArgs e)
         {
-            txtMSSV.Clear();
-            txtFirstName.Clear();
-            txtLastName.Clear();
-            txtPhone.Clear();
-            txtAddress.Clear();
-            txtHometown.Clear();
-            txtEmail.Clear();
-
-            cboGender.SelectedIndex = -1;
-            cboGender.Text = "";
-
-            dtpDateOfBirth.Value = DateTime.Now;
-
-            picStudent.Image = null;
-
-            studentImage = null;
+            if (targetMssv > 0)
+            {
+                // Đang sửa thì không cho clear trắng mã chính
+                txtFirstName.Clear();
+                txtLastName.Clear();
+                txtPhone.Clear();
+                txtAddress.Clear();
+                txtHometown.Clear();
+                txtEmail.Clear();
+                cboGender.SelectedIndex = -1;
+                cboGender.Text = "";
+                dtpDateOfBirth.Value = DateTime.Now;
+                picStudent.Image = null;
+                studentImage = null;
+            }
+            else
+            {
+                txtMSSV.Clear();
+                txtFirstName.Clear();
+                txtLastName.Clear();
+                txtPhone.Clear();
+                txtAddress.Clear();
+                txtHometown.Clear();
+                txtEmail.Clear();
+                cboGender.SelectedIndex = -1;
+                cboGender.Text = "";
+                dtpDateOfBirth.Value = DateTime.Now;
+                picStudent.Image = null;
+                studentImage = null;
+            }
         }
 
-        bool IsValidEmail(string email)
+        private bool IsValidEmail(string email)
         {
             string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-
             return Regex.IsMatch(email, pattern);
         }
-        bool IsValidPhone(string phone)
+
+        private bool IsValidPhone(string phone)
         {
             return Regex.IsMatch(phone, @"^[0-9]{10}$");
-        }
-
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void pnlBackground_Paint(object sender, PaintEventArgs e)
-        {
-
         }
     }
 }
