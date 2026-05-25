@@ -65,41 +65,25 @@ namespace ClassProject.DataAccess.Repositories
             return null; // Không tìm thấy
         }
 
-        // 3. Tự động đăng ký song song tài khoản User ngầm cho Sinh viên (Tránh lỗi FK vô sinh)
+        // 3. THÊM MỚI SINH VIÊN (Luồng 1: HR thêm danh sách trước, UserId tạm thời để NULL)
         public bool AddStudent(Student student)
         {
-            SqlTransaction transaction = null;
             using (SqlConnection conn = new SqlConnection(_connString))
             {
                 try
                 {
                     conn.Open();
-                    transaction = conn.BeginTransaction(); // Dùng Transaction để đảm bảo an toàn dữ liệu 2 bên
 
-                    // CHẶNG A: Tạo một tài khoản đăng nhập tương ứng trong bảng Users trước (RoleId = 1: Student)
-                    string sqlUser = @"INSERT INTO dbo.Users (Username, Email, Password, RoleId) 
-                                       OUTPUT INSERTED.Id 
-                                       VALUES (@User, @Email, @Pass, 1)";
-
-                    int generatedUserId;
-                    using (SqlCommand cmdUser = new SqlCommand(sqlUser, conn, transaction))
-                    {
-                        cmdUser.Parameters.AddWithValue("@User", student.Mssv.ToString()); // Lấy luôn MSSV làm Username đăng nhập
-                        cmdUser.Parameters.AddWithValue("@Email", student.Email ?? $"{student.Mssv}@student.com");
-                        cmdUser.Parameters.AddWithValue("@Pass", "$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS"); // Pass mặc định: admin
-
-                        generatedUserId = (int)cmdUser.ExecuteScalar(); // Lấy Id vừa tự tăng lên từ bảng Users
-                    }
-
-                    // CHẶNG B: Insert thông tin cụ thể vào bảng Students kèm khóa ngoại vừa lấy
+                    // Chỉ Insert vào bảng Students.
                     string sqlStudent = @"INSERT INTO Students 
                                        (UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Picture)
                                    VALUES 
                                        (@UserId, @MSSV, @FirstName, @LastName, @DateOfBirth, @Gender, @Phone, @Address, @Hometown, @Email, @Picture)";
 
-                    using (SqlCommand cmd = new SqlCommand(sqlStudent, conn, transaction))
+                    using (SqlCommand cmd = new SqlCommand(sqlStudent, conn))
                     {
-                        cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = generatedUserId }); // Khóa ngoại chuẩn chỉ!
+                        // CHÚ Ý CHỖ NÀY: Xử lý giá trị null ép về DBNull.Value cho SQL hiểu
+                        cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = (object)student.UserId ?? DBNull.Value });
                         cmd.Parameters.Add(new SqlParameter("@MSSV", SqlDbType.NVarChar) { Value = student.Mssv.ToString() });
                         cmd.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = student.FirstName });
                         cmd.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = student.LastName });
@@ -113,13 +97,10 @@ namespace ClassProject.DataAccess.Repositories
 
                         cmd.ExecuteNonQuery();
                     }
-
-                    transaction.Commit(); // Đồng bộ thành công cả 2 bảng
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    if (transaction != null) transaction.Rollback(); // Có lỗi hủy bỏ toàn bộ phiên làm việc
                     MessageBox.Show("Lỗi khi thêm sinh viên: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }

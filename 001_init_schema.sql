@@ -17,7 +17,7 @@ GO
 USE LoginDB;
 GO
 
--- Command: tạo bảng Roles nếu chưa có (Id cố định 0/1/2, KHÔNG identity)
+-- Command: tạo bảng Roles nếu chưa có
 IF OBJECT_ID(N'dbo.Roles', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Roles
@@ -38,12 +38,27 @@ BEGIN
         Email NVARCHAR(100) NOT NULL UNIQUE,
         Password NVARCHAR(255) NOT NULL,
         RoleId INT NOT NULL,
+        
+        -- CÁC TRƯỜNG MỚI THÊM CHO LOGIC THỰC TẾ
+        Valid INT DEFAULT 0,              
+        FailedAttempts INT DEFAULT 0,     
+        LockoutEnd DATETIME NULL,         
+        
         Created_At DATETIME DEFAULT GETDATE(),
 
         CONSTRAINT FK_Users_Roles
             FOREIGN KEY (RoleId) REFERENCES dbo.Roles(Id)
     );
 END
+GO
+
+-- CHẠY ĐOẠN NÀY ĐỂ BỔ SUNG CỘT NẾU BẢNG ĐÃ TỒN TẠI
+IF COL_LENGTH('dbo.Users', 'Valid') IS NULL
+    ALTER TABLE dbo.Users ADD Valid INT DEFAULT 0;
+IF COL_LENGTH('dbo.Users', 'FailedAttempts') IS NULL
+    ALTER TABLE dbo.Users ADD FailedAttempts INT DEFAULT 0;
+IF COL_LENGTH('dbo.Users', 'LockoutEnd') IS NULL
+    ALTER TABLE dbo.Users ADD LockoutEnd DATETIME NULL;
 GO
 
 -- Command: tạo bảng Students nếu chưa có
@@ -53,7 +68,7 @@ BEGIN
     (
         Id INT PRIMARY KEY IDENTITY(1,1),
         UserId INT NULL,
-        MSSV NVARCHAR(30) NOT NULL UNIQUE, -- Kiểu dữ liệu gốc là NVARCHAR(30)
+        MSSV NVARCHAR(30) NOT NULL UNIQUE,
         FirstName NVARCHAR(100) NOT NULL,
         LastName NVARCHAR(100) NOT NULL,
         DateOfBirth DATETIME NULL,
@@ -84,26 +99,27 @@ WHEN NOT MATCHED THEN
     INSERT (Id, RoleName) VALUES (src.Id, src.RoleName);
 GO
 
-/* Command: seed admin (tùy chọn) */
+/* Command: seed admin (Fix lỗi Invalid Column Name bằng EXEC) */
 IF NOT EXISTS (SELECT 1 FROM dbo.Users WHERE Username = N'admin' OR Email = N'admin@gmail.com')
 BEGIN
-    INSERT INTO dbo.Users (Username, Email, Password, RoleId)
-    VALUES (N'admin', N'admin@gmail.com', N'$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS', 0);
+    EXEC('INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid)
+          VALUES (N''admin'', N''admin@gmail.com'', N''$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS'', 0, 1)');
 END
 GO
 
-UPDATE dbo.Users
-SET Password = N'$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS'
-WHERE Username = N'admin';
+EXEC('UPDATE dbo.Users
+      SET Password = N''$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS'',
+          Valid = 1 
+      WHERE Username = N''admin''');
 GO
 
 -- =========================================================
--- ĐÃ SỬA LỖI: Tạo bảng Đăng ký môn học (Đảm bảo an toàn không lỗi trùng)
+-- Tạo bảng Đăng ký môn học 
 -- =========================================================
 IF OBJECT_ID(N'dbo.CourseRegistration', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.CourseRegistration (
-        Mssv NVARCHAR(30) NOT NULL, -- ĐÃ SỬA: Đổi từ INT sang NVARCHAR(30) khớp 100% với bảng Students
+        Mssv NVARCHAR(30) NOT NULL,
         CourseId VARCHAR(50) NOT NULL,
         RegistrationDate DATETIME DEFAULT GETDATE(),
         Score FLOAT NULL, 

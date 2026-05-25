@@ -40,10 +40,20 @@
             pnlFemale = new Panel();
             lblFemaleStudents = new Label();
             lblRole = new Label();
+            picChart = new PictureBox();
+            dgvPendingUsers = new DataGridView();
+            colAccept = new DataGridViewButtonColumn();
+            colDelete = new DataGridViewButtonColumn();
+            txtSearchPending = new TextBox();
+            btnBulkAccept = new Button();
+            btnBulkDelete = new Button();
+            chkSelectAll = new CheckBox();
             menuStrip1.SuspendLayout();
             pnlTotal.SuspendLayout();
             pnlMale.SuspendLayout();
             pnlFemale.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picChart).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvPendingUsers).BeginInit();
             SuspendLayout();
             // 
             // menuStrip1
@@ -52,7 +62,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { studentToolStripMenuItem, adminToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(800, 28);
+            menuStrip1.Size = new Size(875, 28);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -87,16 +97,16 @@
             // 
             pnlTotal.BackColor = Color.FromArgb(192, 255, 192);
             pnlTotal.Controls.Add(lblTotalStudents);
-            pnlTotal.Location = new Point(0, 74);
+            pnlTotal.Location = new Point(12, 38);
             pnlTotal.Name = "pnlTotal";
-            pnlTotal.Size = new Size(250, 125);
+            pnlTotal.Size = new Size(250, 105);
             pnlTotal.TabIndex = 1;
             // 
             // lblTotalStudents
             // 
             lblTotalStudents.AutoSize = true;
             lblTotalStudents.Font = new Font("Segoe UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblTotalStudents.Location = new Point(41, 49);
+            lblTotalStudents.Location = new Point(22, 37);
             lblTotalStudents.Name = "lblTotalStudents";
             lblTotalStudents.Size = new Size(152, 31);
             lblTotalStudents.TabIndex = 4;
@@ -104,18 +114,19 @@
             // 
             // pnlMale
             // 
+            pnlMale.Anchor = AnchorStyles.Top;
             pnlMale.BackColor = Color.Cyan;
             pnlMale.Controls.Add(lblMaleStudents);
-            pnlMale.Location = new Point(270, 74);
+            pnlMale.Location = new Point(312, 40);
             pnlMale.Name = "pnlMale";
-            pnlMale.Size = new Size(250, 125);
+            pnlMale.Size = new Size(250, 105);
             pnlMale.TabIndex = 2;
             // 
             // lblMaleStudents
             // 
             lblMaleStudents.AutoSize = true;
             lblMaleStudents.Font = new Font("Segoe UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblMaleStudents.Location = new Point(51, 49);
+            lblMaleStudents.Location = new Point(30, 37);
             lblMaleStudents.Name = "lblMaleStudents";
             lblMaleStudents.Size = new Size(154, 31);
             lblMaleStudents.TabIndex = 5;
@@ -123,18 +134,19 @@
             // 
             // pnlFemale
             // 
+            pnlFemale.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             pnlFemale.BackColor = Color.FromArgb(255, 192, 255);
             pnlFemale.Controls.Add(lblFemaleStudents);
-            pnlFemale.Location = new Point(538, 74);
+            pnlFemale.Location = new Point(618, 40);
             pnlFemale.Name = "pnlFemale";
-            pnlFemale.Size = new Size(250, 125);
+            pnlFemale.Size = new Size(250, 105);
             pnlFemale.TabIndex = 3;
             // 
             // lblFemaleStudents
             // 
             lblFemaleStudents.AutoSize = true;
             lblFemaleStudents.Font = new Font("Segoe UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblFemaleStudents.Location = new Point(36, 49);
+            lblFemaleStudents.Location = new Point(27, 37);
             lblFemaleStudents.Name = "lblFemaleStudents";
             lblFemaleStudents.Size = new Size(176, 31);
             lblFemaleStudents.TabIndex = 6;
@@ -142,8 +154,9 @@
             // 
             // lblRole
             // 
+            lblRole.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             lblRole.AutoSize = true;
-            lblRole.Location = new Point(693, 376);
+            lblRole.Location = new Point(782, 771);
             lblRole.Name = "lblRole";
             lblRole.RightToLeft = RightToLeft.No;
             lblRole.Size = new Size(39, 20);
@@ -151,18 +164,106 @@
             lblRole.Text = "Role";
             lblRole.TextAlign = ContentAlignment.MiddleRight;
             // 
+            // picChart
+            // 
+            picChart.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            picChart.Location = new Point(137, 153);
+            picChart.Name = "picChart";
+            picChart.Size = new Size(643, 608);
+            picChart.TabIndex = 5;
+            picChart.TabStop = false;
+            // 
+            // dgvPendingUsers
+            // 
+            dgvPendingUsers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvPendingUsers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvPendingUsers.Columns.AddRange(new DataGridViewColumn[] { colAccept, colDelete });
+            dgvPendingUsers.Location = new Point(12, 186);
+            dgvPendingUsers.Name = "dgvPendingUsers";
+            dgvPendingUsers.RowHeadersWidth = 51;
+            dgvPendingUsers.Size = new Size(851, 575);
+            dgvPendingUsers.TabIndex = 6;
+            // 
+            // colAccept
+            // 
+            colAccept.HeaderText = "Accept";
+            colAccept.MinimumWidth = 6;
+            colAccept.Name = "colAccept";
+            colAccept.Resizable = DataGridViewTriState.True;
+            colAccept.SortMode = DataGridViewColumnSortMode.Automatic;
+            colAccept.Text = "✔";
+            colAccept.UseColumnTextForButtonValue = true;
+            colAccept.Width = 125;
+            // 
+            // colDelete
+            // 
+            colDelete.HeaderText = "Delete";
+            colDelete.MinimumWidth = 6;
+            colDelete.Name = "colDelete";
+            colDelete.Text = "✖";
+            colDelete.UseColumnTextForButtonValue = true;
+            colDelete.Width = 125;
+            // 
+            // txtSearchPending
+            // 
+            txtSearchPending.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            txtSearchPending.Location = new Point(696, 153);
+            txtSearchPending.Name = "txtSearchPending";
+            txtSearchPending.PlaceholderText = "Nhập tìm kiếm...";
+            txtSearchPending.Size = new Size(172, 27);
+            txtSearchPending.TabIndex = 7;
+            // 
+            // btnBulkAccept
+            // 
+            btnBulkAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnBulkAccept.Location = new Point(27, 767);
+            btnBulkAccept.Name = "btnBulkAccept";
+            btnBulkAccept.Size = new Size(205, 29);
+            btnBulkAccept.TabIndex = 8;
+            btnBulkAccept.Text = "✔ Duyệt các mục đã chọn";
+            btnBulkAccept.UseVisualStyleBackColor = true;
+            // 
+            // btnBulkDelete
+            // 
+            btnBulkDelete.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnBulkDelete.Location = new Point(264, 767);
+            btnBulkDelete.Name = "btnBulkDelete";
+            btnBulkDelete.Size = new Size(205, 29);
+            btnBulkDelete.TabIndex = 9;
+            btnBulkDelete.Text = "✖ Từ chối các mục đã chọn";
+            btnBulkDelete.UseVisualStyleBackColor = true;
+            // 
+            // chkSelectAll
+            // 
+            chkSelectAll.AutoSize = true;
+            chkSelectAll.Location = new Point(20, 193);
+            chkSelectAll.Name = "chkSelectAll";
+            chkSelectAll.Size = new Size(18, 17);
+            chkSelectAll.TabIndex = 10;
+            chkSelectAll.UseVisualStyleBackColor = true;
+            chkSelectAll.CheckedChanged += chkSelectAll_CheckedChanged;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(875, 801);
+            Controls.Add(chkSelectAll);
+            Controls.Add(btnBulkDelete);
+            Controls.Add(btnBulkAccept);
+            Controls.Add(txtSearchPending);
+            Controls.Add(dgvPendingUsers);
+            Controls.Add(picChart);
             Controls.Add(lblRole);
             Controls.Add(pnlFemale);
             Controls.Add(pnlMale);
             Controls.Add(pnlTotal);
             Controls.Add(menuStrip1);
+            DoubleBuffered = true;
             MainMenuStrip = menuStrip1;
+            MaximizeBox = false;
             Name = "MainForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "MainForm";
             Load += MainForm_Load;
             menuStrip1.ResumeLayout(false);
@@ -173,6 +274,8 @@
             pnlMale.PerformLayout();
             pnlFemale.ResumeLayout(false);
             pnlFemale.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picChart).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvPendingUsers).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -191,5 +294,13 @@
         private Panel pnlFemale;
         private Label lblFemaleStudents;
         private Label lblRole;
+        private PictureBox picChart;
+        private DataGridView dgvPendingUsers;
+        private DataGridViewButtonColumn colAccept;
+        private DataGridViewButtonColumn colDelete;
+        private TextBox txtSearchPending;
+        private Button btnBulkAccept;
+        private Button btnBulkDelete;
+        private CheckBox chkSelectAll;
     }
 }

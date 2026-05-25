@@ -103,7 +103,7 @@ namespace ClassProject
 
         private void cbSort_SelectedIndexChanged(object sender, EventArgs e)
         {
-            fillGrid(); // Người dùng đổi kiểu xếp -> tải lại lưới tự động đảo vị trí
+            fillGrid(); // Người dùng đổi kiểu xếp -> tải lại lưới tự động đảo vị  
         }
 
         // Hàm phụ dùng chung để định dạng thẩm mỹ và Việt hóa tiêu đề lưới

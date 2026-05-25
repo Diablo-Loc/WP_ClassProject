@@ -113,7 +113,7 @@ namespace ClassProject
             {
                 // 2. Nạp dữ liệu vào Model để Model tự kiểm tra logic nghiệp vụ (Validation trong set)
                 Student sv = new Student();
-                sv.UserId = mssv; // Tạm gán UserId trùng MSSV
+                sv.UserId = null; // Khi HR thêm mới, học sinh chưa có tài khoản đăng nhập -> Để NULL
                 sv.Mssv = mssv;
                 sv.FirstName = txtFirstName.Text.Trim();
                 sv.LastName = txtLastName.Text.Trim();

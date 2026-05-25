@@ -5,7 +5,7 @@ namespace ClassProject.Models
     public class Student
     {
         // Fields
-        private int _userId;
+        private int? _userId;
         private int _mssv;
         private string _firstName;
         private string _lastName;
@@ -18,12 +18,13 @@ namespace ClassProject.Models
         private byte[] _picture;
 
         // Properties
-        public int UserId
+        public int? UserId
         {
             get { return _userId; }
             set
             {
-                if (value <= 0)
+                // Nếu có giá trị (không null) và giá trị đó <= 0 thì mới báo lỗi
+                if (value.HasValue && value.Value <= 0)
                     throw new Exception("UserId không hợp lệ!");
                 _userId = value;
             }
@@ -130,9 +131,9 @@ namespace ClassProject.Models
 
         // Constructor
         public Student(){ }
-        public Student(int userId, int mssv, string firstName, string lastName, DateTime dateOfBirth,
-                       string gender, string phone, string address, string hometown,
-                       string email, byte[] picture = null)
+        public Student(int? userId, int mssv, string firstName, string lastName, DateTime dateOfBirth,
+               string gender, string phone, string address, string hometown,
+               string email, byte[] picture = null)
         {
             UserId = userId;
             Mssv = mssv;

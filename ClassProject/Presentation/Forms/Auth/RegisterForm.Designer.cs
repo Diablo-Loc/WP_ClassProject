@@ -54,10 +54,10 @@
             pictureBox1.BackColor = Color.Transparent;
             pictureBox1.BackgroundImage = (Image)resources.GetObject("pictureBox1.BackgroundImage");
             pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
-            pictureBox1.Location = new Point(116, 13);
-            pictureBox1.Margin = new Padding(2);
+            pictureBox1.Location = new Point(133, 17);
+            pictureBox1.Margin = new Padding(2, 3, 2, 3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(85, 69);
+            pictureBox1.Size = new Size(97, 92);
             pictureBox1.TabIndex = 1;
             pictureBox1.TabStop = false;
             // 
@@ -67,49 +67,45 @@
             lblCreatAcount.BackColor = Color.Transparent;
             lblCreatAcount.Font = new Font("Segoe UI", 19.875F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblCreatAcount.ForeColor = Color.Black;
-            lblCreatAcount.Location = new Point(50, 83);
+            lblCreatAcount.Location = new Point(57, 111);
             lblCreatAcount.Margin = new Padding(2, 0, 2, 0);
             lblCreatAcount.Name = "lblCreatAcount";
-            lblCreatAcount.Size = new Size(213, 37);
+            lblCreatAcount.Size = new Size(263, 46);
             lblCreatAcount.TabIndex = 2;
             lblCreatAcount.Text = "Create Account";
             lblCreatAcount.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // txtUsername
             // 
-            txtUsername.Location = new Point(34, 144);
-            txtUsername.Margin = new Padding(3, 2, 3, 2);
+            txtUsername.Location = new Point(39, 192);
             txtUsername.Name = "txtUsername";
             txtUsername.PlaceholderText = "Username";
-            txtUsername.Size = new Size(246, 23);
+            txtUsername.Size = new Size(281, 27);
             txtUsername.TabIndex = 5;
             // 
             // txtEmail
             // 
-            txtEmail.Location = new Point(34, 189);
-            txtEmail.Margin = new Padding(3, 2, 3, 2);
+            txtEmail.Location = new Point(39, 252);
             txtEmail.Name = "txtEmail";
             txtEmail.PlaceholderText = "Email";
-            txtEmail.Size = new Size(246, 23);
+            txtEmail.Size = new Size(281, 27);
             txtEmail.TabIndex = 6;
             // 
             // txtPassword
             // 
-            txtPassword.Location = new Point(34, 237);
-            txtPassword.Margin = new Padding(3, 2, 3, 2);
+            txtPassword.Location = new Point(39, 316);
             txtPassword.Name = "txtPassword";
             txtPassword.PlaceholderText = "Password";
-            txtPassword.Size = new Size(112, 23);
+            txtPassword.Size = new Size(127, 27);
             txtPassword.TabIndex = 7;
             txtPassword.UseSystemPasswordChar = true;
             // 
             // txtConfirm
             // 
-            txtConfirm.Location = new Point(169, 237);
-            txtConfirm.Margin = new Padding(3, 2, 3, 2);
+            txtConfirm.Location = new Point(193, 316);
             txtConfirm.Name = "txtConfirm";
             txtConfirm.PlaceholderText = "Confirm Password";
-            txtConfirm.Size = new Size(112, 23);
+            txtConfirm.Size = new Size(127, 27);
             txtConfirm.TabIndex = 8;
             txtConfirm.UseSystemPasswordChar = true;
             // 
@@ -118,20 +114,18 @@
             chkAgree.AutoSize = true;
             chkAgree.BackColor = Color.Transparent;
             chkAgree.ForeColor = Color.Red;
-            chkAgree.Location = new Point(169, 281);
-            chkAgree.Margin = new Padding(3, 2, 3, 2);
+            chkAgree.Location = new Point(193, 375);
             chkAgree.Name = "chkAgree";
-            chkAgree.Size = new Size(108, 19);
+            chkAgree.Size = new Size(136, 24);
             chkAgree.TabIndex = 9;
             chkAgree.Text = "I agree to terms";
             chkAgree.UseVisualStyleBackColor = false;
             // 
             // btnRegister
             // 
-            btnRegister.Location = new Point(35, 309);
-            btnRegister.Margin = new Padding(3, 2, 3, 2);
+            btnRegister.Location = new Point(40, 412);
             btnRegister.Name = "btnRegister";
-            btnRegister.Size = new Size(246, 22);
+            btnRegister.Size = new Size(281, 29);
             btnRegister.TabIndex = 10;
             btnRegister.Text = "Register";
             btnRegister.UseVisualStyleBackColor = true;
@@ -155,37 +149,37 @@
             pnlCreateAccount.Controls.Add(txtUsername);
             pnlCreateAccount.Controls.Add(txtEmail);
             pnlCreateAccount.Controls.Add(txtConfirm);
-            pnlCreateAccount.Location = new Point(180, 9);
-            pnlCreateAccount.Margin = new Padding(3, 2, 3, 2);
+            pnlCreateAccount.Location = new Point(206, 12);
             pnlCreateAccount.Name = "pnlCreateAccount";
-            pnlCreateAccount.Size = new Size(316, 364);
+            pnlCreateAccount.Size = new Size(361, 485);
             pnlCreateAccount.TabIndex = 12;
             // 
             // txtPosition
             // 
             txtPosition.AutoSize = true;
-            txtPosition.Location = new Point(35, 262);
+            txtPosition.Location = new Point(40, 349);
             txtPosition.Name = "txtPosition";
-            txtPosition.Size = new Size(50, 15);
+            txtPosition.Size = new Size(61, 20);
             txtPosition.TabIndex = 21;
             txtPosition.Text = "Position";
             // 
             // cboPosition
             // 
             cboPosition.FormattingEnabled = true;
-            cboPosition.Items.AddRange(new object[] { "Admin", "Student", "HR" });
-            cboPosition.Location = new Point(35, 281);
+            cboPosition.Items.AddRange(new object[] { "Student", "HR" });
+            cboPosition.Location = new Point(40, 375);
+            cboPosition.Margin = new Padding(3, 4, 3, 4);
             cboPosition.Name = "cboPosition";
-            cboPosition.Size = new Size(113, 23);
+            cboPosition.Size = new Size(129, 28);
             cboPosition.TabIndex = 20;
             // 
             // lblBacktoLogin
             // 
             lblBacktoLogin.AutoSize = true;
             lblBacktoLogin.Font = new Font("Segoe UI", 9F, FontStyle.Underline);
-            lblBacktoLogin.Location = new Point(32, 333);
+            lblBacktoLogin.Location = new Point(37, 444);
             lblBacktoLogin.Name = "lblBacktoLogin";
-            lblBacktoLogin.Size = new Size(79, 15);
+            lblBacktoLogin.Size = new Size(99, 20);
             lblBacktoLogin.TabIndex = 19;
             lblBacktoLogin.Text = "Back to Login";
             lblBacktoLogin.Click += lblBacktoLogin_Click;
@@ -193,48 +187,47 @@
             // lblConfirmPassword
             // 
             lblConfirmPassword.AutoSize = true;
-            lblConfirmPassword.Location = new Point(167, 219);
+            lblConfirmPassword.Location = new Point(191, 292);
             lblConfirmPassword.Name = "lblConfirmPassword";
-            lblConfirmPassword.Size = new Size(104, 15);
+            lblConfirmPassword.Size = new Size(127, 20);
             lblConfirmPassword.TabIndex = 15;
             lblConfirmPassword.Text = "Confirm Password";
             // 
             // lblPassword
             // 
             lblPassword.AutoSize = true;
-            lblPassword.Location = new Point(33, 219);
+            lblPassword.Location = new Point(38, 292);
             lblPassword.Name = "lblPassword";
-            lblPassword.Size = new Size(57, 15);
+            lblPassword.Size = new Size(70, 20);
             lblPassword.TabIndex = 14;
             lblPassword.Text = "Password";
             // 
             // lblEmail
             // 
             lblEmail.AutoSize = true;
-            lblEmail.Location = new Point(32, 170);
+            lblEmail.Location = new Point(37, 227);
             lblEmail.Name = "lblEmail";
-            lblEmail.Size = new Size(36, 15);
+            lblEmail.Size = new Size(46, 20);
             lblEmail.TabIndex = 13;
             lblEmail.Text = "Email";
             // 
             // lblUsername
             // 
             lblUsername.AutoSize = true;
-            lblUsername.Location = new Point(32, 123);
+            lblUsername.Location = new Point(37, 164);
             lblUsername.Name = "lblUsername";
-            lblUsername.Size = new Size(60, 15);
+            lblUsername.Size = new Size(75, 20);
             lblUsername.TabIndex = 12;
             lblUsername.Text = "Username";
             // 
             // RegisterForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
-            ClientSize = new Size(668, 380);
+            ClientSize = new Size(763, 507);
             Controls.Add(pnlCreateAccount);
-            Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
             Name = "RegisterForm";
             StartPosition = FormStartPosition.CenterScreen;
