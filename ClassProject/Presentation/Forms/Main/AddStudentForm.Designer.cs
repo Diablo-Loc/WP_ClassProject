@@ -28,6 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            
             picStudent = new PictureBox();
             btnChooseImage = new Button();
             lbFirstName = new Label();
@@ -35,9 +46,6 @@
             lbDateOfBirth = new Label();
             lbPhone = new Label();
             lbGender = new Label();
-            btnAdd = new Button();
-            btnClear = new Button();
-            txtMSSV = new TextBox();
             txtFirstName = new TextBox();
             txtLastName = new TextBox();
             txtPhone = new TextBox();
@@ -51,9 +59,11 @@
             lbAddress = new Label();
             txtHometown = new TextBox();
             picLogo = new PictureBox();
+            
             ((System.ComponentModel.ISupportInitialize)picStudent).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
             SuspendLayout();
+            
             // 
             // picStudent
             // 
@@ -125,26 +135,6 @@
             lbGender.Size = new Size(70, 21);
             lbGender.TabIndex = 8;
             lbGender.Text = "Giới tính";
-            // 
-            // btnAdd
-            // 
-            btnAdd.Location = new Point(245, 371);
-            btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(115, 40);
-            btnAdd.TabIndex = 9;
-            btnAdd.Text = "ADD";
-            btnAdd.UseVisualStyleBackColor = true;
-            btnAdd.Click += btnAdd_Click;
-            // 
-            // btnClear
-            // 
-            btnClear.Location = new Point(419, 371);
-            btnClear.Name = "btnClear";
-            btnClear.Size = new Size(115, 40);
-            btnClear.TabIndex = 10;
-            btnClear.Text = "CLEAR";
-            btnClear.UseVisualStyleBackColor = true;
-            btnClear.Click += btnClear_Click;
             // 
             // txtMSSV
             // 
@@ -285,9 +275,6 @@
             Controls.Add(txtPhone);
             Controls.Add(txtLastName);
             Controls.Add(txtFirstName);
-            Controls.Add(txtMSSV);
-            Controls.Add(btnClear);
-            Controls.Add(btnAdd);
             Controls.Add(lbGender);
             Controls.Add(lbPhone);
             Controls.Add(lbDateOfBirth);
@@ -306,29 +293,26 @@
 
         #endregion
 
-        private PictureBox picStudent;
-        private Button btnChooseImage;
-        private Label lbFirstName;
-        private Label lbLastName;
-        private Label lbDateOfBirth;
-        private Label lbPhone;
-        private Label lbGender;
-        private Button btnAdd;
-        private Button btnClear;
-        private TextBox txtMSSV;
-        private TextBox txtFirstName;
-        private TextBox txtLastName;
-        private TextBox txtPhone;
-        private TextBox textBox5;
-        private TextBox txtAddress;
-        private DateTimePicker dtpDateOfBirth;
-        private TextBox txtEmail;
-        private ComboBox cboGender;
-        private Label lblHometown;
-        private Label lbMSSV;
-        private Label lbEmail;
-        private Label lbAddress;
-        private TextBox txtHometown;
-        private PictureBox picLogo;
+        private System.Windows.Forms.PictureBox picStudent;
+        private System.Windows.Forms.Button btnChooseImage;
+        private System.Windows.Forms.Label lbFirstName;
+        private System.Windows.Forms.Label lbLastName;
+        private System.Windows.Forms.Label lbDateOfBirth;
+        private System.Windows.Forms.Label lbPhone;
+        private System.Windows.Forms.Label lbGender;
+        private System.Windows.Forms.TextBox txtFirstName;
+        private System.Windows.Forms.TextBox txtLastName;
+        private System.Windows.Forms.TextBox txtPhone;
+        private System.Windows.Forms.TextBox txtAddress;
+        private System.Windows.Forms.DateTimePicker dtpDateOfBirth;
+        private System.Windows.Forms.TextBox txtEmail;
+        private System.Windows.Forms.ComboBox cboGender;
+        private System.Windows.Forms.Label lblHometown;
+        private System.Windows.Forms.Label lbMSSV;
+        private System.Windows.Forms.TextBox txtMSSV;
+        private System.Windows.Forms.Label lbEmail;
+        private System.Windows.Forms.Label lbAddress;
+        private System.Windows.Forms.TextBox txtHometown;
+        private System.Windows.Forms.PictureBox picLogo;
     }
 }
