@@ -113,21 +113,47 @@ EXEC('UPDATE dbo.Users
       WHERE Username = N''admin''');
 GO
 
+-- =================================================
+-- Tạo bảng Courses
+-- =================================================
+IF OBJECT_ID(N'dbo.Courses', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Courses
+    (
+        MaMH VARCHAR(50) PRIMARY KEY,
+        TenMH NVARCHAR(100) NOT NULL,
+        SoTC INT NOT NULL,
+        Tuan INT NOT NULL,
+        Hky INT NOT NULL,
+        Mota NVARCHAR(500) NULL,
+        Created_At DATETIME DEFAULT GETDATE()
+    );
+END
+GO
+
 -- =========================================================
 -- Tạo bảng Đăng ký môn học 
 -- =========================================================
 IF OBJECT_ID(N'dbo.CourseRegistration', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.CourseRegistration (
-        Mssv NVARCHAR(30) NOT NULL,
-        CourseId VARCHAR(50) NOT NULL,
-        RegistrationDate DATETIME DEFAULT GETDATE(),
-        Score FLOAT NULL, 
-        
-        PRIMARY KEY (Mssv, CourseId),
-        CONSTRAINT FK_CourseRegistration_Students 
-            FOREIGN KEY (Mssv) REFERENCES dbo.Students(MSSV) ON DELETE CASCADE
-    );
+    Mssv NVARCHAR(30) NOT NULL,
+    MaMH VARCHAR(50) NOT NULL,
+    RegistrationDate DATETIME DEFAULT GETDATE(),
+    Score DECIMAL(4,2) NULL, 
+    
+    PRIMARY KEY (Mssv, MaMH),
+
+    CONSTRAINT FK_CourseRegistration_Students 
+        FOREIGN KEY (Mssv) 
+        REFERENCES dbo.Students(MSSV) 
+        ON DELETE CASCADE,
+
+    CONSTRAINT FK_CourseRegistration_Courses
+        FOREIGN KEY (MaMH)
+        REFERENCES dbo.Courses(MaMH)
+        ON DELETE CASCADE
+);
 END
 GO
 

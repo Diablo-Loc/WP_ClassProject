@@ -143,17 +143,17 @@ namespace ClassProject.Presentation.Forms
         {
             try
             {
-                string senderEmail = "24110077@student.hcmute.edu.vn";
-                string senderPassword = "xxxx yyyy zzzz qqqq"; // Mật khẩu ứng dụng 16 ký tự của Google
+                string senderEmail = "tranthienan6298.2017@gmail.com";
+                string senderPassword = "kmxdsjowtxbfwuhl";
 
-                // Kiểm tra nếu chưa điền thông tin thật thì ép trả về false để bật chế độ Mock Test ngay
-                if (string.IsNullOrEmpty(senderEmail) || senderEmail == "24110077@student.hcmute.edu.vn")
+                if (string.IsNullOrEmpty(senderEmail) || string.IsNullOrEmpty(senderPassword))
                 {
+                    System.Diagnostics.Debug.WriteLine("Cảnh báo: Chưa cấu hình Email hoặc Mật khẩu ứng dụng.");
                     return false;
                 }
 
+                // Tạo nội dung Email bằng MailKit / MimeKit
                 var message = new MimeMessage();
-                //Đảm bảo senderEmail không bị null
                 message.From.Add(new MailboxAddress("ClassProject Systems", senderEmail));
                 message.To.Add(new MailboxAddress("", toEmail));
                 message.Subject = "HCMUTE SYSTEM - RESET PASSWORD OTP";
@@ -162,22 +162,28 @@ namespace ClassProject.Presentation.Forms
                 bodyBuilder.TextBody = $"Mã OTP đặt lại mật khẩu của bạn là: {otp}\n\nMã này chỉ có hiệu lực trong vòng 5 phút. Vui lòng tuyệt đối không chia sẻ mã này cho bất kỳ ai!";
                 message.Body = bodyBuilder.ToMessageBody();
 
-                using (var client = new SmtpClient())
+                // Thực hiện kết nối SMTP Server của Google và gửi mail
+                using (var client = new MailKit.Net.Smtp.SmtpClient()) // Định nghĩa rõ ràng MailKit SmtpClient
                 {
+                    // Kết nối qua cổng 587 bằng STARTTLS
                     client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+
+                    // Đăng nhập bằng Mật khẩu ứng dụng
                     client.Authenticate(senderEmail, senderPassword);
+
+                    // Gửi thư
                     client.Send(message);
                     client.Disconnect(true);
                 }
 
-                return true; // Gửi mail thật thành công
+                return true; // Gửi mail thật THÀNH CÔNG, không chạy vào chế độ Test nữa
             }
             catch (Exception ex)
             {
-                // Ghi nhận lỗi ra cửa sổ Output để bạn dễ kiểm tra lý do lỗi (Ví dụ: sai mật khẩu, mất mạng...)
-                System.Diagnostics.Debug.WriteLine("Lỗi gửi mail chi tiết: " + ex.Message);
+                // Nếu có lỗi phát sinh (Sai mật khẩu ứng dụng, chặn tường lửa, mất mạng...), log sẽ hiện ở đây
+                System.Diagnostics.Debug.WriteLine("Lỗi gửi mail chi tiết: " + ex.ToString());
 
-                // Trả về false thay vì hiện lỗi crash, giúp kích hoạt MessageBox hiện mã OTP dự phòng
+                // Trả về false để hệ thống bật thông báo Mock OTP dự phòng, tránh crash ứng dụng
                 return false;
             }
         }
