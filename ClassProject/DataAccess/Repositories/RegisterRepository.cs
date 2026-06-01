@@ -13,10 +13,6 @@ namespace ClassProject.DataAccess.Repositories
             _connectionString = connectionString;
         }
 
-        // =========================================================
-        // LOGIC TUẦN 6: ĐĂNG KÝ MÔN HỌC
-        // =========================================================
-
         // 1. Hàm Đăng ký môn học (INSERT)
         public bool AddRegistration(string mssv, string courseId)
         {
@@ -78,8 +74,8 @@ namespace ClassProject.DataAccess.Repositories
             }
         }
 
-        // 4. Lấy danh sách đã đăng ký nạp lên DataGridView (Đã FIX JOIN c.MaMH)
-        public DataTable GetRegistrationList()
+        // 4. Lấy danh sách đã đăng ký nạp lên DataGridView
+        public DataTable GetRegistrationList(string mssv)
         {
             DataTable dt = new DataTable();
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -87,116 +83,36 @@ namespace ClassProject.DataAccess.Repositories
                 try
                 {
                     conn.Open();
+                    
                     string query = @"SELECT 
-                                        r.Mssv AS [Mã SV],
-                                        (s.LastName + ' ' + s.FirstName) AS [Họ và Tên],
-                                        r.CourseId AS [Mã MH],
-                                        c.TenMH AS [Tên Môn Học],
-                                        r.RegistrationDate AS [Ngày Đăng Ký]
-                                     FROM dbo.CourseRegistration r
-                                     JOIN dbo.Students s ON r.Mssv = s.MSSV
-                                     JOIN dbo.Course c ON r.CourseId = c.MaMH";
-
-                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
-                    {
-                        da.Fill(dt);
-                    }
-                }
-                catch { }
-            }
-            return dt;
-        }
-
-        // =========================================================
-        // LOGIC TUẦN 7: QUẢN LÝ ĐIỂM SỐ (SCORE)
-        // =========================================================
-
-        // Trước khi lưu điểm chi tiết, ta cần đảm bảo bảng CourseRegistration 
-        // có đủ cột DiemQT và DiemCK để chạy. Hàm này sẽ tự kiểm tra và cập nhật Database tự động.
-        public void EnsureScoreColumnsExist()
-        {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    string query = @"
-                        IF COL_LENGTH('dbo.CourseRegistration', 'DiemQT') IS NULL
-                            ALTER TABLE dbo.CourseRegistration ADD DiemQT DECIMAL(4,2) NULL;
-                        IF COL_LENGTH('dbo.CourseRegistration', 'DiemCK') IS NULL
-                            ALTER TABLE dbo.CourseRegistration ADD DiemCK DECIMAL(4,2) NULL;
-                    ";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                catch { }
-            }
-        }
-
-        // 5. Hàm Lưu điểm số cho Sinh viên (Cập nhật Score, DiemQT, DiemCK)
-        public bool SaveScore(string mssv, string courseId, decimal diemQt, decimal diemCk, decimal diemTk)
-        {
-            EnsureScoreColumnsExist();
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    // Cập nhật điểm số dựa trên bản ghi đăng ký môn học đã tồn tại
-                    string query = @"UPDATE dbo.CourseRegistration 
-                                     SET DiemQT = @diemQt, 
-                                         DiemCK = @diemCk, 
-                                         Score = @diemTk 
-                                     WHERE Mssv = @mssv AND CourseId = @courseId";
+                                ROW_NUMBER() OVER (ORDER BY r.RegistrationDate DESC) AS STT,
+                                r.MaMH AS CourseId,
+                                c.TenMH AS CourseName,
+                                ISNULL(c.SoTC, 0) AS Credits,
+                                N'Chưa phân công' AS Teacher,
+                                ISNULL(c.Hky, 0) AS Semester
+                             FROM dbo.DKMH r
+                             JOIN dbo.Course c ON r.MaMH = c.MaMH
+                             WHERE r.MSSV = @mssv";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@mssv", mssv);
-                        cmd.Parameters.AddWithValue("@courseId", courseId);
-                        cmd.Parameters.AddWithValue("@diemQt", diemQt);
-                        cmd.Parameters.AddWithValue("@diemCk", diemCk);
-                        cmd.Parameters.AddWithValue("@diemTk", diemTk); // Score lưu điểm tổng kết
-
-                        return cmd.ExecuteNonQuery() > 0;
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            da.Fill(dt);
+                        }
                     }
                 }
-                catch { return false; }
-            }
-        }
-
-        // 6. Lấy bảng điểm tổng hợp hiển thị lên Form Quản Lý Điểm
-        public DataTable GetScoreList()
-        {
-            EnsureScoreColumnsExist();
-            DataTable dt = new DataTable();
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                try
+                catch (Exception ex)
                 {
-                    conn.Open();
-                    string query = @"SELECT 
-                                        r.Mssv AS [Mã SV],
-                                        (s.LastName + ' ' + s.FirstName) AS [Họ và Tên],
-                                        r.CourseId AS [Mã MH],
-                                        c.TenMH AS [Tên Môn Học],
-                                        ISNULL(r.DiemQT, 0) AS [Điểm QT (40%)],
-                                        ISNULL(r.DiemCK, 0) AS [Điểm CK (60%)],
-                                        ISNULL(r.Score, 0) AS [Điểm Tổng Kết]
-                                     FROM dbo.CourseRegistration r
-                                     JOIN dbo.Students s ON r.Mssv = s.MSSV
-                                     JOIN dbo.Course c ON r.CourseId = c.MaMH";
-
-                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
-                    {
-                        da.Fill(dt);
-                    }
+                    System.Windows.Forms.MessageBox.Show("Lỗi SQL: " + ex.Message, "Lỗi kết nối");
                 }
-                catch { }
             }
             return dt;
         }
+
+        // 5. Tính tổng số tín chỉ sinh viên đã đăng ký
         public int GetTotalCreditsRegistered(string mssv)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -204,11 +120,29 @@ namespace ClassProject.DataAccess.Repositories
                 try
                 {
                     conn.Open();
-                    // Lấy tổng số tín chỉ bằng cách SUM cột SoTC từ bảng Course thông qua liên kết DKMH
                     string query = @"SELECT ISNULL(SUM(c.SoTC), 0) 
-                             FROM dbo.DKMH r 
-                             JOIN dbo.Course c ON r.MaMH = c.MaMH 
-                             WHERE r.MSSV = @mssv";
+                             FROM dbo.CourseRegistration r 
+                             JOIN dbo.Course c ON r.CourseId = c.MaMH 
+                             WHERE r.Mssv = @mssv";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@mssv", mssv);
+                        return Convert.ToInt32(cmd.ExecuteScalar());
+                    }
+                }
+                catch { return 0; }
+            }
+        }
+
+        //6. Hàm đếm tổng số môn học sinh viên đó đã đăng ký
+        public int GetTotalCoursesRegistered(string mssv)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT COUNT(*) FROM dbo.CourseRegistration WHERE Mssv = @mssv";
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@mssv", mssv);

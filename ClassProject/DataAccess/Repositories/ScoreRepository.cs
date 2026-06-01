@@ -13,7 +13,6 @@ namespace ClassProject.DataAccess.Repositories
             _connectionString = connectionString;
         }
 
-        // 1. Lưu hoặc Cập nhật điểm số cho Sinh viên (Sử dụng lệnh MERGE vào bảng dbo.Score)
         public bool SaveScore(string mssv, string maMH, decimal diemQt, decimal diemCk, decimal diemTk, string mota)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -46,7 +45,6 @@ namespace ClassProject.DataAccess.Repositories
             }
         }
 
-        // 2. Lấy danh sách điểm số nạp lên DataGridView (ĐÃ THÊM HỌC KỲ, NĂM HỌC, HỆ 4, XẾP LOẠI)
         public DataTable GetScoreList()
         {
             DataTable dt = new DataTable();
@@ -55,7 +53,6 @@ namespace ClassProject.DataAccess.Repositories
                 try
                 {
                     conn.Open();
-                    // SỬA ĐỔI: Thêm c.Hky, c.NamHoc để đồng bộ UI và dùng câu lệnh CASE WHEN để tự động tính Hệ 4 + Xếp loại từ SQL
                     string query = @"SELECT 
                                         sc.MSSV AS [Mã SV],
                                         (s.LastName + ' ' + s.FirstName) AS [Họ và Tên],
@@ -98,7 +95,6 @@ namespace ClassProject.DataAccess.Repositories
             return dt;
         }
 
-        // 3. Xóa điểm số môn học của một sinh viên
         public bool DeleteScore(string mssv, string maMH)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -118,7 +114,6 @@ namespace ClassProject.DataAccess.Repositories
             }
         }
 
-        // 4. Lấy điểm trung bình tích lũy hệ 10
         public decimal GetStudentGPA(string mssv)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -136,6 +131,27 @@ namespace ClassProject.DataAccess.Repositories
                 catch { return 0; }
             }
         }
+
+        // 🔥 HÀM THÊM MỚI: Check chính xác xem môn học cụ thể này của SV đã có điểm chưa
+        public bool HasCourseScore(string mssv, string maMH)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT COUNT(*) FROM dbo.Score WHERE MSSV = @mssv AND MaMH = @maMH";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@mssv", mssv);
+                        cmd.Parameters.AddWithValue("@maMH", maMH);
+                        return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                    }
+                }
+                catch { return false; }
+            }
+        }
+
         public DataTable GetQuickStats()
         {
             DataTable dt = new DataTable();
@@ -144,7 +160,6 @@ namespace ClassProject.DataAccess.Repositories
                 try
                 {
                     conn.Open();
-                    // Câu truy vấn gộp tính toán 4 chỉ số cùng 1 lúc để tối ưu hiệu năng kết nối
                     string query = @"
                 SELECT 
                     (SELECT COUNT(*) FROM dbo.Students) AS TotalStudents,

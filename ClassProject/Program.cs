@@ -16,6 +16,7 @@ namespace ClassProject
             //Application.Run(new LoginForm());
             //Application.Run(new RegisterCourseForm());
             Application.Run(new ManageScoreForm());
+            //Application.Run(new RegisterCourseForm());
         }
     }
 }

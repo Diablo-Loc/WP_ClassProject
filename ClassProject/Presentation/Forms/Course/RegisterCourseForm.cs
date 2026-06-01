@@ -14,8 +14,12 @@ namespace ClassProject.Presentation.Forms.Course
     {
         private RegisterRepository _registerRepo;
         private StudentRepository _studentRepo;
-        private ScoreRepository _scoreRepo; // Bổ sung tầng Score để check điều kiện hủy môn học
+        private ScoreRepository _scoreRepo;
         private My_DB _db = new My_DB();
+
+        private bool _isBindingCombo = false;
+
+        public object DataGridViewColumnAutoSizeMode { get; private set; }
 
         public RegisterCourseForm()
         {
@@ -23,32 +27,38 @@ namespace ClassProject.Presentation.Forms.Course
             string connString = _db.GetConnection().ConnectionString;
             _registerRepo = new RegisterRepository(connString);
             _studentRepo = new StudentRepository(connString);
-            _scoreRepo = new ScoreRepository(connString); // Khởi tạo Repo Điểm
+            _scoreRepo = new ScoreRepository(connString);
         }
 
-        // Sự kiện Form Load: tự động nạp dữ liệu khi mở màn hình này lên
         private void RegisterCourseForm_Load(object sender, EventArgs e)
         {
+            _isBindingCombo = true;
             LoadStudentCombo();
             LoadCourseCombo();
+            _isBindingCombo = false;
+
             LoadGridData();
+            UpdateQuickStats();
         }
 
-        // 1. Load danh sách Sinh viên vào cboStudent
         private void LoadStudentCombo()
         {
             try
             {
                 DataTable dt = _studentRepo.SearchStudents("", "Tất cả");
 
-                if (dt.Columns.Contains("MSSV") && dt.Columns.Contains("FirstName"))
+                if (dt.Columns.Contains("Mssv") && dt.Columns.Contains("FirstName"))
+                {
+                    dt.Columns.Add("FullNameWithId", typeof(string), "Mssv + ' - ' + LastName + ' ' + FirstName");
+                }
+                else if (dt.Columns.Contains("MSSV") && dt.Columns.Contains("FirstName"))
                 {
                     dt.Columns.Add("FullNameWithId", typeof(string), "MSSV + ' - ' + LastName + ' ' + FirstName");
                 }
 
                 cboStudent.DataSource = dt;
                 cboStudent.DisplayMember = "FullNameWithId";
-                cboStudent.ValueMember = "MSSV";
+                cboStudent.ValueMember = dt.Columns.Contains("Mssv") ? "Mssv" : "MSSV";
             }
             catch (Exception ex)
             {
@@ -56,7 +66,6 @@ namespace ClassProject.Presentation.Forms.Course
             }
         }
 
-        // 2. Load danh sách Môn học vào cboCourse
         private void LoadCourseCombo()
         {
             try
@@ -82,21 +91,74 @@ namespace ClassProject.Presentation.Forms.Course
             }
         }
 
-        // 3. Nạp dữ liệu danh sách đã đăng ký lên lưới DataGridView
         private void LoadGridData()
         {
-            DataTable dt = _registerRepo.GetRegistrationList();
+            // Nếu ComboBox đang nạp data hoặc chưa chọn ai thì xóa sạch bảng, tránh lỗi
+            if (_isBindingCombo || cboStudent.SelectedValue == null)
+            {
+                dgvRegisterCourse.DataSource = null;
+                return;
+            }
+
+            string mssv = cboStudent.SelectedValue.ToString();
+            if (mssv.Contains("System.Data.DataRowView")) return;
+
+            // 1. Lấy dữ liệu chuẩn từ tầng Repository đã sửa ở Bước 1
+            DataTable dt = _registerRepo.GetRegistrationList(mssv);
+
+            // 2. Reset làm sạch lưới cũ để nạp cấu trúc mới không bị chồng chéo
+            dgvRegisterCourse.DataSource = null;
+            dgvRegisterCourse.Columns.Clear();
+
+            // 3. Đổ dữ liệu mới vào lưới
+            dgvRegisterCourse.AutoGenerateColumns = true;
             dgvRegisterCourse.DataSource = dt;
+
+            // 4. Bật thanh tiêu đề và đặt tên Tiếng Việt hiển thị theo đúng yêu cầu
+            dgvRegisterCourse.ColumnHeadersVisible = true;
+            dgvRegisterCourse.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 
             if (dgvRegisterCourse.Columns.Count > 0)
             {
+                if (dgvRegisterCourse.Columns.Contains("STT")) dgvRegisterCourse.Columns["STT"].HeaderText = "STT";
+                if (dgvRegisterCourse.Columns.Contains("CourseId")) dgvRegisterCourse.Columns["CourseId"].HeaderText = "Mã Môn Học";
+                if (dgvRegisterCourse.Columns.Contains("CourseName")) dgvRegisterCourse.Columns["CourseName"].HeaderText = "Tên Môn Học";
+                if (dgvRegisterCourse.Columns.Contains("Credits")) dgvRegisterCourse.Columns["Credits"].HeaderText = "Số Tín Chỉ";
+                if (dgvRegisterCourse.Columns.Contains("Teacher")) dgvRegisterCourse.Columns["Teacher"].HeaderText = "Giảng Viên";
+                if (dgvRegisterCourse.Columns.Contains("Semester")) dgvRegisterCourse.Columns["Semester"].HeaderText = "Học Kỳ";
+
+                if (dgvRegisterCourse.Columns.Contains("STT"))
+                {
+                    dgvRegisterCourse.Columns["STT"].Width = 50;
+                }
+
                 dgvRegisterCourse.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
                 dgvRegisterCourse.AllowUserToAddRows = false;
                 dgvRegisterCourse.ReadOnly = true;
+                dgvRegisterCourse.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             }
         }
 
-        // 4. Xử lý nút bấm ĐĂNG KÝ HỌC (btnRegister)
+        private void UpdateQuickStats()
+        {
+            if (_isBindingCombo || cboStudent.SelectedValue == null) return;
+
+            string mssv = cboStudent.SelectedValue.ToString();
+            if (mssv.Contains("System.Data.DataRowView")) return;
+
+            int totalCourses = _registerRepo.GetTotalCoursesRegistered(mssv);
+            int totalCredits = _registerRepo.GetTotalCreditsRegistered(mssv);
+
+            lblTotalCourses.Text = $"{totalCourses}";
+            lblTotalCredits.Text = $"{totalCredits}";
+        }
+
+        private void cboStudent_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadGridData();
+            UpdateQuickStats();
+        }
+
         private void btnRegister_Click(object sender, EventArgs e)
         {
             if (cboStudent.SelectedValue == null || cboCourse.SelectedValue == null)
@@ -105,11 +167,9 @@ namespace ClassProject.Presentation.Forms.Course
                 return;
             }
 
-            // Đưa dòng lấy giá trị lên đầu tiên để sửa lỗi biên dịch
             string mssv = cboStudent.SelectedValue.ToString();
             string courseId = cboCourse.SelectedValue.ToString();
 
-            // 🔥 BONUS ĐIỂM CAO: Kiểm tra giới hạn tối đa 24 Tín chỉ
             int currentCredits = _registerRepo.GetTotalCreditsRegistered(mssv);
             if (currentCredits + 3 > 24)
             {
@@ -117,18 +177,17 @@ namespace ClassProject.Presentation.Forms.Course
                 return;
             }
 
-            // Kiểm tra chống trùng (Sinh viên đăng ký trùng môn học)
             if (_registerRepo.IsRegistered(mssv, courseId))
             {
                 MessageBox.Show("Sinh viên này đã đăng ký môn học này rồi!", "Trùng lịch học", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Gọi Repository thực hiện INSERT vào database
             if (_registerRepo.AddRegistration(mssv, courseId))
             {
                 MessageBox.Show("Đăng ký môn học thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadGridData();
+                UpdateQuickStats();
             }
             else
             {
@@ -136,20 +195,26 @@ namespace ClassProject.Presentation.Forms.Course
             }
         }
 
-        // 5. Xử lý nút bấm HỦY ĐĂNG KÝ (btnCancelRegister)
         private void btnCancelRegister_Click(object sender, EventArgs e)
         {
             string mssv = "";
             string courseId = "";
 
-            if (dgvRegisterCourse.CurrentRow != null)
-            {
-                mssv = dgvRegisterCourse.CurrentRow.Cells["Mã SV"].Value.ToString();
-                courseId = dgvRegisterCourse.CurrentRow.Cells["Mã MH"].Value.ToString();
-            }
-            else if (cboStudent.SelectedValue != null && cboCourse.SelectedValue != null)
+            if (cboStudent.SelectedValue != null)
             {
                 mssv = cboStudent.SelectedValue.ToString();
+            }
+
+            if (dgvRegisterCourse.CurrentRow != null)
+            {
+                // Kiểm tra nếu lấy dữ liệu từ dòng đang chọn thông qua cột CourseId mới cấu hình
+                if (dgvRegisterCourse.CurrentRow.Cells["CourseId"].Value != null)
+                {
+                    courseId = dgvRegisterCourse.CurrentRow.Cells["CourseId"].Value.ToString();
+                }
+            }
+            else if (cboCourse.SelectedValue != null)
+            {
                 courseId = cboCourse.SelectedValue.ToString();
             }
             else
@@ -158,9 +223,7 @@ namespace ClassProject.Presentation.Forms.Course
                 return;
             }
 
-            // ⚠️ LOGIC CHẶT CHẼ ĐIỂM TUYỆT ĐỐI: Kiểm tra xem môn học này đã được nhập điểm chưa
-            // Nếu điểm tích lũy của sinh viên ở môn này khác 0 (tức là đã nhập điểm ở Tuần 7) -> Chặn không cho Hủy học phần
-            if (_scoreRepo.GetStudentGPA(mssv) > 0)
+            if (_scoreRepo.HasCourseScore(mssv, courseId))
             {
                 MessageBox.Show("Môn học này đã được giảng viên vào điểm số thành phần! Bạn không thể thực hiện hủy đăng ký lớp học này.", "Hệ thống khóa học phần", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return;
@@ -175,6 +238,7 @@ namespace ClassProject.Presentation.Forms.Course
                 {
                     MessageBox.Show("Hủy đăng ký môn học thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadGridData();
+                    UpdateQuickStats();
                 }
                 else
                 {
@@ -183,10 +247,10 @@ namespace ClassProject.Presentation.Forms.Course
             }
         }
 
-        // 6. Nút LÀM MỚI (btnLoad)
         private void btnLoad_Click(object sender, EventArgs e)
         {
             LoadGridData();
+            UpdateQuickStats();
         }
     }
 }

@@ -16,6 +16,7 @@ namespace ClassProject.Presentation.Forms.Course
         private RegisterRepository _registerRepo;
         private StudentRepository _studentRepo;
         private My_DB _db = new My_DB();
+        private bool _isBinding = false;
 
         public ManageScoreForm()
         {
@@ -49,6 +50,7 @@ namespace ClassProject.Presentation.Forms.Course
 
         private void ManageScoreForm_Load(object sender, EventArgs e)
         {
+            _isBinding = true;
             LoadStudentCombo();
             LoadCourseCombo();
             LoadGridData();
@@ -56,8 +58,6 @@ namespace ClassProject.Presentation.Forms.Course
 
             // Đăng ký sự kiện SelectedIndexChanged cho cboCourse sau khi dữ liệu đã nạp xong
             cboCourse.SelectedIndexChanged += cboCourse_SelectedIndexChanged;
-
-            // --- ĐĂNG KÝ THÊM 2 DÒNG NÀY ĐỂ KÍCH HOẠT BỘ LỌC ---
             cboHocKy.SelectedIndexChanged += ThucHienBoLocDGV;
             cboNamHoc.SelectedIndexChanged += ThucHienBoLocDGV;
 
@@ -65,9 +65,16 @@ namespace ClassProject.Presentation.Forms.Course
             UpdateSemesterAndYearInfo();
         }
 
+        private void cboStudent_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            HienThiDiemTheoCapHocVienMonHoc();
+        }
+
         // Hàm xử lý lọc dữ liệu kết hợp đồng thời cả Học kỳ, Năm học và Ô tìm kiếm văn bản
         private void ThucHienBoLocDGV(object sender, EventArgs e)
         {
+            if (_isBinding) return;
+
             if (dgvScores.DataSource is DataTable dt)
             {
                 List<string> filters = new List<string>();
@@ -200,8 +207,6 @@ namespace ClassProject.Presentation.Forms.Course
                 dgvScores.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
                 dgvScores.AllowUserToAddRows = false;
                 dgvScores.ReadOnly = true;
-
-                // FIX LỖI ẨN TIÊU ĐỀ CỘT
                 dgvScores.ColumnHeadersVisible = true;
                 if (dgvScores.ColumnHeadersHeight < 30)
                 {
@@ -283,7 +288,7 @@ namespace ClassProject.Presentation.Forms.Course
                 MessageBox.Show("Lưu bảng điểm sinh viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadGridData(); // Refresh lại DataGridView điểm số
                 LoadQuickStats();
-                btnClear_Click(sender, e); // Tự động làm sạch form sau khi lưu thành công
+                //btnClear_Click(sender, e); // Tự động làm sạch form sau khi lưu thành công
             }
             else
             {
@@ -332,6 +337,7 @@ namespace ClassProject.Presentation.Forms.Course
         private void cboCourse_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateSemesterAndYearInfo();
+            HienThiDiemTheoCapHocVienMonHoc();
         }
 
         // Hàm hỗ trợ tự động tìm và cập nhật thông tin Học kỳ / Năm học theo môn học được lựa chọn
@@ -343,8 +349,10 @@ namespace ClassProject.Presentation.Forms.Course
                 DataRow[] rows = dt.Select($"MaMH = '{selectedMaMH}'");
                 if (rows.Length > 0)
                 {
+                    _isBinding = true;
                     cboHocKy.Text = rows[0]["Hky"]?.ToString() ?? "";
                     cboNamHoc.Text = rows[0]["NamHoc"]?.ToString() ?? "";
+                    _isBinding = false;
                 }
             }
         }
@@ -389,10 +397,13 @@ namespace ClassProject.Presentation.Forms.Course
             txtGhiChu.Clear();
             txtSearch.Clear(); // Làm trống cả thanh tìm kiếm để reset bộ lọc DataGridView
 
+            _isBinding = true;
             if (cboStudent.Items.Count > 0) cboStudent.SelectedIndex = 0;
             if (cboCourse.Items.Count > 0) cboCourse.SelectedIndex = 0;
 
             UpdateSemesterAndYearInfo(); // Reset lại Học kỳ/Năm học theo môn mặc định đầu tiên
+            _isBinding = false;
+            if (dgvScores.DataSource is DataTable dt) dt.DefaultView.RowFilter = string.Empty;
             dgvScores.ClearSelection();
         }
 
@@ -522,6 +533,63 @@ namespace ClassProject.Presentation.Forms.Course
                 lblTotalCourses.Text = "0";
                 lblTotalScores.Text = "0";
                 lblAvgScore.Text = "0.00";
+            }
+        }
+        private void HienThiDiemTheoCapHocVienMonHoc()
+        {
+            // Kiểm tra nếu chưa chọn đủ Sinh viên và Môn học thì bỏ qua
+            if (cboStudent.SelectedValue == null || cboCourse.SelectedValue == null) return;
+
+            string selectedMssv = cboStudent.SelectedValue.ToString();
+            string selectedMaMH = cboCourse.SelectedValue.ToString();
+
+            if (dgvScores.DataSource is DataTable dt)
+            {
+                // Tìm kiếm trong DataTable xem đã tồn tại dòng điểm của Sinh viên + Môn học này chưa
+                // Lưu ý: Tên cột phải trùng khít với tên cột trong database/GetScoreList() của bạn (ví dụ: "Mã SV", "Mã MH")
+                DataRow[] rows = dt.Select($"[Mã SV] = '{selectedMssv}' AND [Mã MH] = '{selectedMaMH}'");
+
+                if (rows.Length > 0)
+                {
+                    DataRow row = rows[0];
+
+                    // 1. Đồng bộ Điểm Quá trình
+                    if (decimal.TryParse(row["Điểm QT (40%)"]?.ToString(), out decimal qt))
+                        numQT.Value = qt;
+                    else
+                        numQT.Value = 0;
+
+                    // 2. Đồng bộ Điểm Cuối kỳ
+                    if (decimal.TryParse(row["Điểm CK (60%)"]?.ToString(), out decimal ck))
+                        numCK.Value = ck;
+                    else
+                        numCK.Value = 0;
+
+                    // 3. Đồng bộ Ghi chú
+                    txtGhiChu.Text = row["Ghi Chú"]?.ToString() ?? "";
+
+                    // (Tùy chọn) Chọn luôn dòng đó dưới DataGridView cho người dùng thấy trực quan
+                    foreach (DataGridViewRow dgvRow in dgvScores.Rows)
+                    {
+                        if (dgvRow.Cells["Mã SV"].Value?.ToString() == selectedMssv &&
+                            dgvRow.Cells["Mã MH"].Value?.ToString() == selectedMaMH)
+                        {
+                            dgvRow.Selected = true;
+                            dgvScores.FirstDisplayedScrollingRowIndex = dgvRow.Index; // Cuộn tới dòng đó
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // Nếu chưa có điểm (cặp SV - MH này mới tinh), trả các ô nhập liệu về mặc định
+                    numQT.Value = 0;
+                    numCK.Value = 0;
+                    txtGhiChu.Clear();
+                    txtTK.Text = "0.00";
+                    txtDiemHe4.Text = "0.0";
+                    txtXepLoai.Text = "Chưa xếp loại";
+                }
             }
         }
     }

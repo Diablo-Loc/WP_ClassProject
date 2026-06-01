@@ -114,12 +114,16 @@ namespace ClassProject.Presentation.Forms.Course
             btnTuyChon = new Guna2Button();
             guna2Panel2 = new Guna2Panel();
             pnlDiemTBToanTruong = new Guna2Panel();
+            label5 = new Label();
             lblAvgScore = new Label();
             pnlTongDiemDaNhap = new Guna2Panel();
+            label4 = new Label();
             lblTotalScores = new Label();
             pnlTongMonHoc = new Guna2Panel();
+            label3 = new Label();
             lblTotalCourses = new Label();
             pnlTongSinhVien = new Guna2Panel();
+            label2 = new Label();
             lblTotalStudents = new Label();
             lblThongTinNhanh = new Label();
             txtSearch = new Guna2TextBox();
@@ -129,10 +133,6 @@ namespace ClassProject.Presentation.Forms.Course
             cboNamHoc = new Guna2ComboBox();
             lblNamHoc = new Label();
             label1 = new Label();
-            label2 = new Label();
-            label3 = new Label();
-            label4 = new Label();
-            label5 = new Label();
             guna2Panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numCK).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numQT).BeginInit();
@@ -402,6 +402,7 @@ namespace ClassProject.Presentation.Forms.Course
             cboCourse.ShadowDecoration.CustomizableEdges = customizableEdges14;
             cboCourse.Size = new Size(307, 36);
             cboCourse.TabIndex = 33;
+            cboCourse.SelectedIndexChanged += cboCourse_SelectedIndexChanged;
             // 
             // cboStudent
             // 
@@ -420,6 +421,7 @@ namespace ClassProject.Presentation.Forms.Course
             cboStudent.ShadowDecoration.CustomizableEdges = customizableEdges16;
             cboStudent.Size = new Size(273, 36);
             cboStudent.TabIndex = 32;
+            cboStudent.SelectedIndexChanged += cboStudent_SelectedIndexChanged;
             // 
             // lblThongTinDiem
             // 
@@ -685,6 +687,15 @@ namespace ClassProject.Presentation.Forms.Course
             pnlDiemTBToanTruong.Size = new Size(234, 125);
             pnlDiemTBToanTruong.TabIndex = 45;
             // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(40, 33);
+            label5.Name = "label5";
+            label5.Size = new Size(157, 20);
+            label5.TabIndex = 3;
+            label5.Text = "Điểm TB Toàn Trường ";
+            // 
             // lblAvgScore
             // 
             lblAvgScore.AutoSize = true;
@@ -709,6 +720,15 @@ namespace ClassProject.Presentation.Forms.Course
             pnlTongDiemDaNhap.ShadowDecoration.Enabled = true;
             pnlTongDiemDaNhap.Size = new Size(234, 125);
             pnlTongDiemDaNhap.TabIndex = 44;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(51, 33);
+            label4.Name = "label4";
+            label4.Size = new Size(139, 20);
+            label4.TabIndex = 2;
+            label4.Text = "Tổng điểm đã nhập";
             // 
             // lblTotalScores
             // 
@@ -735,6 +755,15 @@ namespace ClassProject.Presentation.Forms.Course
             pnlTongMonHoc.Size = new Size(234, 125);
             pnlTongMonHoc.TabIndex = 44;
             // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(42, 37);
+            label3.Name = "label3";
+            label3.Size = new Size(105, 20);
+            label3.TabIndex = 2;
+            label3.Text = "Tổng môn học";
+            // 
             // lblTotalCourses
             // 
             lblTotalCourses.AutoSize = true;
@@ -759,6 +788,15 @@ namespace ClassProject.Presentation.Forms.Course
             pnlTongSinhVien.ShadowDecoration.Enabled = true;
             pnlTongSinhVien.Size = new Size(234, 125);
             pnlTongSinhVien.TabIndex = 43;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(51, 37);
+            label2.Name = "label2";
+            label2.Size = new Size(104, 20);
+            label2.TabIndex = 1;
+            label2.Text = "Tổng sinh viên";
             // 
             // lblTotalStudents
             // 
@@ -888,42 +926,6 @@ namespace ClassProject.Presentation.Forms.Course
             label1.Size = new Size(333, 20);
             label1.TabIndex = 51;
             label1.Text = "Quản lý và theo dõi kết quả học tập của sinh viên";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(51, 37);
-            label2.Name = "label2";
-            label2.Size = new Size(104, 20);
-            label2.TabIndex = 1;
-            label2.Text = "Tổng sinh viên";
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(42, 37);
-            label3.Name = "label3";
-            label3.Size = new Size(105, 20);
-            label3.TabIndex = 2;
-            label3.Text = "Tổng môn học";
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Location = new Point(51, 33);
-            label4.Name = "label4";
-            label4.Size = new Size(139, 20);
-            label4.TabIndex = 2;
-            label4.Text = "Tổng điểm đã nhập";
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Location = new Point(40, 33);
-            label5.Name = "label5";
-            label5.Size = new Size(157, 20);
-            label5.TabIndex = 3;
-            label5.Text = "Điểm TB Toàn Trường ";
             // 
             // ManageScoreForm
             // 
