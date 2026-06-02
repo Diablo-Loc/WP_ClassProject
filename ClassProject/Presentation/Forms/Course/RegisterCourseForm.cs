@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace ClassProject.Presentation.Forms.Course
 {
-    public partial class RegisterCourseForm : Form
+    public partial class ClassroomForm : Form
     {
         private RegisterRepository _registerRepo;
         private StudentRepository _studentRepo;
@@ -21,7 +21,7 @@ namespace ClassProject.Presentation.Forms.Course
 
         public object DataGridViewColumnAutoSizeMode { get; private set; }
 
-        public RegisterCourseForm()
+        public ClassroomForm()
         {
             InitializeComponent();
             string connString = _db.GetConnection().ConnectionString;

@@ -1,6 +1,6 @@
 ﻿namespace ClassProject.Presentation.Forms.Course
 {
-    partial class RegisterCourseForm
+    partial class ClassroomForm
     {
         /// <summary>
         /// Required designer variable.

@@ -1,0 +1,7 @@
+CREATE TABLE Classroom
+(
+    MaLop VARCHAR(20) PRIMARY KEY,
+    TenLop NVARCHAR(100) NOT NULL,
+    SiSo INT,
+    GVCN NVARCHAR(100)
+);
