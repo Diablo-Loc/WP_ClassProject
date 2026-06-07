@@ -10,12 +10,12 @@ using System.Windows.Forms;
 
 namespace ClassProject.Presentation.Forms.Students
 {
-    public partial class RegisterCourse : Form
+    public partial class StudentRequestForm : Form
     {
         private readonly RequestRepository _requestRepo;
         private readonly string _currentMSSV;
 
-        public RegisterCourse(string loggedInMSSV)
+        public StudentRequestForm(string loggedInMSSV)
         {
             InitializeComponent();
             _currentMSSV = loggedInMSSV;
@@ -24,7 +24,7 @@ namespace ClassProject.Presentation.Forms.Students
             _requestRepo = new RequestRepository(db.GetConnection().ConnectionString);
         }
 
-        public RegisterCourse()
+        public StudentRequestForm()
         {
             InitializeComponent();
 

@@ -23,6 +23,8 @@ namespace ClassProject
             //Application.Run(new ClassroomForm());
             //Application.Run(new StudentRequestForm());
             //Application.Run(new AdminApprovalForm());
+            //Application.Run(new StatisticsForm());
+
         }
     }
 }

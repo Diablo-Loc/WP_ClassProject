@@ -130,8 +130,8 @@ namespace ClassProject.Presentation.Forms.Main
                 if (pheDuyetYeuCauToolStripMenuItem != null) pheDuyetYeuCauToolStripMenuItem.Visible = true;
                 if (guiYeuCauHoTroToolStripMenuItem != null) guiYeuCauHoTroToolStripMenuItem.Visible = false;
                 if (quảnLýLớpToolStripMenuItem != null) quảnLýLớpToolStripMenuItem.Visible = true;
-                if(đăngKýMônToolStripMenuItem != null) đăngKýMônToolStripMenuItem.Visible = true;
-                if(quảnLýĐiểmToolStripMenuItem != null) quảnLýĐiểmToolStripMenuItem.Visible = true;
+                if (đăngKýMônToolStripMenuItem != null) đăngKýMônToolStripMenuItem.Visible = true;
+                if (quảnLýĐiểmToolStripMenuItem != null) quảnLýĐiểmToolStripMenuItem.Visible = true;
 
                 // Màn hình nền hiển thị bảng quản lý tài khoản của Admin
                 dgvPendingUsers.Visible = true;
@@ -170,7 +170,7 @@ namespace ClassProject.Presentation.Forms.Main
         {
             if (roleId == 0)
             {
-                AdminApprovalForm adminForm = new AdminApprovalForm();
+                Admin.f_main adminForm = new Admin.f_main();
                 adminForm.ShowDialog();
             }
         }
@@ -185,7 +185,7 @@ namespace ClassProject.Presentation.Forms.Main
                     GetStudentMSSV();
                 }
 
-                RegisterCourse studentForm = new RegisterCourse(loggedInMSSV);
+                StudentRequestForm studentForm = new StudentRequestForm(loggedInMSSV);
                 studentForm.ShowDialog();
 
                 LoadDashboard();
@@ -526,7 +526,7 @@ namespace ClassProject.Presentation.Forms.Main
         {
             if (roleId == 0)
             {
-                Course.ClassroomForm adminForm = new Course.ClassroomForm();
+                Course.RegisterCourseForm adminForm = new Course.RegisterCourseForm();
                 adminForm.ShowDialog();
             }
         }

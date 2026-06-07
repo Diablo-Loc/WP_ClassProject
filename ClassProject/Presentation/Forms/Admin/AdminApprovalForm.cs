@@ -10,11 +10,11 @@ using System.Windows.Forms;
 
 namespace ClassProject.Presentation.Forms.Admin
 {
-    public partial class AdminApprovalForm : Form
+    public partial class f_main : Form
     {
         private readonly RequestRepository _requestRepo;
 
-        public AdminApprovalForm()
+        public f_main()
         {
             InitializeComponent();
             My_DB db = new My_DB();
@@ -38,6 +38,26 @@ namespace ClassProject.Presentation.Forms.Admin
             dgvPendingRequests.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             dgvPendingRequests.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             dgvPendingRequests.RowTemplate.Height = 30;
+            dgvPendingRequests.RowPostPaint += dgvPendingRequests_RowPostPaint;
+        }
+
+        private void dgvPendingRequests_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
+        {
+            var grid = sender as DataGridView;
+            string rowIdx = (e.RowIndex + 1).ToString(); // Số thứ tự bắt đầu từ 1
+
+            using (Brush brush = new SolidBrush(grid.RowHeadersDefaultCellStyle.ForeColor))
+            {
+                // Canh lề chữ số thứ tự nằm giữa vùng Row Header bên trái
+                var centerFormat = new StringFormat()
+                {
+                    Alignment = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center
+                };
+
+                Rectangle headerBounds = new Rectangle(e.RowBounds.Left, e.RowBounds.Top, grid.RowHeadersWidth, e.RowBounds.Height);
+                e.Graphics.DrawString(rowIdx, grid.Font, brush, headerBounds, centerFormat);
+            }
         }
 
         // Tải danh sách các yêu cầu đang chờ duyệt
@@ -55,7 +75,8 @@ namespace ClassProject.Presentation.Forms.Admin
                     lblTotalPending.Text = $"Tổng số yêu cầu chờ xử lý: {dt.Rows.Count}";
                 }
 
-                ClearDetailFields();
+                // TỰ ĐỘNG CHỌN VÀ HIỂN THỊ DÒNG ĐẦU TIÊN
+                SelectFirstRowAndDisplay();
             }
             catch (Exception ex)
             {
@@ -68,28 +89,80 @@ namespace ClassProject.Presentation.Forms.Admin
         {
             if (dgvPendingRequests.Columns.Count > 0)
             {
-                if (dgvPendingRequests.Columns.Contains("Id")) dgvPendingRequests.Columns["Id"].HeaderText = "Mã YC";
-                if (dgvPendingRequests.Columns.Contains("MSSV")) dgvPendingRequests.Columns["MSSV"].HeaderText = "Mã số SV";
-                if (dgvPendingRequests.Columns.Contains("RequestContent")) dgvPendingRequests.Columns["RequestContent"].HeaderText = "Nội dung yêu cầu";
-                if (dgvPendingRequests.Columns.Contains("Created_At")) dgvPendingRequests.Columns["Created_At"].HeaderText = "Ngày gửi hỗ trợ";
+                // 💡 LỰA CHỌN HIỂN THỊ MÃ YÊU CẦU (ID)
+                // Nếu bạn muốn hiển thị luôn cột Mã Yêu Cầu (Id) từ SQL, hãy đổi .Visible = true và đặt Header Text
+                if (dgvPendingRequests.Columns.Contains("Id"))
+                {
+                    dgvPendingRequests.Columns["Id"].Visible = true; // Hiện cột mã yêu cầu lên lưới
+                    dgvPendingRequests.Columns["Id"].HeaderText = "Mã YC";
+                }
 
+                if (dgvPendingRequests.Columns.Contains("Created_At")) dgvPendingRequests.Columns["Created_At"].Visible = false;
+
+                if (dgvPendingRequests.Columns.Contains("MSSV"))
+                    dgvPendingRequests.Columns["MSSV"].HeaderText = "MSSV";
+
+                if (dgvPendingRequests.Columns.Contains("FullName"))
+                    dgvPendingRequests.Columns["FullName"].HeaderText = "Họ tên";
+
+                if (dgvPendingRequests.Columns.Contains("RequestContent"))
+                    dgvPendingRequests.Columns["RequestContent"].HeaderText = "Nội dung";
+
+                if (dgvPendingRequests.Columns.Contains("Status"))
+                    dgvPendingRequests.Columns["Status"].HeaderText = "Status";
+
+                // Cấu hình co giãn tự động toàn màn hình
                 dgvPendingRequests.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-                if (dgvPendingRequests.Columns.Contains("Id")) dgvPendingRequests.Columns["Id"].FillWeight = 40;
-                if (dgvPendingRequests.Columns.Contains("MSSV")) dgvPendingRequests.Columns["MSSV"].FillWeight = 60;
+                // Mở rộng cột RowHeaders một chút để hiển thị số thứ tự không bị che khuất
+                dgvPendingRequests.RowHeadersWidth = 45;
+
+                // Phân bổ tỷ lệ độ rộng (FillWeight) bao gồm cả cột Mã YC (Id) nếu hiển thị
+                if (dgvPendingRequests.Columns.Contains("Id")) dgvPendingRequests.Columns["Id"].FillWeight = 45;
+                if (dgvPendingRequests.Columns.Contains("MSSV")) dgvPendingRequests.Columns["MSSV"].FillWeight = 50;
+                if (dgvPendingRequests.Columns.Contains("FullName")) dgvPendingRequests.Columns["FullName"].FillWeight = 90;
+                if (dgvPendingRequests.Columns.Contains("RequestContent")) dgvPendingRequests.Columns["RequestContent"].FillWeight = 160;
+                if (dgvPendingRequests.Columns.Contains("Status")) dgvPendingRequests.Columns["Status"].FillWeight = 50;
             }
         }
 
-        private void dgvPendingRequests_CellClick(object sender, DataGridViewCellEventArgs e)
+        // Tự động chọn hàng đầu tiên và kích hoạt đổ dữ liệu lên TextBox
+        private void SelectFirstRowAndDisplay()
         {
-            if (dgvPendingRequests.CurrentRow == null || e.RowIndex < 0) return;
+            if (dgvPendingRequests.Rows.Count > 0)
+            {
+                dgvPendingRequests.ClearSelection();
 
+                dgvPendingRequests.Rows[0].Selected = true;
+                dgvPendingRequests.CurrentCell = dgvPendingRequests.Rows[0].Cells[GetFirstVisibleColumnIndex()];
+
+                DisplayRowData(dgvPendingRequests.Rows[0]);
+            }
+            else
+            {
+                ClearDetailFields();
+            }
+        }
+
+        // Hàm bổ trợ lấy cột đang hiển thị đầu tiên (Tránh lỗi Cell ẩn)
+        private int GetFirstVisibleColumnIndex()
+        {
+            foreach (DataGridViewColumn col in dgvPendingRequests.Columns)
+            {
+                if (col.Visible) return col.Index;
+            }
+            return 0;
+        }
+
+        // Đổ dữ liệu ra hàm riêng để dùng chung cho cả sự kiện Click và tự động chọn
+        private void DisplayRowData(DataGridViewRow row)
+        {
+            if (row == null) return;
             try
             {
-                // Đổ dữ liệu lên các ô TextBox ở nhóm "CHI TIẾT YÊU CẦU"
-                txtRequestId.Text = dgvPendingRequests.CurrentRow.Cells["Id"].Value?.ToString();
-                txtStudentMSSV.Text = dgvPendingRequests.CurrentRow.Cells["MSSV"].Value?.ToString();
-                txtRequestContentDetail.Text = dgvPendingRequests.CurrentRow.Cells["RequestContent"].Value?.ToString();
+                txtRequestId.Text = row.Cells["Id"].Value?.ToString();
+                txtStudentMSSV.Text = row.Cells["MSSV"].Value?.ToString();
+                txtRequestContentDetail.Text = row.Cells["RequestContent"].Value?.ToString();
             }
             catch (Exception ex)
             {
@@ -97,8 +170,13 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
+        private void dgvPendingRequests_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dgvPendingRequests.CurrentRow == null || e.RowIndex < 0) return;
+            DisplayRowData(dgvPendingRequests.CurrentRow);
+        }
 
-        // Sự kiện khi Admin gõ từ khóa và bấm Enter hoặc hệ thống tự tìm (hoặc bạn có thể gọi qua nút Tìm kiếm)
+        // Sự kiện khi Admin gõ từ khóa
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
             string keyword = txtSearch.Text.Trim();
@@ -118,6 +196,7 @@ namespace ClassProject.Presentation.Forms.Admin
                 {
                     lblTotalPending.Text = $"Tìm thấy: {result.Rows.Count} yêu cầu";
                 }
+                SelectFirstRowAndDisplay();
             }
             catch (Exception ex)
             {
@@ -125,7 +204,7 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        // Sự kiện NÚT LÀM MỚI (Nút màu xanh lá trên giao diện của bạn)
+        // Sự kiện NÚT LÀM MỚI
         private void btnRefresh_Click(object sender, EventArgs e)
         {
             txtSearch.Clear();
@@ -133,7 +212,7 @@ namespace ClassProject.Presentation.Forms.Admin
             LoadPendingRequests();
         }
 
-         private void ProcessRequest(string targetStatus)
+        private void ProcessRequest(string targetStatus)
         {
             if (string.IsNullOrEmpty(txtRequestId.Text))
             {
@@ -156,7 +235,7 @@ namespace ClassProject.Presentation.Forms.Admin
                 if (_requestRepo.UpdateRequestStatus(requestId, targetStatus, comment))
                 {
                     MessageBox.Show($"Đã {actionName} thành công yêu cầu của SV {mssv}!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    btnRefresh_Click(null, null); // Kích hoạt làm mới giao diện ngay lập tức
+                    btnRefresh_Click(null, null);
                 }
                 else
                 {

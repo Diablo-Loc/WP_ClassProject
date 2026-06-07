@@ -4,6 +4,7 @@ using ClassProject.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -27,11 +28,46 @@ namespace ClassProject.Presentation.Forms.Main
         {
             txtMaLop.MaxLength = 20;
             ConfigureGridStyle();
+
+            // ⭐ BƯỚC NÂNG CẤP: Nạp danh sách Giảng viên vào ComboBox trước khi tải dữ liệu bảng
+            LoadTeachersToComboBox();
+
             LoadClassroomGrid();
             SwitchMode(false);
         }
 
         #region --- HÀM TRỢ GIÚP (HELPERS) ---
+
+        // Hàm đọc trực tiếp danh sách tài khoản Giảng viên (RoleId = 2) từ CSDL đổ vào ComboBox
+        private void LoadTeachersToComboBox()
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                string query = "SELECT Id, Username FROM dbo.Users WHERE RoleId = 2";
+
+                using (SqlConnection conn = _db.GetConnection())
+                {
+                    if (conn.State == ConnectionState.Closed) conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            da.Fill(dt);
+                        }
+                    }
+                }
+
+                cboGVCN.DataSource = dt;
+                cboGVCN.DisplayMember = "Username"; // Hiển thị tên tài khoản giảng viên trên giao diện
+                cboGVCN.ValueMember = "Username";   // Lấy giá trị Username để lưu vào cột GVCN (kiểu chuỗi) của bảng Lớp học hành chính
+                cboGVCN.SelectedIndex = -1;         // Để trống mặc định ban đầu
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi nạp danh sách giảng viên chủ nhiệm: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         private void ConfigureGridStyle()
         {
@@ -51,14 +87,11 @@ namespace ClassProject.Presentation.Forms.Main
             if (isEditMode)
             {
                 btnInsert.Text = "💾 Cập nhật";
-                // Có thể đổi màu nút thành màu cam/vàng để cảnh báo đang sửa (tùy chọn)
-                // btnInsert.BackColor = System.Drawing.Color.Orange; 
                 txtMaLop.ReadOnly = true; // Khóa khóa chính không cho phá dữ liệu
             }
             else
             {
                 btnInsert.Text = "(+) Thêm lớp";
-                // btnInsert.BackColor = System.Drawing.Color.DodgerBlue;
                 txtMaLop.ReadOnly = false; // Mở khóa để nhập mã mới
             }
         }
@@ -119,7 +152,8 @@ namespace ClassProject.Presentation.Forms.Main
             MaLop = txtMaLop.Text.Trim(),
             TenLop = txtTenLop.Text.Trim(),
             SiSo = (int)numSiSo.Value,
-            GVCN = txtGVCN.Text.Trim()
+            // ⭐ ĐÃ SỬA: Lấy giá trị chuỗi được chọn từ ComboBox thay vì TextBox gõ tay tự do
+            GVCN = cboGVCN.SelectedValue != null ? cboGVCN.SelectedValue.ToString() : ""
         };
 
         private void ClearInputs()
@@ -127,7 +161,10 @@ namespace ClassProject.Presentation.Forms.Main
             txtMaLop.Clear();
             txtTenLop.Clear();
             numSiSo.Value = 0;
-            txtGVCN.Clear();
+
+            // ⭐ ĐÃ SỬA: Đưa ComboBox về trạng thái chưa chọn ai khi xóa bộ nhớ đệm nhập
+            cboGVCN.SelectedIndex = -1;
+
             txtSearch.Clear();
 
             // ⭐ Khi xóa dữ liệu nhập, tự động trả về chế độ Thêm mới gỡ rối cho người dùng
@@ -226,7 +263,15 @@ namespace ClassProject.Presentation.Forms.Main
                 else
                     numSiSo.Value = 0;
 
-                txtGVCN.Text = row.Cells["GVCN"].Value?.ToString();
+                // ⭐ ĐÃ SỬA: Tìm và hiển thị Giảng viên tương ứng lên ComboBox thay vì gán cho ô TextBox cũ
+                if (row.Cells["GVCN"].Value != null && !string.IsNullOrEmpty(row.Cells["GVCN"].Value.ToString()))
+                {
+                    cboGVCN.SelectedValue = row.Cells["GVCN"].Value.ToString().Trim();
+                }
+                else
+                {
+                    cboGVCN.SelectedIndex = -1;
+                }
 
                 // ⭐ Bật chế độ Sửa: Nút thêm biến thành nút Cập nhật, Khóa Mã lớp
                 SwitchMode(true);
@@ -261,7 +306,6 @@ namespace ClassProject.Presentation.Forms.Main
 
         private void btnExportExcel_Click(object sender, EventArgs e)
         {
-            // Giữ nguyên logic xuất file CSV an toàn của bạn cũ...
             if (dgvClassroom.Rows.Count == 0)
             {
                 MessageBox.Show("Không có dữ liệu trên bảng để xuất file!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
