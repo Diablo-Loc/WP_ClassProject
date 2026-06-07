@@ -17,7 +17,7 @@ Hệ thống quản lý cơ sở dữ liệu của dự án được tổ chức
     ├── Table_classroom.sql     # Quản lý cấu trúc phòng học
     ├── Teaching_Assignment.sql # Quản lý phân công giảng dạy
     └── Create_Procedures_Statistics.sql # Các Stored Procedure thống kê
-
+```
 🚀 Hướng dẫn Thiết lập Database (Chỉ với 1-Click)
 Thay vì phải mở SSMS, tạo Database thủ công rồi copy-paste từng file SQL rất mất thời gian, bạn chỉ cần thực hiện theo các bước siêu đơn giản sau:
 
