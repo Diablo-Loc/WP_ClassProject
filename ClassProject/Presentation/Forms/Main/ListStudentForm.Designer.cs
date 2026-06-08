@@ -49,6 +49,7 @@
             // 
             // btnRefresh
             // 
+            btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
             btnRefresh.FlatStyle = FlatStyle.Flat;
             btnRefresh.Location = new Point(869, 3);
             btnRefresh.Margin = new Padding(2, 3, 2, 3);
@@ -75,7 +76,7 @@
             // 
             txtSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             txtSearch.ForeColor = SystemColors.WindowFrame;
-            txtSearch.Location = new Point(498, 29);
+            txtSearch.Location = new Point(415, 28);
             txtSearch.Margin = new Padding(2, 3, 2, 3);
             txtSearch.Name = "txtSearch";
             txtSearch.Size = new Size(244, 27);
@@ -120,6 +121,7 @@
             // 
             // btnImportExcel
             // 
+            btnImportExcel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
             btnImportExcel.FlatStyle = FlatStyle.Flat;
             btnImportExcel.Location = new Point(628, 3);
             btnImportExcel.Margin = new Padding(2, 3, 2, 3);
@@ -131,6 +133,7 @@
             // 
             // btnExportExcel
             // 
+            btnExportExcel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
             btnExportExcel.FlatStyle = FlatStyle.Flat;
             btnExportExcel.Location = new Point(750, 3);
             btnExportExcel.Margin = new Padding(2, 3, 2, 3);
@@ -182,7 +185,7 @@
             cboFilterGender.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cboFilterGender.FormattingEnabled = true;
             cboFilterGender.Items.AddRange(new object[] { "Tất cả", "Nam", "Nữ" });
-            cboFilterGender.Location = new Point(747, 29);
+            cboFilterGender.Location = new Point(664, 28);
             cboFilterGender.Name = "cboFilterGender";
             cboFilterGender.Size = new Size(81, 28);
             cboFilterGender.TabIndex = 5;
@@ -190,9 +193,10 @@
             // 
             // lblXapXepTheo
             // 
+            lblXapXepTheo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblXapXepTheo.AutoSize = true;
             lblXapXepTheo.Font = new Font("Segoe UI", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblXapXepTheo.Location = new Point(835, 32);
+            lblXapXepTheo.Location = new Point(752, 31);
             lblXapXepTheo.Name = "lblXapXepTheo";
             lblXapXepTheo.Size = new Size(114, 23);
             lblXapXepTheo.TabIndex = 6;
@@ -203,9 +207,9 @@
             cbSort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cbSort.FormattingEnabled = true;
             cbSort.Items.AddRange(new object[] { "Mặc định", "Tên sinh viên", "Mã số sinh viên (MSSV)" });
-            cbSort.Location = new Point(951, 32);
+            cbSort.Location = new Point(869, 28);
             cbSort.Name = "cbSort";
-            cbSort.Size = new Size(33, 28);
+            cbSort.Size = new Size(115, 28);
             cbSort.TabIndex = 7;
             cbSort.SelectedIndexChanged += cbSort_SelectedIndexChanged;
             // 

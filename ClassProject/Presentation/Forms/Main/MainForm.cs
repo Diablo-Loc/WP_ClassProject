@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.Reflection.PortableExecutable;
 using System.Windows.Forms;
+using ClassProject.Presentation.Forms.Students;
+using ClassProject.Presentation.Forms.Admin;
+using ClassProject.Presentation.Forms.Course;
 
 namespace ClassProject.Presentation.Forms.Main
 {
@@ -14,6 +16,7 @@ namespace ClassProject.Presentation.Forms.Main
     {
         private int roleId;
         private int userId;
+        private string loggedInMSSV;
         private StudentRepository studentRepo;
         private My_DB db = new My_DB();
         private DataTable dtPending;
@@ -26,6 +29,8 @@ namespace ClassProject.Presentation.Forms.Main
             string connString = db.GetConnection().ConnectionString;
             studentRepo = new StudentRepository(connString);
 
+            GetStudentMSSV();
+
             dgvPendingUsers.CellContentClick += DgvPendingUsers_CellContentClick;
             dgvPendingUsers.Paint += DgvPendingUsers_Paint;
 
@@ -36,6 +41,65 @@ namespace ClassProject.Presentation.Forms.Main
                 btnBulkAccept.Click += BtnBulkAccept_Click;
             if (this.Controls.Find("btnBulkDelete", true).Length > 0)
                 btnBulkDelete.Click += BtnBulkDelete_Click;
+        }
+
+        private void DgvPendingUsers_Paint(object sender, PaintEventArgs e)
+        {
+            DataGridView dgv = sender as DataGridView;
+            if (dgv.Rows.Count == 0)
+            {
+                string message = "Chưa có tài khoản nào chờ duyệt hoặc không tìm thấy.";
+                using (Font font = new Font("Segoe UI", 12, FontStyle.Italic))
+                {
+                    SizeF size = e.Graphics.MeasureString(message, font);
+                    float x = (dgv.Width - size.Width) / 2;
+                    float y = (dgv.Height - size.Height) / 2;
+                    e.Graphics.DrawString(message, font, Brushes.DimGray, x, y);
+                }
+            }
+        }
+
+        private void GetStudentMSSV()
+        {
+            if (roleId == 1) // Nếu người đăng nhập là Sinh viên
+            {
+                try
+                {
+                    using (SqlConnection conn = db.GetConnection())
+                    {
+                        // Tìm chính xác cột MSSV từ bảng Students bằng cách đối chiếu UserId
+                        string query = @"
+                    SELECT s.MSSV 
+                    FROM dbo.Students s
+                    INNER JOIN dbo.Users u ON s.UserId = u.Id
+                    WHERE u.Id = @userId";
+
+                        using (SqlCommand cmd = new SqlCommand(query, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@userId", userId);
+                            conn.Open();
+                            object result = cmd.ExecuteScalar();
+
+                            if (result != null)
+                            {
+                                loggedInMSSV = result.ToString().Trim();
+                            }
+                            else
+                            {
+                                // Dự phòng trường hợp tài khoản Sinh viên này được tạo ra nhưng chưa được gán thông tin bên bảng Students
+                                MessageBox.Show($"Tài khoản này (User ID: {userId}) chưa có thông tin hồ sơ trong bảng Students!",
+                                                "Cảnh báo hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                loggedInMSSV = "";
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi tự động lấy MSSV: " + ex.Message, "Lỗi truy vấn", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    loggedInMSSV = "";
+                }
+            }
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -57,56 +121,83 @@ namespace ClassProject.Presentation.Forms.Main
                 lblRole.ForeColor = Color.Orange;
             }
 
-            // 2. PHÂN QUYỀN HIỂN THỊ UI (Menu + Khu vực bên dưới)
-            if (roleId == 0) // Là ADMIN
+            // 2. 🛡️ PHÂN QUYỀN ẨN / HIỆN CÁC NÚT TRÊN MENU ĐÚNG Ý BẠN
+            if (roleId == 0) // NẾU LÀ ADMIN
             {
                 if (adminToolStripMenuItem != null) adminToolStripMenuItem.Visible = true;
 
-                // Admin thì xem bảng duyệt tài khoản, ẩn biểu đồ
+                // Admin chỉ thấy nút Phê duyệt, ẩn nút Gửi yêu cầu của Sinh viên đi
+                if (pheDuyetYeuCauToolStripMenuItem != null) pheDuyetYeuCauToolStripMenuItem.Visible = true;
+                if (guiYeuCauHoTroToolStripMenuItem != null) guiYeuCauHoTroToolStripMenuItem.Visible = false;
+                if (quảnLýLớpToolStripMenuItem != null) quảnLýLớpToolStripMenuItem.Visible = true;
+                if (đăngKýMônToolStripMenuItem != null) đăngKýMônToolStripMenuItem.Visible = true;
+                if (quảnLýĐiểmToolStripMenuItem != null) quảnLýĐiểmToolStripMenuItem.Visible = true;
+
+                // Màn hình nền hiển thị bảng quản lý tài khoản của Admin
                 dgvPendingUsers.Visible = true;
                 chkSelectAll.Visible = true;
                 if (picChart != null) picChart.Visible = false;
-
-                //Đổi giao diện khối màu cho ADMIN
-                lblTotalStudents.Text = "Tổng số SV: 0";
-                lblMaleStudents.Text = "Chờ duyệt: 0";
-                lblFemaleStudents.Text = "Đã duyệt: 0";
-
-                //Hiện thanh tìm kiếm và nút bấm cho Admin ---
                 if (this.Controls.Find("txtSearchPending", true).Length > 0) txtSearchPending.Visible = true;
                 if (this.Controls.Find("btnBulkAccept", true).Length > 0) btnBulkAccept.Visible = true;
                 if (this.Controls.Find("btnBulkDelete", true).Length > 0) btnBulkDelete.Visible = true;
 
-                LoadPendingUsers(); // Tải danh sách chờ duyệt
+                LoadPendingUsers();
             }
-            else // Là STUDENT hoặc HR
+            else // NẾU LÀ SINH VIÊN (HOẶC GIẢNG VIÊN)
             {
                 if (adminToolStripMenuItem != null) adminToolStripMenuItem.Visible = false;
 
-                // Không phải Admin thì xem biểu đồ, ẩn bảng duyệt
+                // Sinh viên chỉ thấy nút Gửi yêu cầu, ẩn nút Phê duyệt của Admin đi
+                if (pheDuyetYeuCauToolStripMenuItem != null) pheDuyetYeuCauToolStripMenuItem.Visible = false;
+                if (guiYeuCauHoTroToolStripMenuItem != null) guiYeuCauHoTroToolStripMenuItem.Visible = true;
+                if (quảnLýLớpToolStripMenuItem != null) quảnLýLớpToolStripMenuItem.Visible = false;
+                if (đăngKýMônToolStripMenuItem != null) đăngKýMônToolStripMenuItem.Visible = false;
+                if (quảnLýĐiểmToolStripMenuItem != null) quảnLýĐiểmToolStripMenuItem.Visible = false;
+                // Màn hình nền hiển thị biểu đồ thống kê cho Sinh viên
                 dgvPendingUsers.Visible = false;
                 chkSelectAll.Visible = false;
                 if (picChart != null) picChart.Visible = true;
-
-                // Ẩn thanh tìm kiếm và nút bấm ---
                 if (this.Controls.Find("txtSearchPending", true).Length > 0) txtSearchPending.Visible = false;
                 if (this.Controls.Find("btnBulkAccept", true).Length > 0) btnBulkAccept.Visible = false;
                 if (this.Controls.Find("btnBulkDelete", true).Length > 0) btnBulkDelete.Visible = false;
             }
 
-            // 3. Nạp số liệu Thống kê & Vẽ biểu đồ (nếu picChart đang hiển thị)
             LoadDashboard();
         }
 
-        // KHU VỰC 1: XỬ LÝ ADMIN DUYỆT TÀI KHOẢN (UC-04)
+        // Khi ADMIN click chọn "Phê Duyệt Yêu Cầu"
+        private void pheDuyetYeuCauToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (roleId == 0)
+            {
+                Admin.f_main adminForm = new Admin.f_main();
+                adminForm.ShowDialog();
+            }
+        }
+
+        // Khi SINH VIÊN click chọn "Gửi Yêu Cầu Hỗ Trợ"
+        private void guiYeuCauHoTroToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (roleId == 1)
+            {
+                if (string.IsNullOrEmpty(loggedInMSSV))
+                {
+                    GetStudentMSSV();
+                }
+
+                StudentRequestForm studentForm = new StudentRequestForm(loggedInMSSV);
+                studentForm.ShowDialog();
+
+                LoadDashboard();
+            }
+        }
+
         private void LoadPendingUsers()
         {
             try
             {
                 using (SqlConnection conn = db.GetConnection())
                 {
-                    // SQL CÁCH 2: Chỉ tương tác bảng Users + Roles, loại bỏ hoàn toàn bảng Students dữ liệu gốc
-                    // Thêm điều kiện u.RoleId != 0 để không hiển thị chính tài khoản Admin trong danh sách chờ duyệt
                     string query = @"SELECT u.Id, u.Username, u.Email, r.RoleName, u.Created_At 
                                      FROM dbo.Users u
                                      INNER JOIN dbo.Roles r ON u.RoleId = r.Id
@@ -117,15 +208,12 @@ namespace ClassProject.Presentation.Forms.Main
                         SqlDataAdapter da = new SqlDataAdapter(cmd);
                         dtPending = new DataTable();
                         da.Fill(dtPending);
-
                         dgvPendingUsers.DataSource = dtPending;
 
-                        // 1. Cấu hình UI cơ bản
                         dgvPendingUsers.AllowUserToAddRows = false;
                         dgvPendingUsers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
                         dgvPendingUsers.RowHeadersVisible = false;
 
-                        // 2. Ẩn Id và Đổi tên tiêu đề hiển thị cho thân thiện (Giữ nguyên tên cột gốc dưới code)
                         if (dgvPendingUsers.Columns["Id"] != null) dgvPendingUsers.Columns["Id"].Visible = false;
                         if (dgvPendingUsers.Columns["Username"] != null) dgvPendingUsers.Columns["Username"].HeaderText = "Tên tài khoản";
                         if (dgvPendingUsers.Columns["Email"] != null) dgvPendingUsers.Columns["Email"].HeaderText = "Email liên hệ";
@@ -167,7 +255,6 @@ namespace ClassProject.Presentation.Forms.Main
             }
         }
 
-        //Tìm kiếm dữ liệu
         private void TxtSearchPending_TextChanged(object sender, EventArgs e)
         {
             if (dtPending == null) return;
@@ -175,11 +262,9 @@ namespace ClassProject.Presentation.Forms.Main
             dtPending.DefaultView.RowFilter = string.Format("Username LIKE '%{0}%' OR Email LIKE '%{0}%'", keyword);
         }
 
-        //Nút Duyệt hàng loạt
         private void BtnBulkAccept_Click(object sender, EventArgs e)
         {
             List<string> selectedIds = new List<string>();
-
             foreach (DataGridViewRow row in dgvPendingUsers.Rows)
             {
                 if (Convert.ToBoolean(row.Cells["colSelect"].Value) == true)
@@ -212,11 +297,9 @@ namespace ClassProject.Presentation.Forms.Main
             }
         }
 
-        //Nút Xóa/Từ chối hàng loạt
         private void BtnBulkDelete_Click(object sender, EventArgs e)
         {
             List<string> selectedIds = new List<string>();
-
             foreach (DataGridViewRow row in dgvPendingUsers.Rows)
             {
                 if (Convert.ToBoolean(row.Cells["colSelect"].Value) == true)
@@ -250,14 +333,26 @@ namespace ClassProject.Presentation.Forms.Main
             }
         }
 
-        // Bắt sự kiện Click vào các nút Accept / Delete trên lưới (GIỮ NGUYÊN CODE CŨ)
+        private void dgvPendingUsers_Paint(object sender, PaintEventArgs e)
+        {
+            DataGridView dgv = sender as DataGridView;
+            if (dgv.Rows.Count == 0)
+            {
+                string message = "Chưa có tài khoản nào chờ duyệt hoặc không tìm thấy.";
+                using (Font font = new Font("Segoe UI", 12, FontStyle.Italic))
+                {
+                    SizeF size = e.Graphics.MeasureString(message, font);
+                    float x = (dgv.Width - size.Width) / 2;
+                    float y = (dgv.Height - size.Height) / 2;
+                    e.Graphics.DrawString(message, font, Brushes.DimGray, x, y);
+                }
+            }
+        }
+
         private void DgvPendingUsers_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
-
             string colName = dgvPendingUsers.Columns[e.ColumnIndex].Name;
-
-            // Bỏ qua nếu click vào cột Checkbox
             if (colName == "colSelect") return;
 
             int selectedUserId = Convert.ToInt32(dgvPendingUsers.Rows[e.RowIndex].Cells["Id"].Value);
@@ -301,18 +396,15 @@ namespace ClassProject.Presentation.Forms.Main
             }
         }
 
-        // KHU VỰC 2: THỐNG KÊ & BIỂU ĐỒ
         public void LoadDashboard()
         {
             try
             {
-                // 1. Lấy dữ liệu cũ cho Sinh viên/HR (Giữ nguyên để không lỗi code cũ)
                 int totalStudents = studentRepo.GetTotalStudentsCount();
                 int maleStudents = studentRepo.GetTotalMaleStudentsCount();
                 int femaleStudents = studentRepo.GetTotalFemaleStudentsCount();
 
-                // 2. Phân nhánh hiển thị số liệu chuẩn theo quyền (Role)
-                if (roleId == 0) // Nếu là ADMIN -> Đổi toàn bộ sang hệ quy chiếu TÀI KHOẢN (Users)
+                if (roleId == 0)
                 {
                     int totalUsers = 0;
                     int pendingUsers = 0;
@@ -321,41 +413,26 @@ namespace ClassProject.Presentation.Forms.Main
                     using (SqlConnection conn = db.GetConnection())
                     {
                         conn.Open();
-
-                        // Đếm TỔNG SỐ TÀI KHOẢN hệ thống
                         string queryTotal = "SELECT COUNT(*) FROM dbo.Users";
-                        using (SqlCommand cmd = new SqlCommand(queryTotal, conn))
-                        {
-                            totalUsers = (int)cmd.ExecuteScalar();
-                        }
+                        using (SqlCommand cmd = new SqlCommand(queryTotal, conn)) { totalUsers = (int)cmd.ExecuteScalar(); }
 
-                        // Đếm số tài khoản CHỜ DUYỆT (Valid = 0)
                         string queryPending = "SELECT COUNT(*) FROM dbo.Users WHERE Valid = 0";
-                        using (SqlCommand cmd = new SqlCommand(queryPending, conn))
-                        {
-                            pendingUsers = (int)cmd.ExecuteScalar();
-                        }
+                        using (SqlCommand cmd = new SqlCommand(queryPending, conn)) { pendingUsers = (int)cmd.ExecuteScalar(); }
 
-                        // Đếm số tài khoản ĐÃ DUYỆT (Valid = 1)
                         string queryApproved = "SELECT COUNT(*) FROM dbo.Users WHERE Valid = 1";
-                        using (SqlCommand cmd = new SqlCommand(queryApproved, conn))
-                        {
-                            approvedUsers = (int)cmd.ExecuteScalar();
-                        }
+                        using (SqlCommand cmd = new SqlCommand(queryApproved, conn)) { approvedUsers = (int)cmd.ExecuteScalar(); }
                     }
 
-                    // Hiển thị đồng bộ thông tin về Tài khoản cho Admin
-                    lblTotalStudents.Text = $"Tổng tài khoản: {totalUsers}"; // Đổi chữ "Tổng số SV" thành "Tổng tài khoản"
+                    lblTotalStudents.Text = $"Tổng tài khoản: {totalUsers}";
                     lblMaleStudents.Text = $"Chờ duyệt: {pendingUsers}";
                     lblFemaleStudents.Text = $"Đã duyệt: {approvedUsers}";
                 }
-                else // Nếu là STUDENT hoặc HR -> Giữ nguyên hiển thị về SINH VIÊN (Students)
+                else
                 {
                     lblTotalStudents.Text = $"Tổng số SV: {totalStudents}";
                     lblMaleStudents.Text = $"Nam: {maleStudents}";
                     lblFemaleStudents.Text = $"Nữ: {femaleStudents}";
 
-                    // Vẽ biểu đồ tròn dựa trên giới tính sinh viên
                     if (picChart != null && picChart.Visible)
                     {
                         LoadDataAndChart(totalStudents, maleStudents, femaleStudents);
@@ -394,51 +471,25 @@ namespace ClassProject.Presentation.Forms.Main
                     if (male > 0)
                     {
                         Color maleColor = lblMaleStudents.Parent != null ? lblMaleStudents.Parent.BackColor : Color.Cyan;
-                        using (SolidBrush maleBrush = new SolidBrush(maleColor))
-                        {
-                            g.FillPie(maleBrush, rect, currentStartAngle, maleAngle);
-                        }
+                        using (SolidBrush maleBrush = new SolidBrush(maleColor)) { g.FillPie(maleBrush, rect, currentStartAngle, maleAngle); }
                         currentStartAngle += maleAngle;
                     }
 
                     if (female > 0)
                     {
                         Color femaleColor = lblFemaleStudents.Parent != null ? lblFemaleStudents.Parent.BackColor : Color.Pink;
-                        using (SolidBrush femaleBrush = new SolidBrush(femaleColor))
-                        {
-                            g.FillPie(femaleBrush, rect, currentStartAngle, femaleAngle);
-                        }
+                        using (SolidBrush femaleBrush = new SolidBrush(femaleColor)) { g.FillPie(femaleBrush, rect, currentStartAngle, femaleAngle); }
                     }
 
                     int holeDiameter = (int)(diameter * 0.60);
                     int hX = x + (diameter - holeDiameter) / 2;
                     int hY = y + (diameter - holeDiameter) / 2;
 
-                    using (SolidBrush bgBrush = new SolidBrush(this.BackColor))
-                    {
-                        g.FillEllipse(bgBrush, hX, hY, holeDiameter, holeDiameter);
-                    }
+                    using (SolidBrush bgBrush = new SolidBrush(this.BackColor)) { g.FillEllipse(bgBrush, hX, hY, holeDiameter, holeDiameter); }
                 }
                 picChart.Image = bmp;
             }
             catch { }
-        }
-
-        private void DgvPendingUsers_Paint(object sender, PaintEventArgs e)
-        {
-            DataGridView dgv = sender as DataGridView;
-            if (dgv.Rows.Count == 0)
-            {
-                // Cập nhật text để phù hợp cả khi tìm kiếm không ra kết quả
-                string message = "Chưa có tài khoản nào chờ duyệt hoặc không tìm thấy.";
-                using (Font font = new Font("Segoe UI", 12, FontStyle.Italic))
-                {
-                    SizeF size = e.Graphics.MeasureString(message, font);
-                    float x = (dgv.Width - size.Width) / 2;
-                    float y = (dgv.Height - size.Height) / 2;
-                    e.Graphics.DrawString(message, font, Brushes.DimGray, x, y);
-                }
-            }
         }
 
         private void addStudentToolStripMenuItem_Click(object sender, EventArgs e)
@@ -469,6 +520,33 @@ namespace ClassProject.Presentation.Forms.Main
                 row.Cells["colSelect"].Value = chkSelectAll.Checked;
             }
             dgvPendingUsers.EndEdit();
+        }
+
+        private void đăngKýMônToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (roleId == 0)
+            {
+                Course.RegisterCourseForm adminForm = new Course.RegisterCourseForm();
+                adminForm.ShowDialog();
+            }
+        }
+
+        private void quảnLýĐiểmToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (roleId == 0)
+            {
+                ManageScoreForm adminForm = new ManageScoreForm();
+                adminForm.ShowDialog();
+            }
+        }
+
+        private void quảnLýLớpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (roleId == 0)
+            {
+                ClassroomForm adminForm = new ClassroomForm();
+                adminForm.ShowDialog();
+            }
         }
     }
 }

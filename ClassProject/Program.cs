@@ -1,3 +1,8 @@
+using ClassProject.Presentation.Forms.Admin;
+using ClassProject.Presentation.Forms.Course;
+using ClassProject.Presentation.Forms.Main;
+using ClassProject.Presentation.Forms.Students;
+
 namespace ClassProject
 {
     internal static class Program
@@ -12,6 +17,14 @@ namespace ClassProject
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new LoginForm());
+            //Application.Run(new RegisterCourseForm());
+            //Application.Run(new ManageScoreForm());
+            //Application.Run(new RegisterCourseForm());
+            //Application.Run(new ClassroomForm());
+            //Application.Run(new StudentRequestForm());
+            //Application.Run(new AdminApprovalForm());
+            //Application.Run(new StatisticsForm());
+
         }
     }
 }

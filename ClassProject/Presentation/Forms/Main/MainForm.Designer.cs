@@ -33,6 +33,11 @@
             addStudentToolStripMenuItem = new ToolStripMenuItem();
             listStudentToolStripMenuItem = new ToolStripMenuItem();
             adminToolStripMenuItem = new ToolStripMenuItem();
+            pheDuyetYeuCauToolStripMenuItem = new ToolStripMenuItem();
+            guiYeuCauHoTroToolStripMenuItem = new ToolStripMenuItem();
+            đăngKýMônToolStripMenuItem = new ToolStripMenuItem();
+            quảnLýĐiểmToolStripMenuItem = new ToolStripMenuItem();
+            quảnLýLớpToolStripMenuItem = new ToolStripMenuItem();
             pnlTotal = new Panel();
             lblTotalStudents = new Label();
             pnlMale = new Panel();
@@ -59,7 +64,7 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { studentToolStripMenuItem, adminToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { studentToolStripMenuItem, adminToolStripMenuItem, pheDuyetYeuCauToolStripMenuItem, guiYeuCauHoTroToolStripMenuItem, đăngKýMônToolStripMenuItem, quảnLýĐiểmToolStripMenuItem, quảnLýLớpToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(875, 28);
@@ -92,6 +97,42 @@
             adminToolStripMenuItem.Name = "adminToolStripMenuItem";
             adminToolStripMenuItem.Size = new Size(67, 24);
             adminToolStripMenuItem.Text = "Admin";
+            // 
+            // pheDuyetYeuCauToolStripMenuItem
+            // 
+            pheDuyetYeuCauToolStripMenuItem.Name = "pheDuyetYeuCauToolStripMenuItem";
+            pheDuyetYeuCauToolStripMenuItem.Size = new Size(146, 24);
+            pheDuyetYeuCauToolStripMenuItem.Text = "Phê Duyệt Yêu Cầu";
+            pheDuyetYeuCauToolStripMenuItem.Click += pheDuyetYeuCauToolStripMenuItem_Click;
+            // 
+            // guiYeuCauHoTroToolStripMenuItem
+            // 
+            guiYeuCauHoTroToolStripMenuItem.BackgroundImageLayout = ImageLayout.Stretch;
+            guiYeuCauHoTroToolStripMenuItem.Name = "guiYeuCauHoTroToolStripMenuItem";
+            guiYeuCauHoTroToolStripMenuItem.Size = new Size(151, 24);
+            guiYeuCauHoTroToolStripMenuItem.Text = "Gửi Yêu Cầu Hỗ Trợ";
+            guiYeuCauHoTroToolStripMenuItem.Click += guiYeuCauHoTroToolStripMenuItem_Click;
+            // 
+            // đăngKýMônToolStripMenuItem
+            // 
+            đăngKýMônToolStripMenuItem.Name = "đăngKýMônToolStripMenuItem";
+            đăngKýMônToolStripMenuItem.Size = new Size(111, 24);
+            đăngKýMônToolStripMenuItem.Text = "Đăng ký môn";
+            đăngKýMônToolStripMenuItem.Click += đăngKýMônToolStripMenuItem_Click;
+            // 
+            // quảnLýĐiểmToolStripMenuItem
+            // 
+            quảnLýĐiểmToolStripMenuItem.Name = "quảnLýĐiểmToolStripMenuItem";
+            quảnLýĐiểmToolStripMenuItem.Size = new Size(111, 24);
+            quảnLýĐiểmToolStripMenuItem.Text = "Quản lý điểm";
+            quảnLýĐiểmToolStripMenuItem.Click += quảnLýĐiểmToolStripMenuItem_Click;
+            // 
+            // quảnLýLớpToolStripMenuItem
+            // 
+            quảnLýLớpToolStripMenuItem.Name = "quảnLýLớpToolStripMenuItem";
+            quảnLýLớpToolStripMenuItem.Size = new Size(104, 24);
+            quảnLýLớpToolStripMenuItem.Text = "Quản Lý Lớp";
+            quảnLýLớpToolStripMenuItem.Click += quảnLýLớpToolStripMenuItem_Click;
             // 
             // pnlTotal
             // 
@@ -302,5 +343,10 @@
         private Button btnBulkAccept;
         private Button btnBulkDelete;
         private CheckBox chkSelectAll;
+        private ToolStripMenuItem pheDuyetYeuCauToolStripMenuItem;
+        private ToolStripMenuItem guiYeuCauHoTroToolStripMenuItem;
+        private ToolStripMenuItem đăngKýMônToolStripMenuItem;
+        private ToolStripMenuItem quảnLýĐiểmToolStripMenuItem;
+        private ToolStripMenuItem quảnLýLớpToolStripMenuItem;
     }
 }

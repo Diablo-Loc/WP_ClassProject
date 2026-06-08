@@ -47,12 +47,13 @@ namespace ClassProject
                 {
                     conn.Open();
 
-                    // 2. Truy vấn từ bảng Users (đúng với schema DB của bạn)
+                    // 2. CẬP NHẬT TRUY VẤN: Lấy thêm cột Status từ bảng Users
                     string query = @"SELECT Id, Password, RoleId, 
-                                    ISNULL(Valid, 0) AS Valid, 
-                                    ISNULL(FailedAttempts, 0) AS FailedAttempts, 
-                                    LockoutEnd 
-                             FROM Users WHERE Username = @user";
+                            ISNULL(Valid, 0) AS Valid, 
+                            ISNULL(Status, 0) AS Status, 
+                            ISNULL(FailedAttempts, 0) AS FailedAttempts, 
+                            LockoutEnd 
+                     FROM Users WHERE Username = @user";
 
                     SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@user", username);
@@ -62,10 +63,10 @@ namespace ClassProject
                     int userId = 0;
                     int roleId = -1;
                     int valid = 0;
+                    int status = 0; // Thêm biến lưu trạng thái hệ thống
                     int failedAttempts = 0;
                     DateTime? lockoutEnd = null;
 
-                    // Dùng DataReader lấy thông tin rồi ĐÓNG LẠI NGAY để tránh lỗi Connection
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -75,6 +76,7 @@ namespace ClassProject
                             userId = Convert.ToInt32(reader["Id"]);
                             roleId = Convert.ToInt32(reader["RoleId"]);
                             valid = Convert.ToInt32(reader["Valid"]);
+                            status = Convert.ToInt32(reader["Status"]); // Đọc dữ liệu từ DB
                             failedAttempts = Convert.ToInt32(reader["FailedAttempts"]);
 
                             if (reader["LockoutEnd"] != DBNull.Value)
@@ -93,7 +95,34 @@ namespace ClassProject
                         return;
                     }
 
-                    // Case: Tài khoản đang bị khóa tạm thời do sai nhiều lần (Vẫn đang trong thời hạn)
+                    // --- KIỂM TRA TRẠNG THÁI STATUS TỪ ADMIN ---
+
+                    // Case 3a: Tài khoản đã bị Admin khóa hệ thống (Status = 2)
+                    if (status == 2)
+                    {
+                        MessageBox.Show("Tài khoản của bạn đã bị Admin KHÓA TRUY CẬP hệ thống.\nVui lòng liên hệ phòng quản lý để được hỗ trợ!",
+                                        "Tài khoản bị khóa", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        return;
+                    }
+
+                    // Case 3b: Tài khoản đã bị Admin từ chối phê duyệt thẳng thừng (Status = 3)
+                    if (status == 3)
+                    {
+                        MessageBox.Show("Yêu cầu đăng ký tài khoản này đã bị Admin TỪ CHỐI phê duyệt!",
+                                        "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        return;
+                    }
+
+                    // Case 3c: Tài khoản đã bị xóa mềm (Status = -1), coi như không tồn tại nữa
+                    if (status == -1)
+                    {
+                        MessageBox.Show("Sai tài khoản hoặc mật khẩu!", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        txtPassword.Clear();
+                        txtUsername.Focus();
+                        return;
+                    }
+
+                    // Case: Tài khoản đang bị khóa tạm thời do tự nhập sai pass nhiều lần (LockoutEnd)
                     if (lockoutEnd.HasValue && lockoutEnd.Value > DateTime.Now)
                     {
                         TimeSpan waitTime = lockoutEnd.Value - DateTime.Now;
@@ -102,17 +131,17 @@ namespace ClassProject
                         return;
                     }
 
-                    // Case (Theo tài liệu đồ án): Tài khoản chưa được Admin duyệt (VALID=0)
-                    if (valid == 0)
+                    // Case: Tài khoản chưa được Admin duyệt (VALID = 0 hoặc Status = 0)
+                    if (valid == 0 || status == 0)
                     {
-                        MessageBox.Show("Tài khoản của bạn chưa được Admin duyệt!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        MessageBox.Show("Tài khoản của bạn đang chờ duyệt, chưa được Admin phê duyệt vào hệ thống!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                         return;
                     }
 
                     // 4. Xác thực Mật khẩu qua BCrypt
                     if (BCrypt.Net.BCrypt.Verify(password, hashedPassword))
                     {
-                        // Đăng nhập THÀNH CÔNG: Mọi tội lỗi được xóa bỏ, reset về 0
+                        // Đăng nhập THÀNH CÔNG: Reset số lần sai về 0
                         UpdateLoginStatus(conn, username, 0, null);
 
                         // Lưu trạng thái Remember Me
@@ -126,7 +155,7 @@ namespace ClassProject
 
                         this.Hide();
 
-                        using (MainForm mainForm = new MainForm(roleId, userId))
+                        using (f_main mainForm = new f_main(roleId, userId))
                         {
                             mainForm.ShowDialog();
                         }
@@ -143,24 +172,21 @@ namespace ClassProject
                         // Đăng nhập THẤT BẠI
                         DateTime? newLockout = null;
 
-                        // Nếu đã từng bị khóa (failedAttempts >= 5) thì giữ nguyên 5, nếu chưa thì cộng 1
                         if (failedAttempts < 5)
                         {
                             failedAttempts++;
                         }
 
-                        // Kiểm tra xem đã đến mức bị khóa chưa
                         if (failedAttempts >= 5)
                         {
-                            newLockout = DateTime.Now.AddMinutes(15); // Phạt 15 phút ngay lập tức
-                            MessageBox.Show("Sai mật khẩu! Tài khoản đã bị khóa 15 phút.", "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            newLockout = DateTime.Now.AddMinutes(15); // Khóa tạm thời 15 phút
+                            MessageBox.Show("Sai mật khẩu! Tài khoản đã bị khóa tạm thời 15 phút.", "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         else
                         {
                             MessageBox.Show($"Sai tài khoản hoặc mật khẩu! Bạn còn {5 - failedAttempts} lần thử.", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
 
-                        // Cập nhật số lần sai và thời gian phạt xuống DB
                         UpdateLoginStatus(conn, username, failedAttempts, newLockout);
 
                         txtPassword.Clear();
