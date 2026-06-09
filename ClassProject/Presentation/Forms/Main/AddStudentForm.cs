@@ -81,7 +81,7 @@ namespace ClassProject
             }
         }
 
-        private void btnChooseImage_Click_1(object sender, EventArgs e)
+        private void btnChooseImage_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
@@ -98,7 +98,7 @@ namespace ClassProject
             }
         }
 
-        private void btnAdd_Click_1(object sender, EventArgs e)
+        private void btnAdd_Click(object sender, EventArgs e)
         {
             // 1. Kiểm tra nhanh định dạng cơ bản trước khi nạp vào Model
             if (string.IsNullOrWhiteSpace(txtMSSV.Text)) { MessageBox.Show("Nhập MSSV"); return; }
@@ -168,7 +168,7 @@ namespace ClassProject
             }
         }
 
-        private void btnClear_Click_1(object sender, EventArgs e)
+        private void btnClear_Click(object sender, EventArgs e)
         {
             if (targetMssv > 0)
             {

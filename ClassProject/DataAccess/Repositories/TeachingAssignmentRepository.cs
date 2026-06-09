@@ -14,7 +14,7 @@ namespace ClassProject.DataAccess.Repositories
             _connectionString = connectionString;
         }
 
-        /// 1. Lấy danh sách phân công giảng dạy (Gọi từ Thủ tục lưu trữ Bước 1)
+        /// 1. Lấy danh sách phân công giảng dạy (Đã nâng cấp lấy thêm cột đếm số môn)
         public DataTable GetAssignments()
         {
             DataTable dt = new DataTable();
@@ -32,11 +32,25 @@ namespace ClassProject.DataAccess.Repositories
             return dt;
         }
 
-        /// 2. Lấy danh sách Giảng viên (Tài khoản có RoleId = 2) để đổ vào ComboBox
+        /// 2. BÀI TẬP TỰ LÀM: Lấy số lượng môn học hiện tại một Giảng viên đang dạy để kiểm tra giới hạn 5 môn
+        public int GetCurrentCourseCount(int teacherId)
+        {
+            string query = "SELECT COUNT(*) FROM dbo.TeachingAssignment WHERE HRID = @HRID";
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@HRID", teacherId);
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
+                }
+            }
+        }
+
+        /// 3. Lấy danh sách Giảng viên (Tài khoản có RoleId = 2) để đổ vào ComboBox
         public DataTable GetTeacherList()
         {
             DataTable dt = new DataTable();
-            // Lấy danh sách tài khoản Giảng viên (RoleId = 2) từ bảng Users của bạn
             string query = "SELECT Id, Username FROM dbo.Users WHERE RoleId = 2";
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -51,7 +65,7 @@ namespace ClassProject.DataAccess.Repositories
             return dt;
         }
 
-        /// 3. Lấy danh sách Môn học từ bảng Course để đổ vào ComboBox
+        /// 4. Lấy danh sách Môn học từ bảng Course để đổ vào ComboBox
         public DataTable GetCourseList()
         {
             DataTable dt = new DataTable();
@@ -69,7 +83,7 @@ namespace ClassProject.DataAccess.Repositories
             return dt;
         }
 
-        /// 4. Thêm phân công giảng dạy mới (Có tích hợp kiểm tra trùng lặp)
+        /// 5. Thêm phân công giảng dạy mới (Có tích hợp kiểm tra trùng lặp)
         public bool AssignTeaching(int teacherId, string maMH)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -86,7 +100,7 @@ namespace ClassProject.DataAccess.Repositories
                     int count = Convert.ToInt32(checkCmd.ExecuteScalar());
                     if (count > 0)
                     {
-                        return false; // Trả về false nếu đã tồn tại phân công này (Chống lỗi Crash ứng dụng do trùng Unique)
+                        return false; // Trả về false nếu đã tồn tại phân công này
                     }
                 }
 
@@ -102,7 +116,7 @@ namespace ClassProject.DataAccess.Repositories
             }
         }
 
-        /// 5. Xóa phân công giảng dạy dựa trên ID khóa chính tự tăng
+        /// 6. Xóa phân công giảng dạy dựa trên ID khóa chính tự tăng
         public bool DeleteAssignment(int id)
         {
             string query = "DELETE FROM dbo.TeachingAssignment WHERE ID = @ID";

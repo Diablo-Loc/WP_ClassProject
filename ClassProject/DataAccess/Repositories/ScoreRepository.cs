@@ -176,5 +176,40 @@ namespace ClassProject.DataAccess.Repositories
             }
             return dt;
         }
+        public DataTable GetStudentTranscripts(string mssv)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    // Câu lệnh JOIN an toàn lấy đầy đủ thông tin môn học và điểm của 1 sinh viên cụ thể
+                    string query = @"SELECT 
+                                sc.MaMH AS [Mã Môn],
+                                c.TenMH AS [Tên Môn Học],
+                                c.SoTC AS [Số Tín Chỉ],
+                                c.Hky AS [Học Kỳ],
+                                sc.DiemQT AS [Điểm QT],
+                                sc.DiemCK AS [Điểm CK],
+                                sc.DiemTK AS [Điểm TK],
+                                sc.Mota AS [Mô tả]
+                             FROM dbo.Score sc
+                             JOIN dbo.Course c ON sc.MaMH = c.MaMH
+                             WHERE sc.MSSV = @mssv";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@mssv", mssv);
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            da.Fill(dt);
+                        }
+                    }
+                }
+                catch { }
+            }
+            return dt;
+        }
     }
 }

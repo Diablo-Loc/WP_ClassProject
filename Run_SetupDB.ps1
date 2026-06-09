@@ -52,6 +52,8 @@ $SqlFiles = @(
     "SQL\Table_classroom.sql",
     "SQL\Teaching_Assignment.sql",
     "SQL\Create_Procedures_Statistics.sql"
+    "SQL\006.sql"
+    "sql\005_dashboard_trends.sql"
 )
 
 Write-Host ""

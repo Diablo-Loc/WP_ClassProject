@@ -439,7 +439,7 @@
             dgvContacts.ThemeStyle.RowsStyle.Height = 29;
             dgvContacts.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(231, 229, 255);
             dgvContacts.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(71, 69, 94);
-            dgvContacts.CellContentClick += dgvContacts_CellClick;
+            
             dgvContacts.RowPostPaint += dgvContacts_RowPostPaint;
             // 
             // lblDSPhanCongGiangDay

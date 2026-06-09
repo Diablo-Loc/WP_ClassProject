@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace ClassProject.Presentation.Forms.Admin
@@ -16,25 +17,24 @@ namespace ClassProject.Presentation.Forms.Admin
         private readonly ContactRepository _contactRepo;
         private readonly My_DB _db = new My_DB();
         private bool isEditMode = false;
-        private int selectedContactId = -1; // Lưu lại ID khi chọn dòng cần sửa
+        private int selectedContactId = -1;
 
         public ContactForm()
         {
             InitializeComponent();
             string connString = _db.GetConnection().ConnectionString;
             _contactRepo = new ContactRepository(connString);
+
+            this.txtPhone.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtPhone_KeyPress);
         }
 
         private void ContactForm_Load(object sender, EventArgs e)
         {
             this.BackColor = Color.FromArgb(241, 245, 249);
-
             StyleGrid();
-            LoadContactGrid();
-            SwitchMode(false);
+            LoadContactGrid(); // Hàm này chạy xong sẽ tự kích hoạt dòng đầu và cấu hình trạng thái
         }
 
-        // Làm đẹp DataGridView dgvContacts theo style Slate cao cấp
         private void StyleGrid()
         {
             if (dgvContacts == null) return;
@@ -51,34 +51,29 @@ namespace ClassProject.Presentation.Forms.Admin
             dgvContacts.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dgvContacts.ColumnHeadersHeight = 35;
 
-            // Màu tiêu đề Slate tối
             dgvContacts.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(15, 23, 42);
             dgvContacts.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             dgvContacts.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             dgvContacts.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
 
-            // Màu dòng xen kẽ
             dgvContacts.RowsDefaultCellStyle.BackColor = Color.White;
             dgvContacts.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
 
             dgvContacts.DefaultCellStyle.SelectionBackColor = Color.FromArgb(239, 246, 255);
             dgvContacts.DefaultCellStyle.SelectionForeColor = Color.FromArgb(37, 99, 235);
 
-            // 🛠️ BẬT CỘT TIÊU ĐỀ HÀNG (LỀ TRÁI) ĐỂ CHỨA SỐ THỨ TỰ, TRÁNH BỊ ĐÈ CHỮ
             dgvContacts.RowHeadersVisible = true;
-            dgvContacts.RowHeadersWidth = 40; // Độ rộng vừa đủ cho số thứ tự
+            dgvContacts.RowHeadersWidth = 40;
             dgvContacts.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-            dgvContacts.RowHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252); // Màu nền lề trái xám nhẹ mượt mà
+            dgvContacts.RowHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
             dgvContacts.RowHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(239, 246, 255);
         }
 
-        // Đồng bộ hóa tên cột tiếng Việt trực quan
         private void FormatGridColumns()
         {
             if (dgvContacts.Columns.Count > 0)
             {
-                if (dgvContacts.Columns.Contains("ContactID")) dgvContacts.Columns["ContactID"].Visible = false; // Ẩn khóa chính
-
+                if (dgvContacts.Columns.Contains("ContactID")) dgvContacts.Columns["ContactID"].Visible = false;
                 if (dgvContacts.Columns.Contains("Name")) dgvContacts.Columns["Name"].HeaderText = "Họ và tên / Phòng ban";
                 if (dgvContacts.Columns.Contains("Phone")) dgvContacts.Columns["Phone"].HeaderText = "Số điện thoại";
                 if (dgvContacts.Columns.Contains("Email")) dgvContacts.Columns["Email"].HeaderText = "Địa chỉ Email";
@@ -87,7 +82,6 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        // Chuyển đổi trạng thái Thêm / Sửa linh hoạt
         private void SwitchMode(bool editMode)
         {
             isEditMode = editMode;
@@ -95,12 +89,12 @@ namespace ClassProject.Presentation.Forms.Admin
             if (isEditMode)
             {
                 btnInsert.Text = "💾 Cập nhật";
-                btnInsert.BackColor = Color.FromArgb(245, 158, 11); // Đổi sang màu vàng cam cảnh báo đang sửa
+                btnInsert.BackColor = Color.FromArgb(245, 158, 11);
             }
             else
             {
                 btnInsert.Text = "(+) Thêm liên hệ";
-                btnInsert.BackColor = Color.FromArgb(37, 99, 235); // Màu xanh dương thêm mới
+                btnInsert.BackColor = Color.FromArgb(37, 99, 235);
                 selectedContactId = -1;
             }
         }
@@ -139,7 +133,6 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        // Nút đa năng: Đóng vai trò thực hiện Thêm mới hoặc Cập nhật (Sửa dữ liệu cũ)
         private void btnInsert_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtName.Text))
@@ -149,15 +142,35 @@ namespace ClassProject.Presentation.Forms.Admin
                 return;
             }
 
+            string phoneInput = txtPhone.Text.Trim();
+            string emailInput = txtEmail.Text.Trim();
+
+            string phonePattern = @"^(03|05|07|08|09)[0-9]{8}$";
+            if (!Regex.IsMatch(phoneInput, phonePattern))
+            {
+                MessageBox.Show("Số điện thoại không hợp lệ!\nVui lòng nhập đúng 10 chữ số và bắt đầu bằng các đầu số hợp lệ (03, 05, 07, 08, 09).",
+                                "Lỗi định dạng", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtPhone.Focus();
+                return;
+            }
+
+            string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            if (!Regex.IsMatch(emailInput, emailPattern))
+            {
+                MessageBox.Show("Địa chỉ Email không đúng cấu trúc quy định!\nVí dụ hợp lệ: contact@hcmute.edu.vn hoặc user@gmail.com",
+                                "Lỗi định dạng", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtEmail.Focus();
+                return;
+            }
+
             Contact contact = new Contact
             {
                 ContactID = selectedContactId,
                 Name = txtName.Text.Trim(),
-                Phone = txtPhone.Text.Trim(),
-                Email = txtEmail.Text.Trim()
+                Phone = phoneInput,
+                Email = emailInput
             };
 
-            // ⭐ HÀM UPDATE: Nếu đang ở chế độ chỉnh sửa (isEditMode = true) thì tiến hành cập nhật dữ liệu mới
             if (isEditMode)
             {
                 if (_contactRepo.UpdateContact(contact))
@@ -171,7 +184,6 @@ namespace ClassProject.Presentation.Forms.Admin
                     MessageBox.Show("Cập nhật thất bại, vui lòng kiểm tra lại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            // Ngược lại, nếu ở trạng thái bình thường thì thực hiện Thêm mới bản ghi
             else
             {
                 if (_contactRepo.AddContact(contact))
@@ -187,35 +199,30 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        // ⭐ ĐẨY DỮ LIỆU LÊN CHỖ ĐIỀN: Bấm chọn một dòng trên Grid để hiện thông tin lên các ô nhập và chuẩn bị sửa
-        private void dgvContacts_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0) return;
-
-            DataGridViewRow row = dgvContacts.Rows[e.RowIndex];
-
-            // Lấy ID ẩn của liên hệ được chọn
-            selectedContactId = Convert.ToInt32(row.Cells["ContactID"].Value);
-
-            // Đẩy dữ liệu lên các ô TextBox để người dùng chỉnh sửa
-            txtName.Text = row.Cells["Name"].Value?.ToString();
-            txtPhone.Text = row.Cells["Phone"].Value?.ToString();
-            txtEmail.Text = row.Cells["Email"].Value?.ToString();
-
-            // Kích hoạt trạng thái Sửa (Nút chuyển thành "Cập nhật" và đổi sang màu cam cảnh báo)
-            SwitchMode(true);
-        }
-
-        // Xử lý sự kiện bấm nút Xóa bản ghi được chọn
+        // ⭐ ĐÃ FIX TRIỆT ĐỂ: Cơ chế phòng thủ kép lấy trực tiếp ID từ Grid nếu biến nhớ bị ghi đè
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (dgvContacts.CurrentRow == null || selectedContactId == -1)
+            if (dgvContacts.SelectedRows.Count == 0)
             {
                 MessageBox.Show("Vui lòng click chọn một liên hệ trên bảng trước khi bấm xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            string currentName = dgvContacts.CurrentRow.Cells["Name"].Value?.ToString();
+            DataGridViewRow row = dgvContacts.SelectedRows[0];
+
+            // Nếu biến selectedContactId bị reset về -1 lỗi, lấy lại trực tiếp từ dòng đang chọn
+            if (selectedContactId == -1 && row.Cells["ContactID"].Value != null)
+            {
+                selectedContactId = Convert.ToInt32(row.Cells["ContactID"].Value);
+            }
+
+            if (selectedContactId == -1)
+            {
+                MessageBox.Show("Không tìm thấy mã định danh (ID) của liên hệ cần xóa!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string currentName = row.Cells["Name"].Value?.ToString();
             DialogResult dialogResult = MessageBox.Show($"Bạn có chắc chắn muốn xóa liên hệ [{currentName}] không?", "Xác nhận hành động", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (dialogResult == DialogResult.Yes)
@@ -233,7 +240,6 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        // Tìm kiếm nhanh liên hệ
         private void btnSearch_Click(object sender, EventArgs e)
         {
             string keyword = txtSearch.Text.Trim();
@@ -247,7 +253,6 @@ namespace ClassProject.Presentation.Forms.Admin
                 dgvContacts.DataSource = dt;
                 FormatGridColumns();
 
-                // Cập nhật số lượng theo kết quả tìm kiếm được
                 if (dt != null)
                 {
                     lblTotalContacts.Text = $"Kết quả tìm kiếm: {dt.Rows.Count}";
@@ -255,29 +260,54 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        // Nút Làm mới dữ liệu và đưa Form về trạng thái thêm mới ban đầu
         private void btnClear_Click(object sender, EventArgs e)
         {
             ClearInputs();
             LoadContactGrid();
         }
 
+        private void dgvContacts_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dgvContacts.SelectedRows.Count > 0)
+            {
+                DataGridViewRow row = dgvContacts.SelectedRows[0];
+
+                if (row.Cells["ContactID"].Value != null && row.Cells["ContactID"].Value != DBNull.Value)
+                {
+                    selectedContactId = Convert.ToInt32(row.Cells["ContactID"].Value);
+
+                    txtName.Text = row.Cells["Name"].Value?.ToString();
+                    txtPhone.Text = row.Cells["Phone"].Value?.ToString();
+                    txtEmail.Text = row.Cells["Email"].Value?.ToString();
+
+                    SwitchMode(true);
+                }
+            }
+            else
+            {
+                selectedContactId = -1;
+            }
+        }
+
         private void dgvContacts_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
-            // Tính toán số thứ tự dựa trên chỉ số dòng hiện tại (bắt đầu từ 1)
             string stt = (e.RowIndex + 1).ToString();
-
-            // Cấu hình font chữ và màu sắc hiển thị cho số thứ tự (Màu Slate tối đồng bộ)
             Font rFont = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-            Brush rBrush = new SolidBrush(Color.FromArgb(100, 116, 139)); // Đổi sang xám Slate hiện đại, dịu mắt hơn
+            Brush rBrush = new SolidBrush(Color.FromArgb(100, 116, 139));
 
-            // 🛠️ ĐỊNH VỊ CHÍNH XÁC VÙNG VẼ NẰM TRONG Ô TIÊU ĐỀ HÀNG TRÁI
             var grid = (DataGridView)sender;
             float x = e.RowBounds.Location.X + (grid.RowHeadersWidth - e.Graphics.MeasureString(stt, rFont).Width) / 2;
             float y = e.RowBounds.Location.Y + (e.RowBounds.Height - rFont.Height) / 2;
 
-            // Tiến hành vẽ số thứ tự lên giao diện lề trái
             e.Graphics.DrawString(stt, rFont, rBrush, x, y);
+        }
+
+        private void txtPhone_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)8)
+            {
+                e.Handled = true;
+            }
         }
     }
 }

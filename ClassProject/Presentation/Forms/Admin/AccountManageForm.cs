@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Windows.Forms;
 
@@ -248,7 +249,7 @@ namespace ClassProject.Presentation.Forms.Admin
                     MessageBox.Show("Tài khoản này đã ở trạng thái hoạt động!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
-                string query = "UPDATE dbo.Users SET Status = 1 WHERE Username = @user";
+                string query = "UPDATE dbo.Users SET Status = 1, Valid = 1 WHERE Username = @user";
                 ExecuteDatabaseQuery(query, selectedUsername, $"Kích hoạt thành công tài khoản: {selectedUsername}");
             }
             else if (colName == "colLock")
@@ -416,7 +417,8 @@ namespace ClassProject.Presentation.Forms.Admin
                 {
                     conn.Open();
                     StringBuilder sb = new StringBuilder();
-                    sb.Append($"UPDATE dbo.Users SET Status = {targetStatus} WHERE Username IN (");
+                    int validVal = (targetStatus == 1) ? 1 : 0;
+                    sb.Append($"UPDATE dbo.Users SET Status = {targetStatus}, Valid = {validVal} WHERE Username IN (");
 
                     using (SqlCommand cmd = new SqlCommand())
                     {
