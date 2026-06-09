@@ -202,9 +202,7 @@ namespace ClassProject.Presentation.Forms.Students
                             // ĐỊNH DẠNG FONT CHỮ CHUẨN
                             string fontName = "Times New Roman";
 
-                            // =========================================================================
                             // --- PHẦN HEADER: TIÊU NGỮ (SỬ DỤNG BẢNG ẨN CHIA 2 CỘT SONG SONG) ---
-                            // =========================================================================
                             Table headerTable = document.AddTable(2, 2);
                             headerTable.Alignment = Alignment.center;
 
