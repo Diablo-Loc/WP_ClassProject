@@ -15,6 +15,7 @@
     <PackageReference Include="DocX" Version="5.0.0" />
     <PackageReference Include="EPPlus" Version="8.6.0" />
     <PackageReference Include="Guna.UI2.WinForms" Version="2.0.4.7" />
+    <PackageReference Include="HIC.System.Windows.Forms.DataVisualization" Version="1.0.1" />
     <PackageReference Include="iTextSharp" Version="5.5.13.5" />
     <PackageReference Include="LiveCharts.WinForms" Version="0.9.7.1" />
     <PackageReference Include="MailKit" Version="4.16.0" />

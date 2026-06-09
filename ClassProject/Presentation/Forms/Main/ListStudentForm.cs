@@ -13,14 +13,12 @@ namespace ClassProject
 {
     public partial class ListStudentForm : Form
     {
-        private int roleId;
         private StudentRepository studentRepo;
         private My_DB db = new My_DB();
 
-        public ListStudentForm(int roleId)
+        public ListStudentForm()
         {
             InitializeComponent();
-            this.roleId = roleId;
 
             string connString = db.GetConnection().ConnectionString;
             studentRepo = new StudentRepository(connString);
@@ -35,7 +33,7 @@ namespace ClassProject
             }
             fillGrid();
 
-            if (roleId == 1) // Nếu là Sinh viên -> Khóa giao diện can thiệp dữ liệu
+            if (UserSession.RoleId == 1) // Nếu là Sinh viên -> Khóa giao diện can thiệp dữ liệu
             {
                 btnInsert.Enabled = false;
                 btnUpdate.Enabled = false;
@@ -94,7 +92,6 @@ namespace ClassProject
                 // Định dạng lưới hiển thị
                 FormatDataGridView();
             }
-
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi hiển thị: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -187,7 +184,7 @@ namespace ClassProject
         // 3. Hàm xử lý nút Xóa sinh viên, chặn quyền và bảo mật
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (roleId == 1)
+            if (UserSession.RoleId == 1)
             {
                 MessageBox.Show("Bạn không có quyền thực hiện hành động xóa sinh viên!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                 return;
@@ -211,7 +208,7 @@ namespace ClassProject
         // 4. Nút mở Form Thêm Mới Sinh Viên
         private void btnInsert_Click_1(object sender, EventArgs e)
         {
-            if (roleId == 1)
+            if (UserSession.RoleId == 1)
             {
                 MessageBox.Show("Bạn không có quyền thêm mới sinh viên!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                 return;
@@ -226,7 +223,7 @@ namespace ClassProject
         // 5. Nút mở Form Sửa Thông Tin Sinh Viên
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (roleId == 1)
+            if (UserSession.RoleId == 1)
             {
                 MessageBox.Show("Bạn không có quyền chỉnh sửa thông tin sinh viên!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                 return;
@@ -253,7 +250,7 @@ namespace ClassProject
             }
         }
 
-        // 6. PHẦN 3 — EXPORT EXCEL CHUẨN CLOSEDXML (Theo tài liệu của bạn)
+        // 6. PHẦN 3 — EXPORT EXCEL CHUẨN CLOSEDXML
         private void btnExportExcel_Click(object sender, EventArgs e)
         {
             if (dgvStudents.Rows.Count == 0)
@@ -298,7 +295,7 @@ namespace ClassProject
         private void btnImportExcel_Click(object sender, EventArgs e)
         {
             // Phân quyền bảo mật: Sinh viên không được phép Import bậy dữ liệu
-            if (roleId == 1)
+            if (UserSession.RoleId == 1)
             {
                 MessageBox.Show("Bạn không có quyền thực hiện hành động này!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                 return;

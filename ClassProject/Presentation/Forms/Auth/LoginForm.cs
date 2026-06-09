@@ -1,5 +1,6 @@
-using ClassProject.DataAccess.Db;
 using BCrypt.Net;
+using ClassProject.DataAccess.Db;
+using ClassProject.Models;
 using ClassProject.Presentation.Forms;
 using ClassProject.Presentation.Forms.Main;
 using Microsoft.Data.SqlClient;
@@ -49,11 +50,11 @@ namespace ClassProject
 
                     // 2. CẬP NHẬT TRUY VẤN: Lấy thêm cột Status từ bảng Users
                     string query = @"SELECT Id, Password, RoleId, 
-                            ISNULL(Valid, 0) AS Valid, 
-                            ISNULL(Status, 0) AS Status, 
-                            ISNULL(FailedAttempts, 0) AS FailedAttempts, 
-                            LockoutEnd 
-                     FROM Users WHERE Username = @user";
+                                            ISNULL(Valid, 0) AS Valid, 
+                                            ISNULL(Status, 0) AS Status, 
+                                            ISNULL(FailedAttempts, 0) AS FailedAttempts, 
+                                            LockoutEnd 
+                                     FROM Users WHERE Username = @user";
 
                     SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@user", username);
@@ -63,7 +64,7 @@ namespace ClassProject
                     int userId = 0;
                     int roleId = -1;
                     int valid = 0;
-                    int status = 0; // Thêm biến lưu trạng thái hệ thống
+                    int status = 0;
                     int failedAttempts = 0;
                     DateTime? lockoutEnd = null;
 
@@ -76,7 +77,7 @@ namespace ClassProject
                             userId = Convert.ToInt32(reader["Id"]);
                             roleId = Convert.ToInt32(reader["RoleId"]);
                             valid = Convert.ToInt32(reader["Valid"]);
-                            status = Convert.ToInt32(reader["Status"]); // Đọc dữ liệu từ DB
+                            status = Convert.ToInt32(reader["Status"]);
                             failedAttempts = Convert.ToInt32(reader["FailedAttempts"]);
 
                             if (reader["LockoutEnd"] != DBNull.Value)
@@ -94,8 +95,6 @@ namespace ClassProject
                         txtUsername.Focus();
                         return;
                     }
-
-                    // --- KIỂM TRA TRẠNG THÁI STATUS TỪ ADMIN ---
 
                     // Case 3a: Tài khoản đã bị Admin khóa hệ thống (Status = 2)
                     if (status == 2)
@@ -144,6 +143,12 @@ namespace ClassProject
                         // Đăng nhập THÀNH CÔNG: Reset số lần sai về 0
                         UpdateLoginStatus(conn, username, 0, null);
 
+                        // 🌟 BƯỚC THAY ĐỔI QUAN TRỌNG: Nạp thông tin phiên đăng nhập toàn cục (Global Session)
+                        UserSession.UserId = userId;
+                        UserSession.RoleId = roleId;
+                        UserSession.Username = username;
+                        // (Lưu ý: Thuộc tính UserSession.MSSV tạm thời để trống, f_main sẽ tự truy vấn sau nếu roleId == 1)
+
                         // Lưu trạng thái Remember Me
                         Properties.Settings.Default.Username = chkRememberMe.Checked ? username : "";
                         Properties.Settings.Default.Password = chkRememberMe.Checked ? password : "";
@@ -155,7 +160,8 @@ namespace ClassProject
 
                         this.Hide();
 
-                        using (f_main mainForm = new f_main(roleId, userId))
+                        // 🌟 BƯỚC THAY ĐỔI QUAN TRỌNG: Khởi tạo f_main() trống không cần truyền tham số
+                        using (f_main mainForm = new f_main())
                         {
                             mainForm.ShowDialog();
                         }
@@ -200,7 +206,6 @@ namespace ClassProject
             }
         }
 
-        // Hàm hỗ trợ cập nhật trạng thái khóa tài khoản (Cập nhật bảng Users theo schema DB)
         private void UpdateLoginStatus(SqlConnection conn, string username, int attempts, DateTime? lockoutEnd)
         {
             string query = "UPDATE Users SET FailedAttempts = @attempts, LockoutEnd = @lockout WHERE Username = @user";
