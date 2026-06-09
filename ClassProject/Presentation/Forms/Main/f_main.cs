@@ -298,7 +298,7 @@ namespace ClassProject.Presentation.Forms.Main
                     flowMenu.Controls.Add(CreateMenuButton("Quản lý sinh viên", Student_Click));      // UC-05, 06, 08
                     flowMenu.Controls.Add(CreateMenuButton("Danh mục lớp học", Classroom_Click));
                     flowMenu.Controls.Add(CreateMenuButton("Danh mục môn học", Course_Click));
-                    flowMenu.Controls.Add(CreateMenuButton("Quản lý điểm số", Score_Click));         // UC-14 (HR nhập điểm từ hội đồng thi)
+                    flowMenu.Controls.Add(CreateMenuButton("Quản lý điểm số", ScoreSv_Click));         // UC-14 (HR nhập điểm từ hội đồng thi)
                     flowMenu.Controls.Add(CreateMenuButton("Thống kê", Statistic_Click));            // UC-09, 17 (Thống kê điểm TB, giới tính)
                     break;
             }
@@ -374,6 +374,9 @@ namespace ClassProject.Presentation.Forms.Main
             MessageBox.Show("Chức năng đang phát triển");
         }
          */
+        //3.hr
+        private void ScoreSv_Click(object sender, EventArgs e) => OpenChildForm(new StudentScoreForm());
+
         #endregion
 
         private void timerClock_Tick(object sender, EventArgs e)
