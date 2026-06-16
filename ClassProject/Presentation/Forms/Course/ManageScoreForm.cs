@@ -424,46 +424,124 @@ namespace ClassProject.Presentation.Forms.Course
 
             using (SaveFileDialog sfd = new SaveFileDialog())
             {
-                sfd.Filter = "CSV File (*.csv)|*.csv|Text File (*.txt)|*.txt";
-                sfd.FileName = "Bang_Diem_Sinh_Vien.csv";
+                // Thay đổi bộ lọc sang đuôi mở rộng .xlsx của Excel thay vì file .csv dễ lỗi font
+                sfd.Filter = "Excel Workbook|*.xlsx";
+                sfd.FileName = $"Bang_Diem_Sinh_Vien_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     try
                     {
-                        StringBuilder sb = new StringBuilder();
-                        List<string> headers = new List<string>();
-                        foreach (DataGridViewColumn col in dgvScores.Columns)
-                        {
-                            headers.Add(col.HeaderText);
-                        }
-                        sb.AppendLine(string.Join(",", headers));
+                        // Trích xuất an toàn dữ liệu từ Grid (Hỗ trợ cả trường hợp đang dùng bộ lọc DefaultView)
+                        DataView currentView = dgvScores.DataSource as DataView;
+                        DataTable dtSource;
 
-                        foreach (DataGridViewRow row in dgvScores.Rows)
+                        if (currentView != null)
                         {
-                            List<string> cells = new List<string>();
-                            foreach (DataGridViewCell cell in row.Cells)
+                            dtSource = currentView.ToTable();
+                        }
+                        else if (dgvScores.DataSource is DataTable dt)
+                        {
+                            dtSource = dt.DefaultView.ToTable();
+                        }
+                        else
+                        {
+                            // Trường hợp bất khả kháng: Tự dựng bảng từ các dòng hiện thị trên DataGridView
+                            dtSource = new DataTable();
+                            foreach (DataGridViewColumn col in dgvScores.Columns)
                             {
-                                cells.Add(cell.Value?.ToString()?.Replace(",", " ") ?? "");
+                                dtSource.Columns.Add(col.Name);
                             }
-                            sb.AppendLine(string.Join(",", cells));
+                            foreach (DataGridViewRow row in dgvScores.Rows)
+                            {
+                                if (!row.IsNewRow)
+                                {
+                                    DataRow dr = dtSource.NewRow();
+                                    foreach (DataGridViewColumn col in dgvScores.Columns)
+                                    {
+                                        dr[col.Name] = row.Cells[col.Name].Value;
+                                    }
+                                    dtSource.Rows.Add(dr);
+                                }
+                            }
                         }
 
-                        // MẸO QUAN TRỌNG: Ghi file đính kèm ký tự đặc biệt UTF-8 BOM (Byte Order Mark) 
-                        // Giúp Microsoft Excel tự động nhận dạng ngôn ngữ tiếng Việt có dấu, không lo bị lỗi font ô vuông.
-                        byte[] bom = Encoding.UTF8.GetPreamble();
-                        byte[] content = Encoding.UTF8.GetBytes(sb.ToString());
-
-                        using (var fs = System.IO.File.Create(sfd.FileName))
+                        // Tiến hành khởi tạo Workbook bằng ClosedXML
+                        using (ClosedXML.Excel.XLWorkbook wb = new ClosedXML.Excel.XLWorkbook())
                         {
-                            fs.Write(bom, 0, bom.Length);
-                            fs.Write(content, 0, content.Length);
+                            var ws = wb.Worksheets.Add("BangDiem");
+
+                            // Khởi tạo danh sách cấu trúc tiêu đề cột hiển thị ra Excel dựa trên Grid hiện tại
+                            List<string> headers = new List<string>();
+                            foreach (DataGridViewColumn col in dgvScores.Columns)
+                            {
+                                if (col.Visible) // Chỉ lấy các cột đang hiện trên màn hình công cụ
+                                {
+                                    headers.Add(col.HeaderText);
+                                }
+                            }
+
+                            // 1. Đổ hàng tiêu đề (Header) với phong cách giao diện phẳng màu xanh chủ đạo
+                            for (int i = 0; i < headers.Count; i++)
+                            {
+                                var cell = ws.Cell(1, i + 1);
+                                cell.Value = headers[i];
+                                cell.Style.Font.Bold = true;
+                                cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#0D6EFD"); // Màu xanh thương hiệu
+                                cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.White;
+                                cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                                cell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                            }
+
+                            // 2. Đổ dữ liệu chi tiết điểm số của từng sinh viên vào các dòng kế tiếp
+                            int rIndex = 2;
+                            foreach (DataGridViewRow row in dgvScores.Rows)
+                            {
+                                if (row.IsNewRow) continue;
+
+                                int cIndex = 1;
+                                foreach (DataGridViewColumn col in dgvScores.Columns)
+                                {
+                                    if (col.Visible)
+                                    {
+                                        var val = row.Cells[col.Index].Value;
+                                        var currentCell = ws.Cell(rIndex, cIndex);
+
+                                        // Kiểm tra và định dạng kiểu dữ liệu số (Điểm số) để Excel tính toán được
+                                        if (val != null && decimal.TryParse(val.ToString(), out decimal numVal) &&
+                                            (col.HeaderText.Contains("Điểm") || col.HeaderText.Contains("Hệ 4")))
+                                        {
+                                            currentCell.Value = numVal;
+                                            currentCell.Style.NumberFormat.Format = "0.00";
+                                            currentCell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Right;
+                                        }
+                                        else
+                                        {
+                                            // Dữ liệu chữ text thông thường (Mã SV, Họ tên, X xếp loại...)
+                                            currentCell.Value = val?.ToString() ?? "";
+                                            currentCell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                                        }
+
+                                        // Tạo đường viền mảnh xung quanh ô dữ liệu cho dễ nhìn
+                                        currentCell.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                                        cIndex++;
+                                    }
+                                }
+                                rIndex++;
+                            }
+
+                            // Tự động căn chỉnh độ rộng tất cả các cột Excel cho vừa vặn, không bị che khuất chữ
+                            ws.Columns().AdjustToContents();
+
+                            // Thực hiện lưu tệp xuống đĩa cứng
+                            wb.SaveAs(sfd.FileName);
                         }
 
-                        MessageBox.Show("Xuất danh sách bảng điểm thành công! File hiển thị tiếng Việt chuẩn xác trong Excel.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Xuất danh sách bảng điểm sinh viên ra file Excel thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Lỗi xuất file: " + ex.Message, "Thất bại", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Có lỗi xảy ra khi tạo tệp Excel: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
