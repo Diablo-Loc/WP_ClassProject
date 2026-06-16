@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using ClassProject.DataAccess.Db;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 
@@ -6,150 +7,170 @@ namespace ClassProject.DataAccess.Repositories
 {
     public class RegisterRepository
     {
-        private string _connectionString;
+        private readonly string _connString;
+        private readonly My_DB _db = new My_DB();
 
-        public RegisterRepository(string connectionString)
+        public RegisterRepository()
         {
-            _connectionString = connectionString;
         }
 
-        // 1. Hàm Đăng ký môn học (INSERT)
-        public bool AddRegistration(string mssv, string courseId)
-        {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    string query = "INSERT INTO dbo.CourseRegistration (Mssv, CourseId, RegistrationDate) VALUES (@mssv, @courseId, GETDATE())";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@mssv", mssv);
-                        cmd.Parameters.AddWithValue("@courseId", courseId);
-                        return cmd.ExecuteNonQuery() > 0;
-                    }
-                }
-                catch { return false; }
-            }
-        }
-
-        // 2. Hàm Hủy đăng ký (DELETE)
-        public bool CancelRegistration(string mssv, string courseId)
-        {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    string query = "DELETE FROM dbo.CourseRegistration WHERE Mssv = @mssv AND CourseId = @courseId";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@mssv", mssv);
-                        cmd.Parameters.AddWithValue("@courseId", courseId);
-                        return cmd.ExecuteNonQuery() > 0;
-                    }
-                }
-                catch { return false; }
-            }
-        }
-
-        // 3. Kiểm tra sinh viên đã đăng ký môn này chưa
-        public bool IsRegistered(string mssv, string courseId)
-        {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    string query = "SELECT COUNT(*) FROM dbo.CourseRegistration WHERE Mssv = @mssv AND CourseId = @courseId";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@mssv", mssv);
-                        cmd.Parameters.AddWithValue("@courseId", courseId);
-                        int count = Convert.ToInt32(cmd.ExecuteScalar());
-                        return count > 0;
-                    }
-                }
-                catch { return false; }
-            }
-        }
-
-        // 4. Lấy danh sách đã đăng ký nạp lên DataGridView
+        // 1. Lấy danh sách các Lớp học phần một sinh viên ĐÃ ĐĂNG KÝ (Đã sửa lỗi 207 & Đọc tên giảng viên)
         public DataTable GetRegistrationList(string mssv)
         {
-            DataTable dt = new DataTable();
-            using (SqlConnection conn = new SqlConnection(_connectionString))
+            DataTable table = new DataTable();
+            using (SqlConnection conn = _db.GetConnection())
             {
-                try
-                {
-                    conn.Open();
-                    
-                    string query = @"SELECT 
-                                ROW_NUMBER() OVER (ORDER BY r.RegistrationDate DESC) AS STT,
-                                r.MaMH AS CourseId,
-                                c.TenMH AS CourseName,
-                                ISNULL(c.SoTC, 0) AS Credits,
-                                N'Chưa phân công' AS Teacher,
-                                ISNULL(c.Hky, 0) AS Semester
-                             FROM dbo.DKMH r
-                             JOIN dbo.Course c ON r.MaMH = c.MaMH
-                             WHERE r.MSSV = @mssv";
+                // Truy vấn trực tiếp từ View để lấy trường 'TenGiangVien' đã được đồng bộ với CSDL mới
+                string query = @"
+            SELECT 
+                STT,
+                MaLopHP,
+                TenMH,
+                SoTC,
+                TenGiangVien, -- An toàn, không lo sai lệch cấu trúc cột vật lý
+                PhongHoc,
+                RegistrationDate
+            FROM dbo.vw_StudentRegistrationDetail
+            WHERE MSSV = @mssv";
 
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.Add("@mssv", SqlDbType.NVarChar, 30).Value = mssv.Trim();
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                     {
-                        cmd.Parameters.AddWithValue("@mssv", mssv);
-                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                        {
-                            da.Fill(dt);
-                        }
+                        adapter.Fill(table);
                     }
                 }
-                catch (Exception ex)
-                {
-                    System.Windows.Forms.MessageBox.Show("Lỗi SQL: " + ex.Message, "Lỗi kết nối");
-                }
             }
-            return dt;
+            return table;
         }
 
-        // 5. Tính tổng số tín chỉ sinh viên đã đăng ký
-        public int GetTotalCreditsRegistered(string mssv)
-        {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    string query = @"SELECT ISNULL(SUM(c.SoTC), 0) 
-                             FROM dbo.CourseRegistration r 
-                             JOIN dbo.Course c ON r.CourseId = c.MaMH 
-                             WHERE r.Mssv = @mssv";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@mssv", mssv);
-                        return Convert.ToInt32(cmd.ExecuteScalar());
-                    }
-                }
-                catch { return 0; }
-            }
-        }
-
-        //6. Hàm đếm tổng số môn học sinh viên đó đã đăng ký
+        // 2. Đếm tổng số môn học (Lớp HP) mà sinh viên đã đăng ký
         public int GetTotalCoursesRegistered(string mssv)
         {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlConnection conn = _db.GetConnection())
             {
-                try
+                string query = "SELECT COUNT(1) FROM dbo.DKMH WHERE MSSV = @mssv";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
+                    cmd.Parameters.Add("@mssv", SqlDbType.NVarChar, 30).Value = mssv.Trim();
                     conn.Open();
-                    string query = "SELECT COUNT(*) FROM dbo.CourseRegistration WHERE Mssv = @mssv";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@mssv", mssv);
-                        return Convert.ToInt32(cmd.ExecuteScalar());
-                    }
+                    return Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                catch { return 0; }
+            }
+        }
+
+        // 3. Tính tổng số tín chỉ tích lũy hiện tại của sinh viên trong học kỳ 
+        public int GetTotalCreditsRegistered(string mssv)
+        {
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                //  ĐÃ SỬA: Thay "INNER JOIN JOIN" thành "INNER JOIN" chuẩn cú pháp
+                string query = @"
+            SELECT ISNULL(SUM(c.SoTC), 0)
+            FROM dbo.DKMH dk
+            INNER JOIN dbo.CourseSection cs ON dk.MaLopHP = cs.MaLopHP
+            INNER JOIN dbo.Course c ON cs.MaMH = c.MaMH
+            WHERE dk.MSSV = @mssv";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.Add("@mssv", SqlDbType.NVarChar, 30).Value = mssv.Trim();
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
+                }
+            }
+        }
+
+        // 4. Lấy số tín chỉ của một Lớp học phần bất kỳ để tính toán trước khi bấm đăng ký
+        public int GetCreditsOfSection(string maLopHP)
+        {
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                string query = @"
+                    SELECT ISNULL(c.SoTC, 0) 
+                    FROM dbo.CourseSection cs
+                    INNER JOIN dbo.Course c ON cs.MaMH = c.MaMH
+                    WHERE cs.MaLopHP = @maLopHP";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.Add("@maLopHP", SqlDbType.NVarChar, 30).Value = maLopHP.Trim();
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
+                }
+            }
+        }
+
+        // 5. Kiểm tra xem sinh viên đã đăng ký Lớp học phần này chưa (Tránh trùng lịch)
+        public bool IsRegistered(string mssv, string maLopHP)
+        {
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                string query = "SELECT COUNT(1) FROM dbo.DKMH WHERE MSSV = @mssv AND MaLopHP = @maLopHP";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.Add("@mssv", SqlDbType.NVarChar, 30).Value = mssv.Trim();
+                    cmd.Parameters.Add("@maLopHP", SqlDbType.NVarChar, 30).Value = maLopHP.Trim();
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                }
+            }
+        }
+
+        // 6. Kiểm tra xem lớp học phần đã đạt ngưỡng sĩ số trần hay chưa
+        public bool IsSectionFull(string maLopHP)
+        {
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                string query = @"
+                    SELECT 
+                        CASE 
+                            WHEN (SELECT COUNT(1) FROM dbo.DKMH WHERE MaLopHP = @maLopHP) >= MaxStudents THEN 1 
+                            ELSE 0 
+                        END
+                    FROM dbo.CourseSection
+                    WHERE MaLopHP = @maLopHP";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.Add("@maLopHP", SqlDbType.NVarChar, 30).Value = maLopHP.Trim();
+                    conn.Open();
+                    object result = cmd.ExecuteScalar();
+                    return result != null && Convert.ToInt32(result) == 1;
+                }
+            }
+        }
+
+        // 7. Thực thi nghiệp vụ Đăng ký học phần (Thêm vào bảng DKMH)
+        public bool AddRegistration(string mssv, string maLopHP)
+        {
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                string query = "INSERT INTO dbo.DKMH (MSSV, MaLopHP, RegistrationDate) VALUES (@mssv, @maLopHP, GETDATE())";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.Add("@mssv", SqlDbType.NVarChar, 30).Value = mssv.Trim();
+                    cmd.Parameters.Add("@maLopHP", SqlDbType.NVarChar, 30).Value = maLopHP.Trim();
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+
+        // 8. Thực thi nghiệp vụ Hủy đăng ký học phần
+        public bool CancelRegistration(string mssv, string maLopHP)
+        {
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                string query = "DELETE FROM dbo.DKMH WHERE MSSV = @mssv AND MaLopHP = @maLopHP";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.Add("@mssv", SqlDbType.NVarChar, 30).Value = mssv.Trim();
+                    cmd.Parameters.Add("@maLopHP", SqlDbType.NVarChar, 30).Value = maLopHP.Trim();
+                    conn.Open();
+                    return cmd.ExecuteNonQuery() > 0;
+                }
             }
         }
     }

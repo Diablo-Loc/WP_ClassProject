@@ -21,11 +21,15 @@
     <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
     <PackageReference Include="Microsoft.Office.Interop.Excel" Version="16.0.18925.20022" />
+    <PackageReference Include="MiniExcel" Version="1.44.1" />
     <PackageReference Include="MiniWord" Version="0.9.2" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Presentation\Forms\Admin\ReportFormHR.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Presentation\Forms\Class\ManageCourseSectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Properties\Settings.Designer.cs">

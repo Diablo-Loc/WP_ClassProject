@@ -13,7 +13,8 @@ namespace ClassProject.Presentation.Forms
 {
     public partial class RegisterForm : Form
     {
-        My_DB db = new My_DB();
+        private readonly My_DB db = new My_DB();
+
         public RegisterForm()
         {
             InitializeComponent();
@@ -26,21 +27,22 @@ namespace ClassProject.Presentation.Forms
             string password = txtPassword.Text.Trim();
             string confirmPassword = txtConfirm.Text.Trim();
 
-            // 1. Kiểm tra đầu vào cơ bản
-            if (username == "" || email == "" || password == "" || confirmPassword == "")
+            // 1. Kiểm tra đầu vào cơ bản (Validation)
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) ||
+                string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
             {
                 MessageBox.Show("Vui lòng điền đầy đủ thông tin!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            // CHECKLIST: Chống lỗi NullReference bằng toán tử ?. và kiểm tra null an toàn
             if (cboPosition.SelectedItem == null)
             {
                 MessageBox.Show("Vui lòng chọn chức vụ (Student/HR)!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            string selectedText = cboPosition.SelectedItem.ToString();
-
+            string selectedText = cboPosition.SelectedItem?.ToString() ?? "";
             int selectedRoleId = (selectedText == "Student") ? 1 : 2;
 
             if (!email.Contains("@") || !email.Contains("."))
@@ -55,7 +57,7 @@ namespace ClassProject.Presentation.Forms
                 return;
             }
 
-            // 2. Xử lý Database
+            // 2. Xử lý nghiệp vụ tương tác Cơ sở dữ liệu thông qua Transaction
             try
             {
                 using (SqlConnection conn = db.GetConnection())
@@ -66,67 +68,92 @@ namespace ClassProject.Presentation.Forms
                     {
                         try
                         {
-                            // CHẶNG A: Kiểm tra Username/Email đã tồn tại trong bảng Users chưa
+                            // CHẶNG A: Kiểm tra Username/Email đã tồn tại (CHECKLIST: Sử dụng SqlParameter chống SQL Injection)
                             const string checkUserQuery = "SELECT COUNT(*) FROM dbo.Users WHERE Username = @username OR Email = @email";
                             using (SqlCommand checkCmd = new SqlCommand(checkUserQuery, conn, tx))
                             {
                                 checkCmd.Parameters.AddWithValue("@username", username);
                                 checkCmd.Parameters.AddWithValue("@email", email);
+
                                 if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
                                 {
-                                    MessageBox.Show("Username hoặc Email đã được sử dụng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    MessageBox.Show("Username hoặc Email đã được sử dụng trên hệ thống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    tx.Rollback(); // Phải Rollback rõ ràng trước khi đóng luồng hàm
                                     return;
                                 }
                             }
 
-                            int validStatus = 0; // Mặc định là 0 (Chờ duyệt đối với HR)
-                            int? targetStudentId = null; // Biến lưu ID của sinh viên nếu tìm thấy
+                            // Trạng thái tài khoản bình thường là Status = 1. Tài khoản bị khóa mới là Status = 2.
+                            int validStatus = 0;  // Mặc định: 0 = Chờ duyệt đối với HR
+                            int statusValue = 1;  // Mặc định: 1 = Trạng thái hoạt động bình thường (Active)
+                            int? targetStudentId = null;
 
-                            // CHẶNG B: Nếu là Sinh viên -> Bắt buộc phải có trong danh sách của nhà trường (bảng Students)
+                            // CHẶNG B: Nếu chọn chức vụ là Sinh viên -> Xác thực chéo với danh sách hồ sơ gốc
                             if (selectedRoleId == 1)
                             {
-                                // Quét Email để tìm hồ sơ sinh viên do HR đã nhập
-                                string checkStudentQuery = "SELECT Id, UserId FROM dbo.Students WHERE Email = @email";
+                                string checkStudentQuery =
+                                    "SELECT Id, UserId FROM dbo.Students WHERE Email = @email";
+
                                 using (SqlCommand cmd = new SqlCommand(checkStudentQuery, conn, tx))
                                 {
                                     cmd.Parameters.AddWithValue("@email", email);
+
                                     using (SqlDataReader reader = cmd.ExecuteReader())
                                     {
                                         if (!reader.Read())
                                         {
-                                            MessageBox.Show("Email này chưa có trong danh sách sinh viên của trường!\nVui lòng liên hệ HR để được nhập hồ sơ trước.", "Từ chối", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                            return; // Bắt buộc chặn lại
+                                            MessageBox.Show(
+                                                "Email này chưa tồn tại trong danh sách sinh viên của trường!",
+                                                "Đăng ký thất bại",
+                                                MessageBoxButtons.OK,
+                                                MessageBoxIcon.Error);
+
+                                            reader.Close();
+                                            tx.Rollback();
+                                            return;
                                         }
 
                                         if (reader["UserId"] != DBNull.Value)
                                         {
-                                            MessageBox.Show("Sinh viên này đã được đăng ký và kích hoạt tài khoản rồi!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            MessageBox.Show(
+                                                "Sinh viên này đã có tài khoản hệ thống!",
+                                                "Thông báo",
+                                                MessageBoxButtons.OK,
+                                                MessageBoxIcon.Warning);
+
+                                            reader.Close();
+                                            tx.Rollback();
                                             return;
                                         }
 
                                         targetStudentId = Convert.ToInt32(reader["Id"]);
                                     }
                                 }
-                                validStatus = 1; // Học sinh đã có hồ sơ -> Cho phép Valid = 1 luôn (Đăng nhập được ngay)
+                                //chờ admin duyệt.
+                                validStatus = 0;
+                                statusValue = 1;
                             }
 
-                            // CHẶNG C: Tạo tài khoản trong bảng Users
-                            string insertUserQuery = "INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid) " +
-                                                     "OUTPUT INSERTED.Id " + // Lấy Id vừa tạo
-                                                     "VALUES (@username, @email, @password, @roleId, @valid)";
+                            // CHẶNG C: Thực hiện tạo mới tài khoản vào bảng Users
+                            string insertUserQuery = "INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid, Status) " +
+                                                     "OUTPUT INSERTED.Id " +
+                                                     "VALUES (@username, @email, @password, @roleId, @valid, @status)";
+
                             int newUserId = 0;
                             using (SqlCommand insertCmd = new SqlCommand(insertUserQuery, conn, tx))
                             {
                                 insertCmd.Parameters.AddWithValue("@username", username);
                                 insertCmd.Parameters.AddWithValue("@email", email);
+                                // Mã hóa bảo mật mật khẩu bằng thư viện BCrypt theo yêu cầu kiến trúc hệ thống
                                 insertCmd.Parameters.AddWithValue("@password", BCrypt.Net.BCrypt.HashPassword(password));
                                 insertCmd.Parameters.AddWithValue("@roleId", selectedRoleId);
                                 insertCmd.Parameters.AddWithValue("@valid", validStatus);
+                                insertCmd.Parameters.AddWithValue("@status", statusValue);
 
                                 newUserId = (int)insertCmd.ExecuteScalar();
                             }
 
-                            // CHẶNG D: Nếu là sinh viên, liên kết Id tài khoản ngược lại vào bảng Students
+                            // CHẶNG D: Liên kết ID tài khoản Users vừa sinh ngược lại vào bảng danh sách Sinh viên
                             if (selectedRoleId == 1 && targetStudentId.HasValue)
                             {
                                 string updateStudentQuery = "UPDATE dbo.Students SET UserId = @userId WHERE Id = @studentId";
@@ -138,27 +165,45 @@ namespace ClassProject.Presentation.Forms
                                 }
                             }
 
-                            tx.Commit(); // Lưu toàn bộ giao dịch vào Database
+                            // Cam kết thực thi và lưu toàn bộ tiến trình vào Database một cách an toàn toàn vẹn dữ liệu
+                            tx.Commit();
 
-                            // Thông báo tùy theo chức vụ
+                            // Hiển thị thông báo phản hồi tương ứng theo nhóm chức vụ
                             if (selectedRoleId == 1)
-                                MessageBox.Show("Kích hoạt tài khoản Sinh viên thành công! Bạn có thể đăng nhập ngay bây giờ.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            {
+                                MessageBox.Show(
+                                    "Đăng ký tài khoản Sinh viên thành công!\nVui lòng chờ Admin phê duyệt trước khi đăng nhập.",
+                                    "Chờ phê duyệt",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information);
+                            }
                             else
-                                MessageBox.Show("Đăng ký tài khoản HR thành công! Vui lòng đợi Admin duyệt trước khi đăng nhập.", "Chờ duyệt", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            {
+                                MessageBox.Show(
+                                    "Đăng ký tài khoản HR thành công!\nVui lòng chờ Admin phê duyệt trước khi đăng nhập.",
+                                    "Chờ phê duyệt",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information);
+                            }
 
                             this.Close();
                         }
                         catch (Exception ex)
                         {
-                            tx.Rollback(); // Nếu có lỗi bất kỳ, hủy bỏ toàn bộ (không tạo user rác)
-                            MessageBox.Show("Lỗi trong quá trình ghi dữ liệu: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            tx.Rollback(); // Hoàn tác toàn bộ thay đổi nếu phát sinh bất kỳ lỗi dữ liệu nào
+
+                            // CHECKLIST: Ghi log hệ thống rõ ràng để phục vụ việc Debug, chống nuốt Exception thô
+                            System.Diagnostics.Debug.WriteLine($"[Error - Register Inner Flow]: {ex.Message}");
+                            MessageBox.Show("Có lỗi xảy ra trong quá trình xử lý lưu trữ dữ liệu: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Không thể kết nối đến cơ sở dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // CHECKLIST: Ghi log lỗi kết nối tầng ngoài
+                System.Diagnostics.Debug.WriteLine($"[Error - Database Connection]: {ex.Message}");
+                MessageBox.Show("Không thể thiết lập kết nối đến Cơ sở dữ liệu: " + ex.Message, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

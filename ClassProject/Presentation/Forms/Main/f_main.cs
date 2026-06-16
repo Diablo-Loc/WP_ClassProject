@@ -8,33 +8,31 @@ using Guna.UI2.WinForms;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Drawing;
-using System.Runtime.InteropServices; // Để dùng API ẩn scrollbar
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace ClassProject.Presentation.Forms.Main
 {
     public partial class f_main : Form
     {
-        private Form currentForm;
-
-        private readonly My_DB db = new My_DB();
-        private StudentRepository studentRepo;
+        private Form _currentForm;
+        private readonly My_DB _db = new My_DB();
+        private readonly StudentRepository _studentRepo;
 
         // API Windows ẩn thanh cuộn nhưng giữ tính năng cuộn bằng code
         [DllImport("user32.dll")]
         private static extern bool ShowScrollBar(IntPtr hWnd, int wBar, bool bShow);
         private const int SB_HORZ = 0; // Thanh cuộn ngang
+
         public f_main()
         {
             InitializeComponent();
+            _studentRepo = new StudentRepository();
 
-            string connString = db.GetConnection().ConnectionString;
-            studentRepo = new StudentRepository(connString);
-
-            // Tự động kiểm tra quyền từ bộ nhớ Global, nếu là Sinh viên thì đi lấy MSSV
-            if (UserSession.RoleId == 1)
+            // Tự động kiểm tra quyền từ bộ nhớ Global thông qua Helper hướng đối tượng
+            if (UserSession.IsStudent)
             {
-                GetStudentMSSV();
+                SyncStudentMssv();
             }
         }
 
@@ -43,32 +41,29 @@ namespace ClassProject.Presentation.Forms.Main
             this.FormBorderStyle = FormBorderStyle.Sizable;
             this.WindowState = FormWindowState.Maximized;
 
-            // Nền tổng xám nhạt hiện đại
+            // Nền tổng xám nhạt hiện đại theo chuẩn UI/UX quốc tế
             this.BackColor = Color.FromArgb(246, 248, 251);
 
-            // Các hàm dưới đây tự động đọc cấu hình trực tiếp từ UserSession toàn cục
+            // Tự động đọc cấu hình trực tiếp từ UserSession toàn cục
             LoadRoleInfo();
             LoadMenu();
 
-            // Gán sự kiện click cho 2 nút điều hướng
+            // Gán sự kiện click cho 2 nút điều hướng menu ngang
             btnScrollLeft.Click += BtnScrollLeft_Click;
             btnScrollRight.Click += BtnScrollRight_Click;
 
             timerClock.Start();
         }
 
-        // Hàm thực hiện ẩn thanh cuộn ngang thô kệch
         private void HideFlowMenuScrollbar()
         {
             flowMenu.AutoScroll = true;
-            flowMenu.PerformLayout(); // Ép layout tính toán lại trước khi ẩn
+            flowMenu.PerformLayout();
             ShowScrollBar(flowMenu.Handle, SB_HORZ, false);
         }
 
-        // Hàm cốt lõi: Tự động ẩn/hiện nút Trái/Phải dựa trên vị trí cuộn thực tế
         private void UpdateButtonVisibility()
         {
-            // 1. Kiểm tra vị trí bên trái (Nếu vị trí cuộn <= tối thiểu -> Ẩn nút Trái)
             if (flowMenu.HorizontalScroll.Value <= flowMenu.HorizontalScroll.Minimum)
             {
                 btnScrollLeft.Visible = false;
@@ -78,7 +73,6 @@ namespace ClassProject.Presentation.Forms.Main
                 btnScrollLeft.Visible = true;
             }
 
-            // 2. Tính toán xem tổng độ dài các menu có tràn ra ngoài vùng hiển thị của flowMenu hay không
             int totalWidth = 0;
             foreach (Control ctrl in flowMenu.Controls)
             {
@@ -88,8 +82,6 @@ namespace ClassProject.Presentation.Forms.Main
                 }
             }
 
-            // 3. Kiểm tra vị trí bên phải
-            // Lưu ý: Thêm sai số 5-10 pixel chống đứng hình trên một số độ phân giải màn hình
             bool isAtEnd = (flowMenu.HorizontalScroll.Value + flowMenu.Width) >= (totalWidth - 5);
 
             if (totalWidth <= flowMenu.Width || isAtEnd)
@@ -107,14 +99,10 @@ namespace ClassProject.Presentation.Forms.Main
         private void BtnScrollLeft_Click(object sender, EventArgs e)
         {
             int newScrollPosition = flowMenu.HorizontalScroll.Value - 150;
-
             if (newScrollPosition < flowMenu.HorizontalScroll.Minimum)
                 newScrollPosition = flowMenu.HorizontalScroll.Minimum;
 
-            // Thay đổi AutoScrollPosition bằng Point (X phải là số dương, WinForms tự chuyển thành âm nội bộ)
             flowMenu.AutoScrollPosition = new Point(newScrollPosition, 0);
-
-            // Ép hệ thống ẩn lại thanh cuộn và cập nhật nút
             HideFlowMenuScrollbar();
             UpdateButtonVisibility();
         }
@@ -122,71 +110,70 @@ namespace ClassProject.Presentation.Forms.Main
         private void BtnScrollRight_Click(object sender, EventArgs e)
         {
             int newScrollPosition = flowMenu.HorizontalScroll.Value + 150;
-
             if (newScrollPosition > flowMenu.HorizontalScroll.Maximum)
                 newScrollPosition = flowMenu.HorizontalScroll.Maximum;
 
-            // Thay đổi AutoScrollPosition bằng Point để tránh lỗi WinForms nuốt lệnh cuộn
             flowMenu.AutoScrollPosition = new Point(newScrollPosition, 0);
-
-            // Ép hệ thống ẩn lại thanh cuộn và cập nhật nút
             HideFlowMenuScrollbar();
             UpdateButtonVisibility();
         }
 
         #endregion
 
-        #region UserInfo
+        #region User Identity Sync (Đồng bộ danh tính)
 
-        //Đọc trực tiếp từ UserSession.RoleId
         private void LoadRoleInfo()
         {
-            switch (UserSession.RoleId)
-            {
-                case 0: lblRole.Text = "Administrator"; break;
-                case 1: lblRole.Text = "Student"; break;
-                case 2: lblRole.Text = "HR"; break;
-            }
+            lblRole.Text = UserSession.RoleName;
         }
 
-        //Dùng UserSession.UserId và gán thẳng kết quả vào UserSession.MSSV toàn cục
-        private void GetStudentMSSV()
+        private void SyncStudentMssv()
         {
             try
             {
-                using (SqlConnection conn = db.GetConnection())
+                using (SqlConnection conn = _db.GetConnection())
                 {
                     string query = @"
-                    SELECT s.MSSV FROM Students s
-                    INNER JOIN Users u ON s.UserId = u.Id
-                    WHERE u.Id = @UserId";
+                        SELECT s.MSSV FROM Students s
+                        INNER JOIN Users u ON s.UserId = u.Id
+                        WHERE u.Id = @UserId";
 
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@UserId", UserSession.UserId);
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@UserId", UserSession.UserId);
 
-                    conn.Open();
-                    object result = cmd.ExecuteScalar();
+                        conn.Open();
+                        object result = cmd.ExecuteScalar();
 
-                    if (result != null)
-                        UserSession.MSSV = result.ToString();
+                        if (result != null)
+                        {
+                            UserSession.UpdateStudentMssv(result.ToString());
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                System.Diagnostics.Debug.WriteLine("SQL Error tại f_main.SyncStudentMssv: " + ex.ToString());
+
+                MessageBox.Show("Hệ thống không thể xác định Mã số sinh viên định danh liên kết.\nVui lòng liên hệ Phòng đào tạo để đồng bộ tài khoản!",
+                                "Lỗi đồng bộ dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         #endregion
 
-        #region ChildForm
+        #region ChildForm Manager
 
         private void OpenChildForm(Form child)
         {
-            if (currentForm != null)
-                currentForm.Close();
+            if (_currentForm != null)
+            {
+                _currentForm.Close();
+                _currentForm.Dispose();
+            }
 
-            currentForm = child;
+            _currentForm = child;
             child.TopLevel = false;
             child.FormBorderStyle = FormBorderStyle.None;
             child.Dock = DockStyle.Fill;
@@ -200,37 +187,32 @@ namespace ClassProject.Presentation.Forms.Main
 
         #endregion
 
-        #region Modern Guna Menu
+        #region Modern Guna Menu Builder
 
         private Guna2Button CreateMenuButton(string text, EventHandler click)
         {
-            var btn = new Guna2Button();
-            btn.Text = text;
+            var btn = new Guna2Button
+            {
+                Text = text,
+                AutoSize = true,
+                Height = 48,
+                MinimumSize = new Size(0, 48),
+                MaximumSize = new Size(0, 48),
+                Padding = new Padding(18, 0, 18, 0),
+                TextAlign = HorizontalAlignment.Center,
+                Margin = new Padding(2, 0, 2, 0),
+                FillColor = Color.FromArgb(255, 255, 255),
+                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(100, 116, 139),
+                CustomBorderThickness = new Padding(0, 0, 0, 3),
+                CustomBorderColor = Color.Transparent,
+                ButtonMode = Guna.UI2.WinForms.Enums.ButtonMode.RadioButton
+            };
 
-            btn.AutoSize = true;
-            btn.Height = 48;
-            btn.MinimumSize = new Size(0, 48);
-            btn.MaximumSize = new Size(0, 48);
-            btn.Padding = new Padding(18, 0, 18, 0);
-            btn.TextAlign = HorizontalAlignment.Center;
-            btn.Margin = new Padding(2, 0, 2, 0);
-
-            // MÀU NỀN TRẮNG mặc định
-            btn.FillColor = Color.FromArgb(255, 255, 255);
-            btn.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            btn.ForeColor = Color.FromArgb(100, 116, 139);
-
-            btn.CustomBorderThickness = new Padding(0, 0, 0, 3);
-            btn.CustomBorderColor = Color.Transparent;
-
-            btn.ButtonMode = Guna.UI2.WinForms.Enums.ButtonMode.RadioButton;
-
-            // Trạng thái được chọn (Checked)
             btn.CheckedState.ForeColor = Color.FromArgb(37, 99, 235);
             btn.CheckedState.FillColor = Color.FromArgb(239, 246, 255);
             btn.CheckedState.CustomBorderColor = Color.FromArgb(37, 99, 235);
 
-            // Trạng thái Hover
             btn.HoverState.FillColor = Color.FromArgb(241, 245, 249);
             btn.HoverState.ForeColor = Color.FromArgb(15, 23, 42);
 
@@ -238,71 +220,74 @@ namespace ClassProject.Presentation.Forms.Main
             btn.Cursor = Cursors.Hand;
             btn.Click += click;
 
-            // Mỗi lần kích thước thay đổi, đảm bảo giấu thanh cuộn đi
             btn.SizeChanged += (s, e) => HideFlowMenuScrollbar();
 
             return btn;
         }
 
-        // 🌟 ĐÃ SỬA: Thay switch(roleId) bằng switch(UserSession.RoleId)
         private void LoadMenu()
         {
             flowMenu.Controls.Clear();
 
-            // Màn hình trang chủ tổng quan (Mọi chức vụ đều tiếp cận khi đăng nhập thành công)
+            // Dashboard mặc định khả dụng với tất cả các vị trí
             Guna2Button btnDashboard = CreateMenuButton("Dashboard", Dashboard_Click);
             flowMenu.Controls.Add(btnDashboard);
 
             btnDashboard.Checked = true;
             Dashboard_Click(btnDashboard, EventArgs.Empty);
 
-            switch (UserSession.RoleId)
+            // ===================================================================
+            // 🌟 CẤU TRÚC PHÂN QUYỀN CHUẨN DOANH NGHIỆP (RBAC) - 4 NHÓM VAI TRÒ
+            // ===================================================================
+
+            if (UserSession.IsAdmin)
             {
-                // =========================================================
-                // CASE 0: ADMIN TỐI CAO (POSITION = 0) - TOÀN QUYỀN HỆ THỐNG
-                // =========================================================
-                case 0:
-                    // --- Quản trị tài khoản & Thực thể ---
-                    flowMenu.Controls.Add(CreateMenuButton("Quản lý tài khoản", Account_Click));     // UC-04
-                    flowMenu.Controls.Add(CreateMenuButton("Danh bạ liên hệ", Contact_Click));    // UC-12 / Danh bạ
-                    flowMenu.Controls.Add(CreateMenuButton("Quản lý sinh viên", Student_Click));      // UC-05, 06, 07
-
-                    // --- Quản lý đào tạo ---
-                    flowMenu.Controls.Add(CreateMenuButton("Danh mục môn học", Course_Click));       // UC-10, 11, 12
-                    flowMenu.Controls.Add(CreateMenuButton("Danh mục lớp học", Classroom_Click));    // Quản lý lớp
-                    flowMenu.Controls.Add(CreateMenuButton("Phân công giảng dạy", Assign_Click));   // Mở chức năng phân công cho Admin
-
-                    // --- Nghiệp vụ vận hành ---
-                    flowMenu.Controls.Add(CreateMenuButton("Quản lý điểm số", Score_Click));         // UC-14, 15
-                    flowMenu.Controls.Add(CreateMenuButton("Phê duyệt yêu cầu", Request_Click));    // Duyệt đơn từ / Tài khoản mới
-
-                    // --- Trung tâm dữ liệu & Kết xuất ---
-                    flowMenu.Controls.Add(CreateMenuButton("Thống kê", Statistic_Click));            // UC-09, 17
-                    flowMenu.Controls.Add(CreateMenuButton("Báo cáo", Report_Click));               // UC-20 (Xuất PDF/Excel/Word)
-                    break;
-
-                // =========================================================
-                // CASE 1: STUDENT PORTAL (POSITION = 1) - CỔNG THÔNG TIN SINH VIÊN
-                // =========================================================
-                case 1:
-                    flowMenu.Controls.Add(CreateMenuButton("Hồ sơ cá nhân", Profile_Click));
-                    flowMenu.Controls.Add(CreateMenuButton("Yêu cầu", Request_Click));               // Gửi đơn hỗ trợ, phúc khảo điểm
-                    break;
-
-                // =========================================================
-                // CASE 2: HR / PHÒNG ĐÀO TẠO (POSITION = 2) - QUẢN LÝ NGHIỆP VỤ CA BIÊN
-                // =========================================================
-                case 2:
-                    // HR quản lý dữ liệu đối tượng và lớp học theo phân quyền được giao
-                    flowMenu.Controls.Add(CreateMenuButton("Quản lý sinh viên", Student_Click));      // UC-05, 06, 08
-                    flowMenu.Controls.Add(CreateMenuButton("Danh mục lớp học", Classroom_Click));
-                    flowMenu.Controls.Add(CreateMenuButton("Danh mục môn học", Course_Click));
-                    flowMenu.Controls.Add(CreateMenuButton("Quản lý điểm số", ScoreSv_Click));         // UC-14 (HR nhập điểm từ hội đồng thi)
-                    flowMenu.Controls.Add(CreateMenuButton("Thống kê", Statistic_Click));            // UC-09, 17 (Thống kê điểm TB, giới tính)
-                    break;
+                // Admin tối cao: Full quyền toàn bộ các cấu phần hệ thống
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý tài khoản", Account_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý giảng viên", Teacher_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý sinh viên", Student_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý ngành học", Major_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý lớp học", Classroom_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý môn học", Course_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý lớp học phần", CourseSection_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý đăng ký học phần", Registration_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý điểm số", Score_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Yêu cầu sinh viên", Request_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Thống kê tổng quan", Statistic_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Báo cáo hệ thống", Report_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý Danh bạ", Contact_Click));
+            }
+            else if (UserSession.IsStaff)
+            {
+                // Giáo vụ / Phòng đào tạo: Quản lý vận hành đào tạo toàn trường (Không được sửa tài khoản/giảng viên)
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý sinh viên", Student_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý ngành học", Major_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý lớp học", Classroom_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý môn học", Course_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý lớp học phần", CourseSection_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý đăng ký học phần", Registration_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Quản lý điểm số", Score_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Thống kê đào tạo", Statistic_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Báo cáo đào tạo", Report_Click));
+            }
+            else if (UserSession.IsTeacher)
+            {
+                // Giảng viên: Tập trung hoàn toàn vào lớp phụ trách và nghiệp vụ giảng dạy
+                flowMenu.Controls.Add(CreateMenuButton("Thông tin cá nhân", Profile_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Lớp học phần của tôi", CourseSection_Click)); // Tái sử dụng form, tự lọc theo mã GV
+                flowMenu.Controls.Add(CreateMenuButton("Sinh viên lớp tôi phụ trách", Student_Click)); // Tái sử dụng form, tự lọc danh sách sinh viên học lớp phần của GV
+                flowMenu.Controls.Add(CreateMenuButton("Nhập & Sửa điểm số", Score_Click));         // Tái sử dụng form, khóa chỉ cho sửa lớp mình dạy
+            }
+            else if (UserSession.IsStudent)
+            {
+                // Sinh viên: Học tập và tra cứu cá nhân
+                flowMenu.Controls.Add(CreateMenuButton("Thông tin cá nhân", Profile_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Đăng ký học phần", StudentRegisterCourse_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Học phần đã đăng ký", MyCourses_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Bảng điểm cá nhân", StudentScores_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Yêu cầu hỗ trợ", StudentRequests_Click));
             }
 
-            // Ép WinForms tính toán lại giao diện thực tế để ẩn scrollbar thô và hiển thị phím điều hướng hợp lý
             this.BeginInvoke((MethodInvoker)delegate
             {
                 HideFlowMenuScrollbar();
@@ -312,68 +297,129 @@ namespace ClassProject.Presentation.Forms.Main
 
         #endregion
 
-        #region MenuEvents
+        #region Menu Click Route Events (Định tuyến sự kiện sạch)
 
         private void Dashboard_Click(object sender, EventArgs e) => OpenChildForm(new DashBoardForm());
-
-        //1.Admin: Quản lý tài khoản, quản lý giảng viên, quản lý sinh viên, danh mục môn học, danh mục lớp học, phân công giảng dạy, giám sát điểm số, phê duyệt yêu cầu, thống kê, báo cáo
         private void Account_Click(object sender, EventArgs e) => OpenChildForm(new AccountManageForm());
-        private void Contact_Click(object sender, EventArgs e) => OpenChildForm(new ContactForm());
-
-        //Khởi tạo ListStudentForm trống không tham số (Bên trong Form con tự gọi UserSession.RoleId)
-        private void Student_Click(object sender, EventArgs e) => OpenChildForm(new ListStudentForm());
-
-        // Chuyển logic kiểm tra roleId sang UserSession.RoleId
-        private void Course_Click(object sender, EventArgs e)
+        private void Teacher_Click(object sender, EventArgs e) => OpenChildForm(new ManageTeacherForm());
+        private void Student_Click(object sender, EventArgs e) => OpenChildForm(new ManageStudentForm());
+        private void Major_Click(object sender, EventArgs e) => OpenChildForm(new ManageMajorForm());
+        private void Classroom_Click(object sender, EventArgs e) => OpenChildForm(new ManageClassroomForm());
+        private void Course_Click(object sender, EventArgs e) => OpenChildForm(new ManageCourseForm());
+        private void CourseSection_Click(object sender, EventArgs e)
         {
-            if (UserSession.RoleId == 1) OpenChildForm(new ManageCourseForm());
-            else OpenChildForm(new Course.ManageCourseForm());
+            OpenChildForm(new ManageCourseSectionForm());
         }
-        private void Classroom_Click(object sender, EventArgs e) => OpenChildForm(new ClassroomForm());
-        private void Assign_Click(object sender, EventArgs e) => OpenChildForm(new TeachingAssignmentForm());
-        private void Score_Click(object sender, EventArgs e) => OpenChildForm(new ManageScoreForm());
-
-        //Chuyển logic kiểm tra sang UserSession
-        private void Request_Click(object sender, EventArgs e)
+        private void Score_Click(object sender, EventArgs e)
         {
-            if (UserSession.RoleId == 0)
-                OpenChildForm(new Admin.f_main());
-            else if (UserSession.RoleId == 1)
+            // Kiểm tra xem người dùng hiện tại có thuộc 1 trong 3 nhóm quyền hợp lệ không
+            if (UserSession.IsLoggedIn && (UserSession.IsAdmin || UserSession.IsStaff || UserSession.IsTeacher))
             {
-                if (string.IsNullOrEmpty(UserSession.MSSV))
-                {
-                    MessageBox.Show("Không tìm thấy thông tin Mã số sinh viên (MSSV) liên kết với tài khoản này.\nVui lòng kiểm tra lại bảng Students trong Database!",
-                                    "Thông báo lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                OpenChildForm(new StudentRequestForm(UserSession.MSSV));
+                OpenChildForm(new ManageScoreForm());
+            }
+            else
+            {
+                MessageBox.Show("Tài khoản của bạn không có quyền truy cập vào phân hệ Quản lý điểm số!",
+                                "Quyền Truy Cập Bị Từ Chối", MessageBoxButtons.OK, MessageBoxIcon.Stop);
             }
         }
-        private void Statistic_Click(object sender, EventArgs e) => OpenChildForm(new StatisticsForm());
+
+        private void Registration_Click(object sender, EventArgs e)
+        {
+            if (!UserSession.IsLoggedIn)
+            {
+                MessageBox.Show("Phiên làm việc hệ thống không hợp lệ hoặc đã hết hạn!", "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            OpenChildForm(new Course.ManageRegistrationForm());
+        }
+
+        private void Request_Click(object sender, EventArgs e) => OpenChildForm(new Admin.AdminApproveRequestForm());
+        private void Statistic_Click(object sender, EventArgs e)
+        {
+            // 1. Xác định chuỗi Role đại diện từ UserSession toàn cục
+            string role = "Student"; // Giá trị mặc định an toàn
+            int referenceId = 0;
+
+            if (UserSession.IsAdmin)
+            {
+                role = "Admin";
+            }
+            else if (UserSession.IsStaff)
+            {
+                role = "HR"; // Bản đồ ánh xạ Staff sang quyền HR ở form thống kê
+            }
+
+            // 2. Khởi tạo Form với các tham số phân quyền và đẩy vào vùng hiển thị ChildForm
+            OpenChildForm(new StatisticsForm(role, referenceId));
+        }
         private void Report_Click(object sender, EventArgs e) => OpenChildForm(new ReportFormHR());
-        //2.Student: Hồ sơ cá nhân, yêu cầu (gửi đơn hỗ trợ, phúc khảo điểm)
+        private void Contact_Click(object sender, EventArgs e) => OpenChildForm(new ContactForm());
+
+        // --- ĐIỀU HƯỚNG SINH VIÊN & THÔNG TIN CÁ NHÂN ---
         private void Profile_Click(object sender, EventArgs e)
         {
-            // 1. Lấy chuỗi kết nối trực tiếp từ đối tượng db toàn cục của f_main
-            string connectionString = db.GetConnection().ConnectionString;
-
-            // 2. Kiểm tra an toàn xem hệ thống đã lấy được MSSV của sinh viên này chưa
-            if (string.IsNullOrEmpty(UserSession.MSSV))
+            // 1. Kiểm tra trạng thái đăng nhập hệ thống trước
+            if (!UserSession.IsLoggedIn)
             {
-                MessageBox.Show("Không tìm thấy thông tin Mã số sinh viên (MSSV) cho tài khoản này!",
-                                "Thông báo lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng đăng nhập hệ thống để sử dụng chức năng này!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 3. Ép kiểu chuỗi MSSV từ UserSession sang số nguyên int để khớp với Constructor của ProfileForm
-            int loggedInMssv = Convert.ToInt32(UserSession.MSSV);
+            // 2. Kiểm tra quyền hạn tài khoản (Chỉ cho phép Sinh viên hoặc Giảng viên)
+            if (!UserSession.IsStudent && !UserSession.IsTeacher)
+            {
+                MessageBox.Show("Chức năng chỉ áp dụng cho tài khoản định danh Sinh viên hoặc Giảng viên!", "Quyền Truy Cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
 
-            // 4. Khởi tạo ProfileForm với 2 tham số và đẩy thẳng vào vùng hiển thị pnlContainer
-            OpenChildForm(new ProfileForm(connectionString, loggedInMssv));
+            // 3. Khởi tạo và mở Form Hồ sơ cá nhân
+            ProfileForm profileForm = new ProfileForm();
+            OpenChildForm(profileForm);
         }
-        //3.hr
-        private void ScoreSv_Click(object sender, EventArgs e) => OpenChildForm(new StudentScoreForm());
+
+        private void StudentRegisterCourse_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(UserSession.MSSV))
+            {
+                MessageBox.Show("Hệ tokens chưa đồng bộ được Mã số sinh viên cá nhân của bạn!", "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            OpenChildForm(new Course.ManageRegistrationForm());
+        }
+
+        private void MyCourses_Click(object sender, EventArgs e)
+        {
+            if (!UserSession.IsLoggedIn)
+            {
+                MessageBox.Show("Phiên làm việc đã hết hạn!", "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            OpenChildForm(new Presentation.Forms.Students.MyCoursesForm());
+        }
+
+        private void StudentScores_Click(object sender, EventArgs e) => OpenChildForm(new TranscriptForm());
+
+        private void StudentRequests_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(UserSession.MSSV))
+            {
+                MessageBox.Show("Không tìm thấy thông tin Mã số sinh viên (MSSV) liên kết.", "Thông báo lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            OpenChildForm(new StudentRequestForm());
+        }
+
+        // --- ĐĂNG XUẤT ---
+        private void btnLogout_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?", "Xác nhận đăng xuất", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                UserSession.Clear();
+                this.Close();
+            }
+        }
 
         #endregion
 

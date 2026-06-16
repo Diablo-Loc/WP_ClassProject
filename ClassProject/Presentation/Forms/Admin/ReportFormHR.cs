@@ -1,20 +1,20 @@
-﻿using ClassProject.DataAccess.Db;
-using System;
+﻿using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using ClassProject.BusinessLogic.Services; // Import tầng Service
 
 // 1. Thư viện Excel (ClosedXML)
 using ClosedXML.Excel;
 
-// 2. Thư viện Word (OpenXml) - Đặt Alias rõ ràng để tránh xung đột
+// 2. Thư viện Word (OpenXml)
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using WpWord = DocumentFormat.OpenXml.Wordprocessing;
 
-// 3. Thư viện PDF (iTextSharp) - Chuẩn hóa Alias tránh xung đột kiểu dữ liệu
+// 3. Thư viện PDF (iTextSharp)
 using iTextText = iTextSharp.text;
 using iTextPdf = iTextSharp.text.pdf;
 
@@ -22,21 +22,30 @@ namespace ClassProject.Presentation.Forms.Admin
 {
     public partial class ReportFormHR : Form
     {
-        private readonly My_DB _db = new My_DB();
-        private readonly string _connString;
+        // Sử dụng Service thay vì My_DB thô
+        private readonly TeachingAssignmentService _assignmentService;
 
         public ReportFormHR()
         {
             InitializeComponent();
-            _connString = _db.GetConnection().ConnectionString;
+
+            // Khởi tạo Service. 
+            // Lưu ý: Bạn có thể truyền chuỗi kết nối lấy từ cấu hình hệ thống hoặc thông qua một Helper quản lý DB của dự án.
+            string connString = new ClassProject.DataAccess.Db.My_DB().GetConnection().ConnectionString;
+            _assignmentService = new TeachingAssignmentService(connString);
         }
 
-        private void ReportForm_Load(object sender, EventArgs e)
+        private async void ReportForm_Load(object sender, EventArgs e)
         {
             StyleGrid();
-            LoadFilterGiangVien();
-            LoadFilterMonHoc();
-            LoadReportData();
+
+            // Chạy song song các tác vụ nạp bộ lọc để tối ưu hóa hiệu năng UI
+            await Task.WhenAll(
+                LoadFilterGiangVienAsync(),
+                LoadFilterMonHocAsync()
+            );
+
+            await LoadReportDataAsync();
         }
 
         private void StyleGrid()
@@ -59,105 +68,88 @@ namespace ClassProject.Presentation.Forms.Admin
             dgvReport.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
         }
 
-        private void LoadFilterGiangVien()
+        private async Task LoadFilterGiangVienAsync()
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(_connString))
+                DataTable dt = await _assignmentService.GetDropdownTeachersAsync();
+
+                if (dt.Columns.Contains("Id"))
                 {
-                    string query = "SELECT Id, Username FROM dbo.Users WHERE RoleId = @RoleId";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@RoleId", 2);
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-
-                        DataRow row = dt.NewRow();
-                        row["Id"] = DBNull.Value;
-                        row["Username"] = "-- Tất cả giảng viên --";
-                        dt.Rows.InsertAt(row, 0);
-
-                        cbGiangVien.DataSource = dt;
-                        cbGiangVien.DisplayMember = "Username";
-                        cbGiangVien.ValueMember = "Id";
-                    }
+                    dt.Columns["Id"].AllowDBNull = true;
                 }
+
+                DataRow row = dt.NewRow();
+                row["Id"] = DBNull.Value; 
+                row["Username"] = "-- Tất cả giảng viên --";
+                dt.Rows.InsertAt(row, 0);
+
+                cbGiangVien.DataSource = dt;
+                cbGiangVien.DisplayMember = "Username";
+                cbGiangVien.ValueMember = "Id";
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi hệ thống khi nạp danh sách giảng viên: {ex.Message}", "Lỗi Kết Nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi nạp danh sách giảng viên: {ex.Message}", "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void LoadFilterMonHoc()
+        private async Task LoadFilterMonHocAsync()
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(_connString))
+                DataTable dt = await _assignmentService.GetDropdownCoursesAsync();
+
+                if (dt.Columns.Contains("MaMH"))
                 {
-                    string query = "SELECT MaMH, TenMH FROM dbo.Course";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-
-                        DataRow row = dt.NewRow();
-                        row["MaMH"] = DBNull.Value;
-                        row["TenMH"] = "-- Tất cả môn học --";
-                        dt.Rows.InsertAt(row, 0);
-
-                        cbMonHoc.DataSource = dt;
-                        cbMonHoc.DisplayMember = "TenMH";
-                        cbMonHoc.ValueMember = "MaMH";
-                    }
+                    dt.Columns["MaMH"].AllowDBNull = true;
                 }
+
+                DataRow row = dt.NewRow();
+                row["MaMH"] = DBNull.Value;
+                row["TenMH"] = "-- Tất cả môn học --";
+                dt.Rows.InsertAt(row, 0);
+
+                cbMonHoc.DataSource = dt;
+                cbMonHoc.DisplayMember = "TenMH";
+                cbMonHoc.ValueMember = "MaMH";
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi hệ thống khi nạp danh sách môn học: {ex.Message}", "Lỗi Kết Nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi nạp danh sách môn học: {ex.Message}", "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void LoadReportData()
+        private async Task LoadReportDataAsync()
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(_connString))
+                // Xác định giá trị bộ lọc từ UI
+                int? teacherId = null;
+                if (cbGiangVien.SelectedValue != null && cbGiangVien.SelectedValue != DBNull.Value)
                 {
-                    conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("proc_GetTeachingAssignments_Report", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
+                    teacherId = Convert.ToInt32(cbGiangVien.SelectedValue);
+                }
 
-                        if (cbGiangVien.SelectedValue == null || cbGiangVien.SelectedValue == DBNull.Value)
-                            cmd.Parameters.AddWithValue("@HRID", DBNull.Value);
-                        else
-                            cmd.Parameters.AddWithValue("@HRID", Convert.ToInt32(cbGiangVien.SelectedValue));
+                string maMH = null;
+                if (cbMonHoc.SelectedValue != null && cbMonHoc.SelectedValue != DBNull.Value)
+                {
+                    maMH = cbMonHoc.SelectedValue.ToString();
+                }
 
-                        if (cbMonHoc.SelectedValue == null || cbMonHoc.SelectedValue == DBNull.Value)
-                            cmd.Parameters.AddWithValue("@MaMH", DBNull.Value);
-                        else
-                            cmd.Parameters.AddWithValue("@MaMH", cbMonHoc.SelectedValue.ToString());
+                // Gọi dữ liệu thông qua tầng nghiệp vụ Service (Bất đồng bộ)
+                DataTable dtResult = await _assignmentService.GetReportDataAsync(teacherId, maMH);
+                dgvReport.DataSource = dtResult;
 
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dtResult = new DataTable();
-                        da.Fill(dtResult);
+                if (dgvReport.Columns.Count > 0)
+                {
+                    if (dgvReport.Columns.Contains("ID")) dgvReport.Columns["ID"].Visible = false;
+                    if (dgvReport.Columns.Contains("HRID")) dgvReport.Columns["HRID"].HeaderText = "Mã Nhân Sự (HRID)";
+                    if (dgvReport.Columns.Contains("HRName")) dgvReport.Columns["HRName"].HeaderText = "Tên Giảng Viên";
+                    if (dgvReport.Columns.Contains("MaMH")) dgvReport.Columns["MaMH"].HeaderText = "Mã Môn Học";
+                    if (dgvReport.Columns.Contains("TenMH")) dgvReport.Columns["TenMH"].HeaderText = "Tên Môn Học Được Phân Công";
 
-                        dgvReport.DataSource = dtResult;
-
-                        if (dgvReport.Columns.Count > 0)
-                        {
-                            if (dgvReport.Columns.Contains("ID")) dgvReport.Columns["ID"].Visible = false;
-                            if (dgvReport.Columns.Contains("HRID")) dgvReport.Columns["HRID"].HeaderText = "Mã Nhân Sự (HRID)";
-                            if (dgvReport.Columns.Contains("HRName")) dgvReport.Columns["HRName"].HeaderText = "Tên Giảng Viên";
-                            if (dgvReport.Columns.Contains("MaMH")) dgvReport.Columns["MaMH"].HeaderText = "Mã Môn Học";
-                            if (dgvReport.Columns.Contains("TenMH")) dgvReport.Columns["TenMH"].HeaderText = "Tên Môn Học Được Phân Công";
-
-                            dgvReport.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                        }
-                    }
+                    dgvReport.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
                 }
             }
             catch (Exception ex)
@@ -166,12 +158,12 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        private void btnXemBaoCao_Click(object sender, EventArgs e)
+        private async void btnXemBaoCao_Click(object sender, EventArgs e)
         {
-            LoadReportData();
+            await LoadReportDataAsync();
         }
 
-        // ⭐ XUẤT EXCEL - ĐẦY ĐỦ GRIDLINES + ĐỒ THỊ TRỰC QUAN DATA BAR
+        // ⭐ XUẤT EXCEL - GIỮ NGUYÊN LOGIC GIAO DIỆN XUẤT SẮC CỦA BẠN
         private void btnExportExcel_Click(object sender, EventArgs e)
         {
             if (dgvReport.Rows.Count == 0)
@@ -189,7 +181,6 @@ namespace ClassProject.Presentation.Forms.Admin
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 Cursor.Current = Cursors.WaitCursor;
-
                 try
                 {
                     using (XLWorkbook workbook = new XLWorkbook())
@@ -197,13 +188,11 @@ namespace ClassProject.Presentation.Forms.Admin
                         var worksheet = workbook.Worksheets.Add("Thống kê giảng dạy");
                         worksheet.ShowGridLines = true;
 
-                        // --- 1. Tiêu đề lớn (Căn giữa bảng báo cáo) ---
                         worksheet.Cell(1, 1).Value = "BÁO CÁO THỐNG KÊ PHÂN CÔNG GIẢNG DẠY - ADMIN HR";
                         worksheet.Cell(1, 1).Style.Font.Bold = true;
                         worksheet.Cell(1, 1).Style.Font.FontSize = 16;
                         worksheet.Cell(1, 1).Style.Font.FontColor = XLColor.FromHtml("#0F172A");
 
-                        // --- 2. Tiêu đề cột ---
                         worksheet.Cell(3, 1).Value = "STT";
                         int excelColIdx = 2;
                         for (int i = 0; i < dgvReport.Columns.Count; i++)
@@ -221,7 +210,6 @@ namespace ClassProject.Presentation.Forms.Admin
                         headerRange.Style.Font.FontColor = XLColor.White;
                         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#0F172A");
                         headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
                         headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                         headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
                         headerRange.Style.Border.OutsideBorderColor = XLColor.FromHtml("#94A3B8");
@@ -229,13 +217,11 @@ namespace ClassProject.Presentation.Forms.Admin
                         worksheet.Range(1, 1, 1, totalUsedColumns).Merge();
                         worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                        // --- 3. Đổ dữ liệu & Vẽ đường viền ---
                         for (int r = 0; r < dgvReport.Rows.Count; r++)
                         {
                             int currentRow = r + 4;
-
                             var cellStt = worksheet.Cell(currentRow, 1);
-                            cellStt.SetValue(r + 1); // Đảm bảo ghi dạng số nguyên để tránh lỗi cảnh báo Text
+                            cellStt.SetValue(r + 1);
                             cellStt.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                             int colIdx = 2;
@@ -244,8 +230,6 @@ namespace ClassProject.Presentation.Forms.Admin
                                 if (dgvReport.Columns[c].Visible)
                                 {
                                     string cellValue = dgvReport.Rows[r].Cells[c].Value?.ToString() ?? "";
-
-                                    // Chuyển đổi giá trị HRID sang kiểu số để tránh lỗi cảnh báo tam giác xanh lá
                                     if (dgvReport.Columns[c].Name == "HRID" && int.TryParse(cellValue, out int numValue))
                                     {
                                         worksheet.Cell(currentRow, colIdx).SetValue(numValue);
@@ -254,7 +238,6 @@ namespace ClassProject.Presentation.Forms.Admin
                                     {
                                         worksheet.Cell(currentRow, colIdx).SetValue(cellValue);
                                     }
-
                                     colIdx++;
                                 }
                             }
@@ -266,7 +249,6 @@ namespace ClassProject.Presentation.Forms.Admin
                             dataRowRange.Style.Border.InsideBorderColor = XLColor.FromHtml("#E2E8F0");
                         }
 
-                        // Tự động hóa DataBar an toàn tuyệt đối liên phiên bản
                         if (dgvReport.Rows.Count > 0)
                         {
                             var targetRange = worksheet.Range(4, 2, dgvReport.Rows.Count + 3, 2);
@@ -276,7 +258,6 @@ namespace ClassProject.Presentation.Forms.Admin
                         worksheet.Columns().AdjustToContents();
                         workbook.SaveAs(sfd.FileName);
                     }
-
                     MessageBox.Show("Xuất báo cáo Excel thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -287,43 +268,7 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        // ⭐ SỰ KIỆN PDF - IN NGÀY XUẤT & ĐÁNH SỐ TRANG TRANG X/Y
-        public class PdfHeaderFooterEvent : iTextPdf.PdfPageEventHelper
-        {
-            private iTextText.Font _fontFooter;
-            public PdfHeaderFooterEvent(iTextPdf.BaseFont bf)
-            {
-                _fontFooter = new iTextText.Font(bf, 8, iTextText.Font.ITALIC, iTextText.BaseColor.LIGHT_GRAY);
-            }
-
-            public override void OnEndPage(iTextPdf.PdfWriter writer, iTextText.Document document)
-            {
-                base.OnEndPage(writer, document);
-
-                iTextPdf.PdfPTable footerTable = new iTextPdf.PdfPTable(2);
-                footerTable.TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin;
-                footerTable.LockedWidth = true;
-
-                string dateText = $"Ngày xuất báo cáo: {DateTime.Now:dd/MM/yyyy HH:mm}";
-                iTextPdf.PdfPCell cellLeft = new iTextPdf.PdfPCell(new iTextText.Phrase(dateText, _fontFooter))
-                {
-                    Border = iTextText.Rectangle.NO_BORDER,
-                    HorizontalAlignment = iTextText.Element.ALIGN_LEFT
-                };
-                footerTable.AddCell(cellLeft);
-
-                string pageText = $"Trang {writer.PageNumber}";
-                iTextPdf.PdfPCell cellRight = new iTextPdf.PdfPCell(new iTextText.Phrase(pageText, _fontFooter))
-                {
-                    Border = iTextText.Rectangle.NO_BORDER,
-                    HorizontalAlignment = iTextText.Element.ALIGN_RIGHT
-                };
-                footerTable.AddCell(cellRight);
-
-                footerTable.WriteSelectedRows(0, -1, document.LeftMargin, document.BottomMargin, writer.DirectContent);
-            }
-        }
-
+        // ⭐ XUẤT PDF
         private void btnExportPdf_Click(object sender, EventArgs e)
         {
             if (dgvReport.Rows.Count == 0)
@@ -341,7 +286,6 @@ namespace ClassProject.Presentation.Forms.Admin
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 Cursor.Current = Cursors.WaitCursor;
-
                 try
                 {
                     string sysFontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "Arial.ttf");
@@ -361,7 +305,6 @@ namespace ClassProject.Presentation.Forms.Admin
 
                         pdfDoc.Open();
 
-                        // --- Thiết lập tiêu đề chuẩn căn giữa ---
                         iTextPdf.PdfPTable headerTable = new iTextPdf.PdfPTable(1) { WidthPercentage = 100 };
                         iTextText.Paragraph pTitle = new iTextText.Paragraph();
                         pTitle.Add(new iTextText.Chunk("TRƯỜNG ĐẠI HỌC CÔNG NGHỆ KỸ THUẬT TPHCM\n", fontSub));
@@ -373,12 +316,11 @@ namespace ClassProject.Presentation.Forms.Admin
                         pdfDoc.Add(headerTable);
                         pdfDoc.Add(new iTextText.Paragraph("\n"));
 
-                        int visibleColumnsCount = 1; // Khởi tạo bằng 1 để chèn cột STT tự động
+                        int visibleColumnsCount = 1;
                         for (int i = 0; i < dgvReport.Columns.Count; i++) if (dgvReport.Columns[i].Visible) visibleColumnsCount++;
 
                         iTextPdf.PdfPTable pdfTable = new iTextPdf.PdfPTable(visibleColumnsCount) { WidthPercentage = 100 };
 
-                        // Header ô STT
                         pdfTable.AddCell(new iTextPdf.PdfPCell(new iTextText.Phrase("STT", fontHeader))
                         {
                             BackgroundColor = new iTextText.BaseColor(15, 23, 42),
@@ -399,7 +341,6 @@ namespace ClassProject.Presentation.Forms.Admin
                             }
                         }
 
-                        // Ghi dữ liệu và tự tăng biến STT
                         for (int r = 0; r < dgvReport.Rows.Count; r++)
                         {
                             var cellStt = new iTextPdf.PdfPCell(new iTextText.Phrase((r + 1).ToString(), fontBody)) { Padding = 5f, HorizontalAlignment = iTextText.Element.ALIGN_CENTER };
@@ -447,7 +388,6 @@ namespace ClassProject.Presentation.Forms.Admin
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 Cursor.Current = Cursors.WaitCursor;
-
                 try
                 {
                     using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(sfd.FileName, WordprocessingDocumentType.Document))
@@ -456,7 +396,6 @@ namespace ClassProject.Presentation.Forms.Admin
                         mainPart.Document = new WpWord.Document();
                         WpWord.Body body = mainPart.Document.AppendChild(new WpWord.Body());
 
-                        // --- Tiêu đề căn giữa chuẩn ---
                         WpWord.Paragraph pTitle = body.AppendChild(new WpWord.Paragraph());
                         WpWord.ParagraphProperties pPr = pTitle.AppendChild(new WpWord.ParagraphProperties());
                         pPr.AppendChild(new WpWord.Justification() { Val = WpWord.JustificationValues.Center });
@@ -470,7 +409,6 @@ namespace ClassProject.Presentation.Forms.Admin
                         body.AppendChild(new WpWord.Paragraph(new WpWord.Run(new WpWord.Break())));
 
                         WpWord.Table table = new WpWord.Table();
-
                         WpWord.TableBorders borders = new WpWord.TableBorders(
                             new WpWord.TopBorder() { Val = WpWord.BorderValues.Single, Size = 4, Color = "CBD5E1" },
                             new WpWord.BottomBorder() { Val = WpWord.BorderValues.Single, Size = 4, Color = "CBD5E1" },
@@ -480,9 +418,7 @@ namespace ClassProject.Presentation.Forms.Admin
                             new WpWord.InsideVerticalBorder() { Val = WpWord.BorderValues.Single, Size = 4, Color = "E2E8F0" }
                         );
 
-                        // Đặt độ rộng bảng chiếm 100% (5000 Pct tương đương 100% trang Word) tránh co rúm bảng
                         WpWord.TableWidth tblWidth = new WpWord.TableWidth() { Width = "5000", Type = WpWord.TableWidthUnitValues.Pct };
-
                         WpWord.TableCellMargin margins = new WpWord.TableCellMargin(
                             new WpWord.TopMargin() { Width = "140", Type = WpWord.TableWidthUnitValues.Dxa },
                             new WpWord.BottomMargin() { Width = "140", Type = WpWord.TableWidthUnitValues.Dxa },
@@ -494,7 +430,6 @@ namespace ClassProject.Presentation.Forms.Admin
                         table.AppendChild(tblProp);
 
                         WpWord.TableRow headerRow = new WpWord.TableRow();
-
                         Action<string> addHeaderCell = (text) => {
                             WpWord.TableCell cell = new WpWord.TableCell();
                             WpWord.TableCellProperties cellProp = new WpWord.TableCellProperties(
@@ -510,7 +445,6 @@ namespace ClassProject.Presentation.Forms.Admin
                             headerRow.Append(cell);
                         };
 
-                        // Tạo cột Header STT
                         addHeaderCell("STT");
                         foreach (DataGridViewColumn col in dgvReport.Columns)
                         {
@@ -518,12 +452,10 @@ namespace ClassProject.Presentation.Forms.Admin
                         }
                         table.Append(headerRow);
 
-                        // Đổ dữ liệu hàng, tự sinh cột STT chạy tuyến tính
                         for (int i = 0; i < dgvReport.Rows.Count; i++)
                         {
                             WpWord.TableRow dataRow = new WpWord.TableRow();
 
-                            // Ghi ô STT vào hàng dữ liệu
                             WpWord.TableCell cellStt = new WpWord.TableCell(new WpWord.Paragraph(new WpWord.Run(new WpWord.Text((i + 1).ToString()))));
                             cellStt.AppendChild(new WpWord.TableCellProperties(new WpWord.TableCellWidth() { Type = WpWord.TableWidthUnitValues.Auto }));
                             dataRow.Append(cellStt);
@@ -534,7 +466,6 @@ namespace ClassProject.Presentation.Forms.Admin
                                 {
                                     string cellValue = dgvReport.Rows[i].Cells[j].Value?.ToString() ?? "";
                                     WpWord.TableCell dataCell = new WpWord.TableCell(new WpWord.Paragraph(new WpWord.Run(new WpWord.Text(cellValue))));
-
                                     dataCell.AppendChild(new WpWord.TableCellProperties(new WpWord.TableCellWidth() { Type = WpWord.TableWidthUnitValues.Auto }));
                                     dataRow.Append(dataCell);
                                 }
@@ -545,7 +476,6 @@ namespace ClassProject.Presentation.Forms.Admin
                         body.Append(table);
                         mainPart.Document.Save();
                     }
-
                     MessageBox.Show("Xuất file Word thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -553,6 +483,43 @@ namespace ClassProject.Presentation.Forms.Admin
                     MessageBox.Show($"Lỗi khi xuất Word: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 using (new DisposableCursor(Cursors.Default)) { }
+            }
+        }
+
+        // Subclass phục vụ Footer PDF
+        public class PdfHeaderFooterEvent : iTextPdf.PdfPageEventHelper
+        {
+            private iTextText.Font _fontFooter;
+            public PdfHeaderFooterEvent(iTextPdf.BaseFont bf)
+            {
+                _fontFooter = new iTextText.Font(bf, 8, iTextText.Font.ITALIC, iTextText.BaseColor.LIGHT_GRAY);
+            }
+
+            public override void OnEndPage(iTextPdf.PdfWriter writer, iTextText.Document document)
+            {
+                base.OnEndPage(writer, document);
+
+                iTextPdf.PdfPTable footerTable = new iTextPdf.PdfPTable(2);
+                footerTable.TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin;
+                footerTable.LockedWidth = true;
+
+                string dateText = $"Ngày xuất báo cáo: {DateTime.Now:dd/MM/yyyy HH:mm}";
+                iTextPdf.PdfPCell cellLeft = new iTextPdf.PdfPCell(new iTextText.Phrase(dateText, _fontFooter))
+                {
+                    Border = iTextText.Rectangle.NO_BORDER,
+                    HorizontalAlignment = iTextText.Element.ALIGN_LEFT
+                };
+                footerTable.AddCell(cellLeft);
+
+                string pageText = $"Trang {writer.PageNumber}";
+                iTextPdf.PdfPCell cellRight = new iTextPdf.PdfPCell(new iTextText.Phrase(pageText, _fontFooter))
+                {
+                    Border = iTextText.Rectangle.NO_BORDER,
+                    HorizontalAlignment = iTextText.Element.ALIGN_RIGHT
+                };
+                footerTable.AddCell(cellRight);
+
+                footerTable.WriteSelectedRows(0, -1, document.LeftMargin, document.BottomMargin, writer.DirectContent);
             }
         }
 

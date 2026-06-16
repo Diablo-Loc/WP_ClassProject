@@ -1,27 +1,35 @@
-﻿using ClassProject.Models;
+﻿using ClassProject.DataAccess.Db;
+using ClassProject.Models;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
-using System.Windows.Forms;
 
 namespace ClassProject.DataAccess.Repositories
 {
     public class StudentRepository
     {
         private readonly string _connString;
+        private readonly My_DB _db = new My_DB();
 
-        public StudentRepository(string connString)
+        public StudentRepository()
         {
-            _connString = connString;
         }
 
-        // 1. Hàm lấy danh sách toàn bộ sinh viên
         public DataTable GetStudents()
         {
             DataTable table = new DataTable();
-            using (SqlConnection conn = new SqlConnection(_connString))
+            using (SqlConnection conn = _db.GetConnection())
             {
-                string query = "SELECT * FROM Students ORDER BY Id DESC";
+                string query = @"SELECT s.UserId, s.MSSV, s.FirstName, s.LastName, s.DateOfBirth, 
+                                        s.Gender, s.Phone, s.Address, s.Hometown, s.Email, s.Picture,
+                                        s.MaLop, s.MaNganh,
+                                        ISNULL(c.TenLop, N'Chưa xếp lớp') AS TenLop, 
+                                        ISNULL(m.TenNganh, N'Chưa phân ngành') AS TenNganh 
+                                 FROM dbo.Students s
+                                 LEFT JOIN dbo.Classroom c ON s.MaLop = c.MaLop
+                                 LEFT JOIN dbo.Major m ON s.MaNganh = m.MaNganh
+                                 ORDER BY s.Id DESC";
+
                 using (SqlDataAdapter adapter = new SqlDataAdapter(query, conn))
                 {
                     adapter.Fill(table);
@@ -30,185 +38,207 @@ namespace ClassProject.DataAccess.Repositories
             return table;
         }
 
-        // 2. lấy hs theo mssv: Truy vấn dựa trên ép kiểu tương thích NVARCHAR của MSSV dưới DB
-        public Student GetStudentByMssv(int mssv)
+        public Student GetStudentByMssv(string mssv)
         {
-            using (SqlConnection conn = new SqlConnection(_connString))
+            if (string.IsNullOrWhiteSpace(mssv)) return null;
+
+            using (SqlConnection conn = _db.GetConnection())
             {
-                // Truy vấn dựa trên ép kiểu tương thích NVARCHAR của MSSV dưới DB
-                string query = "SELECT UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Picture FROM Students WHERE CAST(MSSV AS INT) = @mssv";
+                string query = @"SELECT s.UserId, s.MSSV, s.FirstName, s.LastName, s.DateOfBirth, 
+                                        s.Gender, s.Phone, s.Address, s.Hometown, s.Email, s.Picture, 
+                                        s.MaLop, s.MaNganh,
+                                        c.TenLop, m.TenNganh 
+                                 FROM dbo.Students s
+                                 LEFT JOIN dbo.Classroom c ON s.MaLop = c.MaLop
+                                 LEFT JOIN dbo.Major m ON s.MaNganh = m.MaNganh 
+                                 WHERE s.MSSV = @mssv";
+
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@mssv", mssv);
+                    cmd.Parameters.Add(new SqlParameter("@mssv", SqlDbType.NVarChar, 30) { Value = mssv.Trim() });
+
                     conn.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            return new Student(
-                                reader["UserId"] != DBNull.Value && Convert.ToInt32(reader["UserId"]) != 0 ? Convert.ToInt32(reader["UserId"]) : 1,
-                                Convert.ToInt32(reader["MSSV"]), // Chuyển đổi an toàn từ chuỗi sang số nguyên cho Model C#
-                                reader["FirstName"] != DBNull.Value ? reader["FirstName"].ToString() : "",
-                                reader["LastName"] != DBNull.Value ? reader["LastName"].ToString() : "",
-                                reader["DateOfBirth"] != DBNull.Value ? Convert.ToDateTime(reader["DateOfBirth"]) : DateTime.Now,
-                                reader["Gender"] != DBNull.Value ? reader["Gender"].ToString() : "Nam",
-                                reader["Phone"] != DBNull.Value ? reader["Phone"].ToString() : "",
-                                reader["Address"] != DBNull.Value ? reader["Address"].ToString() : null,
-                                reader["Hometown"] != DBNull.Value ? reader["Hometown"].ToString() : null,
-                                reader["Email"] != DBNull.Value ? reader["Email"].ToString() : "",
-                                reader["Picture"] != DBNull.Value ? (byte[])reader["Picture"] : null
-                            );
+                            return new Student
+                            {
+                                UserId = reader["UserId"] != DBNull.Value ? Convert.ToInt32(reader["UserId"]) : (int?)null,
+                                Mssv = reader["MSSV"].ToString(),
+                                FirstName = reader["FirstName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                DateOfBirth = reader["DateOfBirth"] != DBNull.Value ? Convert.ToDateTime(reader["DateOfBirth"]) : (DateTime?)null,
+                                Gender = reader["Gender"]?.ToString() ?? "",
+                                Phone = reader["Phone"]?.ToString() ?? "",
+                                Address = reader["Address"] != DBNull.Value ? reader["Address"].ToString() : null,
+                                Hometown = reader["Hometown"] != DBNull.Value ? reader["Hometown"].ToString() : null,
+                                Email = reader["Email"]?.ToString() ?? "",
+                                Picture = reader["Picture"] != DBNull.Value ? reader["Picture"] as byte[] : null,
+                                MaLop = reader["MaLop"] != DBNull.Value ? reader["MaLop"].ToString() : null,
+                                MaNganh = reader["MaNganh"] != DBNull.Value ? reader["MaNganh"].ToString() : null,
+                                TenLop = reader["TenLop"] != DBNull.Value ? reader["TenLop"].ToString() : "Chưa xếp lớp",
+                                TenNganh = reader["TenNganh"] != DBNull.Value ? reader["TenNganh"].ToString() : "Chưa phân ngành"
+                            };
                         }
                     }
                 }
             }
-            return null; // Không tìm thấy
+            return null;
         }
 
-        // 3. THÊM MỚI SINH VIÊN (Luồng 1: HR thêm danh sách trước, UserId tạm thời để NULL)
         public bool AddStudent(Student student)
         {
-            using (SqlConnection conn = new SqlConnection(_connString))
+            using (SqlConnection conn = _db.GetConnection())
             {
-                try
+                string sqlStudent = @"INSERT INTO dbo.Students 
+                                       (UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Picture, MaLop, MaNganh)
+                                     VALUES 
+                                       (@UserId, @MSSV, @FirstName, @LastName, @DateOfBirth, @Gender, @Phone, @Address, @Hometown, @Email, @Picture, @MaLop, @MaNganh);";
+
+                using (SqlCommand cmd = new SqlCommand(sqlStudent, conn))
                 {
-                    conn.Open();
+                    cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = (object)student.UserId ?? DBNull.Value });
+                    cmd.Parameters.Add(new SqlParameter("@MSSV", SqlDbType.NVarChar, 30) { Value = student.Mssv?.Trim() });
+                    cmd.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar, 100) { Value = student.FirstName?.Trim() });
+                    cmd.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar, 100) { Value = student.LastName?.Trim() });
+                    cmd.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.DateTime) { Value = (object)student.DateOfBirth ?? DBNull.Value });
+                    cmd.Parameters.Add(new SqlParameter("@Gender", SqlDbType.NVarChar, 10) { Value = student.Gender?.Trim() ?? (object)DBNull.Value });
+                    cmd.Parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 15) { Value = student.Phone?.Trim() ?? (object)DBNull.Value });
+                    cmd.Parameters.Add(new SqlParameter("@Address", SqlDbType.NVarChar, 200) { Value = student.Address?.Trim() ?? (object)DBNull.Value });
+                    cmd.Parameters.Add(new SqlParameter("@Hometown", SqlDbType.NVarChar, 100) { Value = student.Hometown?.Trim() ?? (object)DBNull.Value });
+                    cmd.Parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 100) { Value = student.Email?.Trim() ?? (object)DBNull.Value });
+                    cmd.Parameters.Add(new SqlParameter("@Picture", SqlDbType.VarBinary) { Value = student.Picture ?? (object)DBNull.Value });
+                    cmd.Parameters.Add(new SqlParameter("@MaLop", SqlDbType.VarChar, 20) { Value = student.MaLop?.Trim() ?? (object)DBNull.Value });
+                    cmd.Parameters.Add(new SqlParameter("@MaNganh", SqlDbType.Char, 10) { Value = student.MaNganh?.Trim() ?? (object)DBNull.Value });
 
-                    // Chỉ Insert vào bảng Students.
-                    string sqlStudent = @"INSERT INTO Students 
-                                       (UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Picture)
-                                   VALUES 
-                                       (@UserId, @MSSV, @FirstName, @LastName, @DateOfBirth, @Gender, @Phone, @Address, @Hometown, @Email, @Picture)";
-
-                    using (SqlCommand cmd = new SqlCommand(sqlStudent, conn))
+                    try
                     {
-                        // CHÚ Ý CHỖ NÀY: Xử lý giá trị null ép về DBNull.Value cho SQL hiểu
-                        cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = (object)student.UserId ?? DBNull.Value });
-                        cmd.Parameters.Add(new SqlParameter("@MSSV", SqlDbType.NVarChar) { Value = student.Mssv.ToString() });
-                        cmd.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = student.FirstName });
-                        cmd.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = student.LastName });
-                        cmd.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.DateTime) { Value = student.DateOfBirth });
-                        cmd.Parameters.Add(new SqlParameter("@Gender", SqlDbType.NVarChar) { Value = student.Gender });
-                        cmd.Parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar) { Value = student.Phone });
-                        cmd.Parameters.Add(new SqlParameter("@Address", SqlDbType.NVarChar) { Value = student.Address ?? (object)DBNull.Value });
-                        cmd.Parameters.Add(new SqlParameter("@Hometown", SqlDbType.NVarChar) { Value = student.Hometown ?? (object)DBNull.Value });
-                        cmd.Parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar) { Value = student.Email });
-                        cmd.Parameters.Add(new SqlParameter("@Picture", SqlDbType.VarBinary) { Value = student.Picture ?? (object)DBNull.Value });
-
-                        cmd.ExecuteNonQuery();
+                        conn.Open();
+                        return cmd.ExecuteNonQuery() > 0;
                     }
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Lỗi khi thêm sinh viên: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return false;
+                    catch (SqlException ex)
+                    {
+                        if (ex.Number == 2627 || ex.Number == 2601)
+                        {
+                            if (ex.Message.Contains("Email") || ex.Message.Contains("UQ_Students_Email"))
+                            {
+                                throw new InvalidOperationException("Địa chỉ Email này đã tồn tại trong hệ thống sinh viên!");
+                            }
+                            throw new InvalidOperationException("Mã số sinh viên (MSSV) này đã được sử dụng!");
+                        }
+                        throw;
+                    }
                 }
             }
         }
 
-        // 4. Hàm cập nhật thông tin: Nhận vào thực thể Student chứa dữ liệu mới
         public bool UpdateStudent(Student student)
         {
-            try
+            using (SqlConnection conn = _db.GetConnection())
             {
-                using (SqlConnection conn = new SqlConnection(_connString))
+                string sql = @"UPDATE dbo.Students 
+                               SET FirstName=@fn, LastName=@ln, DateOfBirth=@db, Gender=@gr, 
+                                   Phone=@ph, Address=@ad, Hometown=@ht, Email=@em, 
+                                   Picture = ISNULL(@pc, Picture),
+                                   MaLop=@ml, MaNganh=@mn
+                               WHERE MSSV = @mssv";
+
+                using (SqlCommand command = new SqlCommand(sql, conn))
                 {
-                    string sql = @"UPDATE Students 
-                                   SET FirstName=@fn, LastName=@ln, DateOfBirth=@db, Gender=@gr, 
-                                       Phone=@ph, Address=@ad, Hometown=@ht, Email=@em, Picture=@pc 
-                                   WHERE CAST(MSSV AS INT) = @mssv";
+                    command.Parameters.Add(new SqlParameter("@mssv", SqlDbType.NVarChar, 30) { Value = student.Mssv?.Trim() });
+                    command.Parameters.Add(new SqlParameter("@fn", SqlDbType.NVarChar, 100) { Value = student.FirstName?.Trim() });
+                    command.Parameters.Add(new SqlParameter("@ln", SqlDbType.NVarChar, 100) { Value = student.LastName?.Trim() });
+                    command.Parameters.Add(new SqlParameter("@db", SqlDbType.DateTime) { Value = (object)student.DateOfBirth ?? DBNull.Value });
+                    command.Parameters.Add(new SqlParameter("@gr", SqlDbType.NVarChar, 10) { Value = student.Gender?.Trim() ?? (object)DBNull.Value });
+                    command.Parameters.Add(new SqlParameter("@ph", SqlDbType.NVarChar, 15) { Value = student.Phone?.Trim() ?? (object)DBNull.Value });
+                    command.Parameters.Add(new SqlParameter("@ad", SqlDbType.NVarChar, 200) { Value = student.Address?.Trim() ?? (object)DBNull.Value });
+                    command.Parameters.Add(new SqlParameter("@ht", SqlDbType.NVarChar, 100) { Value = student.Hometown?.Trim() ?? (object)DBNull.Value });
+                    command.Parameters.Add(new SqlParameter("@em", SqlDbType.NVarChar, 100) { Value = student.Email?.Trim() ?? (object)DBNull.Value });
+                    command.Parameters.Add(new SqlParameter("@pc", SqlDbType.VarBinary) { Value = student.Picture ?? (object)DBNull.Value });
+                    command.Parameters.Add(new SqlParameter("@ml", SqlDbType.VarChar, 20) { Value = student.MaLop?.Trim() ?? (object)DBNull.Value });
+                    command.Parameters.Add(new SqlParameter("@mn", SqlDbType.Char, 10) { Value = student.MaNganh?.Trim() ?? (object)DBNull.Value });
 
-                    using (SqlCommand command = new SqlCommand(sql, conn))
+                    try
                     {
-                        command.Parameters.AddWithValue("@mssv", student.Mssv);
-                        command.Parameters.AddWithValue("@fn", student.FirstName);
-                        command.Parameters.AddWithValue("@ln", student.LastName);
-                        command.Parameters.AddWithValue("@db", student.DateOfBirth);
-                        command.Parameters.AddWithValue("@gr", student.Gender);
-                        command.Parameters.AddWithValue("@ph", student.Phone);
-                        command.Parameters.AddWithValue("@ad", student.Address ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@ht", student.Hometown ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@em", student.Email);
-                        command.Parameters.AddWithValue("@pc", student.Picture ?? (object)DBNull.Value);
-
                         conn.Open();
-                        return command.ExecuteNonQuery() == 1;
+                        return command.ExecuteNonQuery() > 0;
+                    }
+                    catch (SqlException ex)
+                    {
+                        if (ex.Number == 2627 || ex.Number == 2601)
+                        {
+                            throw new InvalidOperationException("Email cập nhật đã trùng với một sinh viên khác trong hệ thống!");
+                        }
+                        throw;
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi cập nhật sinh viên: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
         }
 
-        // 5. Hàm xóa sinh viên theo MSSV
-        public bool DeleteStudent(int mssv)
+        public bool DeleteStudent(string mssv)
         {
-            try
+            using (SqlConnection conn = _db.GetConnection())
             {
-                using (SqlConnection conn = new SqlConnection(_connString))
+                string query = "DELETE FROM dbo.Students WHERE MSSV = @id";
+                using (SqlCommand command = new SqlCommand(query, conn))
                 {
-                    string query = "DELETE FROM Students WHERE CAST(MSSV AS INT) = @id";
-                    using (SqlCommand command = new SqlCommand(query, conn))
-                    {
-                        command.Parameters.AddWithValue("@id", mssv);
-                        conn.Open();
-                        return command.ExecuteNonQuery() == 1;
-                    }
+                    command.Parameters.Add(new SqlParameter("@id", SqlDbType.NVarChar, 30) { Value = mssv });
+                    conn.Open();
+                    return command.ExecuteNonQuery() > 0;
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi xóa sinh viên: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
         }
 
-        // 6. Hàm kiểm tra MSSV đã tồn tại chưa
-        public bool IsMssvExist(int mssv)
+        public bool IsMssvExist(string mssv)
         {
-            using (SqlConnection conn = new SqlConnection(_connString))
+            if (string.IsNullOrWhiteSpace(mssv)) return false;
+
+            using (SqlConnection conn = _db.GetConnection())
             {
-                string query = "SELECT COUNT(*) FROM Students WHERE CAST(MSSV AS INT) = @mssv";
+                string query = "SELECT COUNT(*) FROM dbo.Students WHERE MSSV = @mssv";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@mssv", mssv);
+                    cmd.Parameters.Add(new SqlParameter("@mssv", SqlDbType.NVarChar, 30) { Value = mssv.Trim() });
                     conn.Open();
-                    int count = (int)cmd.ExecuteScalar();
-                    return count > 0;
+                    return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
                 }
             }
         }
 
-        // 7. Hàm tìm kiếm nâng cao kết hợp bộ lọc kép từ ComboBox
         public DataTable SearchStudents(string keyword, string genderFilter)
         {
+            keyword = keyword?.Trim() ?? "";
             DataTable dt = new DataTable();
-            using (SqlConnection conn = new SqlConnection(_connString))
+            using (SqlConnection conn = _db.GetConnection())
             {
-                string query = @"SELECT UserId, MSSV as Mssv, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Picture 
-                                 FROM Students 
-                                 WHERE (MSSV LIKE @key 
-                                 OR FirstName LIKE @key 
-                                 OR LastName LIKE @key
-                                 OR Email LIKE @key
-                                 OR Phone LIKE @key)";
+                // Giữ nguyên logic so khớp không dấu thông minh của bạn
+                string query = @"SELECT s.UserId, s.MSSV, s.FirstName, s.LastName, s.DateOfBirth, 
+                                        s.Gender, s.Phone, s.Address, s.Hometown, s.Email, s.Picture,
+                                        s.MaLop, s.MaNganh,
+                                        ISNULL(c.TenLop, N'Chưa xếp lớp') AS TenLop, 
+                                        ISNULL(m.TenNganh, N'Chưa phân ngành') AS TenNganh 
+                                 FROM dbo.Students s
+                                 LEFT JOIN dbo.Classroom c ON s.MaLop = c.MaLop
+                                 LEFT JOIN dbo.Major m ON s.MaNganh = m.MaNganh
+                                 WHERE (s.MSSV COLLATE Latin1_General_CI_AI LIKE @key 
+                                 OR s.FirstName COLLATE Latin1_General_CI_AI LIKE @key 
+                                 OR s.LastName COLLATE Latin1_General_CI_AI LIKE @key
+                                 OR s.Email COLLATE Latin1_General_CI_AI LIKE @key
+                                 OR s.Phone COLLATE Latin1_General_CI_AI LIKE @key)";
 
                 if (!string.IsNullOrEmpty(genderFilter) && genderFilter != "Tất cả")
                 {
-                    query += " AND Gender = @gender";
+                    query += " AND s.Gender = @gender";
                 }
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@key", "%" + keyword.Trim() + "%");
+                    cmd.Parameters.Add(new SqlParameter("@key", SqlDbType.NVarChar) { Value = "%" + keyword + "%" });
 
                     if (!string.IsNullOrEmpty(genderFilter) && genderFilter != "Tất cả")
                     {
-                        cmd.Parameters.AddWithValue("@gender", genderFilter);
+                        cmd.Parameters.Add(new SqlParameter("@gender", SqlDbType.NVarChar, 10) { Value = genderFilter });
                     }
 
                     using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
@@ -220,83 +250,124 @@ namespace ClassProject.DataAccess.Repositories
             }
             return dt;
         }
-        // 8. THỐNG KÊ: Đếm tổng số sinh viên hiện có trong hệ thống
-        public int GetTotalStudentsCount()
+
+        public int GetTotalStudentsCount() => ExecuteScalarCount("SELECT COUNT(*) FROM dbo.Students");
+        public int GetTotalMaleStudentsCount() => ExecuteScalarCount("SELECT COUNT(*) FROM dbo.Students WHERE Gender = N'Nam'");
+        public int GetTotalFemaleStudentsCount() => ExecuteScalarCount("SELECT COUNT(*) FROM dbo.Students WHERE Gender = N'Nữ'");
+
+        private int ExecuteScalarCount(string query)
         {
-            using (SqlConnection conn = new SqlConnection(_connString))
+            using (SqlConnection conn = _db.GetConnection())
             {
-                string query = "SELECT COUNT(*) FROM dbo.Students";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     conn.Open();
-                    return (int)cmd.ExecuteScalar();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
         }
 
-        // 9. THỐNG KÊ: Đếm tổng số sinh viên Nam (Dựa trên chữ N'Nam' hỗ trợ Unicode tiếng Việt)
-        public int GetTotalMaleStudentsCount()
+        public bool RegisterCourse(string mssv, string maLopHP)
         {
-            using (SqlConnection conn = new SqlConnection(_connString))
+            using (SqlConnection conn = _db.GetConnection())
             {
-                string query = "SELECT COUNT(*) FROM dbo.Students WHERE Gender = N'Nam'";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    conn.Open();
-                    return (int)cmd.ExecuteScalar();
-                }
-            }
-        }
+                conn.Open();
 
-        // 10. THỐNG KÊ: Đếm tổng số sinh viên Nữ (Dựa trên chữ N'Nữ' hỗ trợ Unicode tiếng Việt)
-        public int GetTotalFemaleStudentsCount()
-        {
-            using (SqlConnection conn = new SqlConnection(_connString))
-            {
-                string query = "SELECT COUNT(*) FROM dbo.Students WHERE Gender = N'Nữ'";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                string checkSql = "SELECT COUNT(*) FROM dbo.DKMH WHERE MSSV = @Mssv AND MaLopHP = @MaLopHP";
+                using (SqlCommand checkCmd = new SqlCommand(checkSql, conn))
                 {
-                    conn.Open();
-                    return (int)cmd.ExecuteScalar();
-                }
-            }
-        }
-        // 11. ĐĂNG KÝ MÔN HỌC (Đã sửa đổi đồng bộ biến _connString toàn cục)
-        public bool RegisterCourse(string mssv, string courseId)
-        {
-            using (SqlConnection conn = new SqlConnection(_connString))
-            {
-                try
-                {
-                    conn.Open();
+                    checkCmd.Parameters.Add(new SqlParameter("@Mssv", SqlDbType.NVarChar, 30) { Value = mssv.Trim() });
 
-                    // 1. KIỂM TRA TRƯỚC
-                    string checkSql = "SELECT COUNT(*) FROM CourseRegistration WHERE Mssv = @Mssv AND CourseId = @CourseId";
-                    using (SqlCommand checkCmd = new SqlCommand(checkSql, conn))
+                    // ĐỒNG BỘ: Sửa thành VarChar(30) cho khớp chính xác với bảng DKMH vật lý trong SQL
+                    checkCmd.Parameters.Add(new SqlParameter("@MaLopHP", SqlDbType.VarChar, 30) { Value = maLopHP.Trim() });
+
+                    if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
                     {
-                        checkCmd.Parameters.AddWithValue("@Mssv", mssv);
-                        checkCmd.Parameters.AddWithValue("@CourseId", courseId);
-
-                        int count = (int)checkCmd.ExecuteScalar();
-                        if (count > 0) return false;
-                    }
-
-                    // 2. TIẾN HÀNH CHÈN DỮ LIỆU
-                    string insertSql = @"INSERT INTO CourseRegistration (Mssv, CourseId, RegistrationDate) 
-                                         VALUES (@Mssv, @CourseId, @RegistrationDate)";
-
-                    using (SqlCommand insertCmd = new SqlCommand(insertSql, conn))
-                    {
-                        insertCmd.Parameters.AddWithValue("@Mssv", mssv);
-                        insertCmd.Parameters.AddWithValue("@CourseId", courseId);
-                        insertCmd.Parameters.AddWithValue("@RegistrationDate", DateTime.Now);
-
-                        return insertCmd.ExecuteNonQuery() > 0;
+                        return false;
                     }
                 }
-                catch (Exception)
+
+                string insertSql = @"INSERT INTO dbo.DKMH (MSSV, MaLopHP, RegistrationDate) 
+                                     VALUES (@Mssv, @MaLopHP, GETDATE())";
+
+                using (SqlCommand insertCmd = new SqlCommand(insertSql, conn))
                 {
-                    return false;
+                    insertCmd.Parameters.Add(new SqlParameter("@Mssv", SqlDbType.NVarChar, 30) { Value = mssv.Trim() });
+
+                    insertCmd.Parameters.Add(new SqlParameter("@MaLopHP", SqlDbType.VarChar, 30) { Value = maLopHP.Trim() });
+
+                    return insertCmd.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+        public bool ImportStudentWithAccount(string username, string hashedPassword, Student student)
+        {
+            // Lấy chuỗi kết nối từ cấu trúc cơ sở dữ liệu hiện tại của dự án của bạn
+            // Giả định _db.GetConnection() trả về đối tượng SqlConnection
+            using (SqlConnection conn = (SqlConnection)_db.GetConnection())
+            {
+                if (conn.State == System.Data.ConnectionState.Closed) conn.Open();
+
+                // Khởi tạo Transaction bảo vệ tính toàn vẹn dữ liệu
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        // BƯỚC 1: Chèn tài khoản mới vào bảng Users với RoleId = 1 (Sinh viên)
+                        // Sử dụng SELECT SCOPE_IDENTITY() để lấy ra ID tự tăng vừa tạo ngay lập tức
+                        string userQuery = @"
+                    INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid, Status, Created_At)
+                    VALUES (@Username, @Email, @Password, 1, 1, 1, GETDATE());
+                    SELECT SCOPE_IDENTITY();";
+
+                        int newUserId = 0;
+                        using (SqlCommand cmdUser = new SqlCommand(userQuery, conn, trans))
+                        {
+                            cmdUser.Parameters.AddWithValue("@Username", username);
+                            cmdUser.Parameters.AddWithValue("@Email", student.Email);
+                            cmdUser.Parameters.AddWithValue("@Password", hashedPassword);
+
+                            newUserId = Convert.ToInt32(cmdUser.ExecuteScalar());
+                        }
+
+                        // BƯỚC 2: Chèn thông tin vào bảng Students với UserId vừa lấy được từ bảng Users
+                        string studentQuery = @"
+                    INSERT INTO dbo.Students (UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Created_At)
+                    VALUES (@UserId, @MSSV, @FirstName, @LastName, @DateOfBirth, @Gender, @Phone, @Address, @Hometown, @Email, GETDATE());";
+
+                        using (SqlCommand cmdStudent = new SqlCommand(studentQuery, conn, trans))
+                        {
+                            cmdStudent.Parameters.AddWithValue("@UserId", newUserId);
+                            cmdStudent.Parameters.AddWithValue("@MSSV", student.Mssv);
+                            cmdStudent.Parameters.AddWithValue("@FirstName", student.FirstName);
+                            cmdStudent.Parameters.AddWithValue("@LastName", student.LastName);
+
+                            // Xử lý kiểm tra dữ liệu ngày tháng rỗng an toàn
+                            if (student.DateOfBirth.HasValue)
+                                cmdStudent.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth.Value);
+                            else
+                                cmdStudent.Parameters.AddWithValue("@DateOfBirth", DBNull.Value);
+
+                            cmdStudent.Parameters.AddWithValue("@Gender", string.IsNullOrEmpty(student.Gender) ? DBNull.Value : (object)student.Gender);
+                            cmdStudent.Parameters.AddWithValue("@Phone", string.IsNullOrEmpty(student.Phone) ? DBNull.Value : (object)student.Phone);
+                            cmdStudent.Parameters.AddWithValue("@Address", string.IsNullOrEmpty(student.Address) ? DBNull.Value : (object)student.Address);
+                            cmdStudent.Parameters.AddWithValue("@Hometown", string.IsNullOrEmpty(student.Hometown) ? DBNull.Value : (object)student.Hometown);
+                            cmdStudent.Parameters.AddWithValue("@Email", student.Email);
+
+                            cmdStudent.ExecuteNonQuery();
+                        }
+
+                        // BƯỚC 3: Nếu cả 2 bước chạy không lỗi, xác nhận lưu dữ liệu vĩnh viễn vào SQL Server
+                        trans.Commit();
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Có lỗi phát sinh (Trùng Email hệ thống, sai kiểu dữ liệu...), hủy bỏ toàn bộ thao tác của dòng này
+                        trans.Rollback();
+                        System.Diagnostics.Debug.WriteLine("Lỗi khi thực thi ImportTransaction: " + ex.Message);
+                        return false;
+                    }
                 }
             }
         }

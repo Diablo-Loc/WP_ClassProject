@@ -10,11 +10,11 @@ using System.Windows.Forms;
 
 namespace ClassProject.Presentation.Forms.Admin
 {
-    public partial class f_main : Form
+    public partial class AdminApproveRequestForm : Form
     {
         private readonly RequestRepository _requestRepo;
 
-        public f_main()
+        public AdminApproveRequestForm()
         {
             InitializeComponent();
             My_DB db = new My_DB();

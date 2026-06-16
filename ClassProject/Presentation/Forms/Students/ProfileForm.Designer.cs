@@ -2,15 +2,8 @@
 {
     partial class ProfileForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,14 +15,8 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
@@ -49,367 +36,550 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            pnlCard = new Guna.UI2.WinForms.Guna2Panel();
-            lblTitle = new Label();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+
+            pnlLeftCard = new Guna.UI2.WinForms.Guna2Panel();
             picAvatar = new Guna.UI2.WinForms.Guna2CirclePictureBox();
             btnChooseAvatar = new Guna.UI2.WinForms.Guna2Button();
+            lblSideFullName = new Label();
+            lblSideMssv = new Label();
+            lblBadgeStatus = new Label();
+
+            pnlRightContainer = new Guna.UI2.WinForms.Guna2Panel();
+            lblMainTitle = new Label();
+
+            grpAcademic = new Guna.UI2.WinForms.Guna2GroupBox();
             lblUsername = new Label();
             txtUsername = new Guna.UI2.WinForms.Guna2TextBox();
             lblStudentId = new Label();
             txtStudentId = new Guna.UI2.WinForms.Guna2TextBox();
-            lblName = new Label();
-            txtName = new Guna.UI2.WinForms.Guna2TextBox();
-            lblEmail = new Label();
-            txtEmail = new Guna.UI2.WinForms.Guna2TextBox();
-            lblPhone = new Label();
-            txtPhone = new Guna.UI2.WinForms.Guna2TextBox();
             lblClass = new Label();
             txtClass = new Guna.UI2.WinForms.Guna2TextBox();
             lblMajor = new Label();
             txtMajor = new Guna.UI2.WinForms.Guna2TextBox();
+
+            grpPersonal = new Guna.UI2.WinForms.Guna2GroupBox();
+            lblName = new Label();
+            txtName = new Guna.UI2.WinForms.Guna2TextBox();
+            lblBirthDate = new Label();
+            dtpBirthDate = new Guna.UI2.WinForms.Guna2DateTimePicker();
+            lblGender = new Label();
+            cboGender = new Guna.UI2.WinForms.Guna2ComboBox();
+            lblEmail = new Label();
+            txtEmail = new Guna.UI2.WinForms.Guna2TextBox();
+            lblPhone = new Label();
+            txtPhone = new Guna.UI2.WinForms.Guna2TextBox();
+
+            grpAddress = new Guna.UI2.WinForms.Guna2GroupBox();
+            lblHometown = new Label();
+            txtHometown = new Guna.UI2.WinForms.Guna2TextBox();
+            lblAddress = new Label();
+            txtAddress = new Guna.UI2.WinForms.Guna2TextBox();
+
             btnUpdate = new Guna.UI2.WinForms.Guna2Button();
             ofdAvatar = new OpenFileDialog();
-            pnlCard.SuspendLayout();
+
+            pnlLeftCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picAvatar).BeginInit();
+            pnlRightContainer.SuspendLayout();
+            grpAcademic.SuspendLayout();
+            grpPersonal.SuspendLayout();
+            grpAddress.SuspendLayout();
             SuspendLayout();
             // 
-            // pnlCard
+            // pnlLeftCard
             // 
-            pnlCard.BackColor = Color.Transparent;
-            pnlCard.BorderColor = Color.FromArgb(230, 235, 240);
-            pnlCard.BorderRadius = 16;
-            pnlCard.BorderThickness = 1;
-            pnlCard.Controls.Add(lblTitle);
-            pnlCard.Controls.Add(picAvatar);
-            pnlCard.Controls.Add(btnChooseAvatar);
-            pnlCard.Controls.Add(lblUsername);
-            pnlCard.Controls.Add(txtUsername);
-            pnlCard.Controls.Add(lblStudentId);
-            pnlCard.Controls.Add(txtStudentId);
-            pnlCard.Controls.Add(lblName);
-            pnlCard.Controls.Add(txtName);
-            pnlCard.Controls.Add(lblEmail);
-            pnlCard.Controls.Add(txtEmail);
-            pnlCard.Controls.Add(lblPhone);
-            pnlCard.Controls.Add(txtPhone);
-            pnlCard.Controls.Add(lblClass);
-            pnlCard.Controls.Add(txtClass);
-            pnlCard.Controls.Add(lblMajor);
-            pnlCard.Controls.Add(txtMajor);
-            pnlCard.Controls.Add(btnUpdate);
-            pnlCard.CustomizableEdges = customizableEdges20;
-            pnlCard.FillColor = Color.White;
-            pnlCard.Location = new Point(45, 30);
-            pnlCard.Name = "pnlCard";
-            pnlCard.ShadowDecoration.BorderRadius = 16;
-            pnlCard.ShadowDecoration.Color = Color.FromArgb(100, 0, 0, 0);
-            pnlCard.ShadowDecoration.CustomizableEdges = customizableEdges21;
-            pnlCard.ShadowDecoration.Depth = 15;
-            pnlCard.ShadowDecoration.Enabled = true;
-            pnlCard.Size = new Size(500, 780);
-            pnlCard.TabIndex = 0;
-            // 
-            // lblTitle
-            // 
-            lblTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            lblTitle.ForeColor = Color.FromArgb(43, 54, 116);
-            lblTitle.Location = new Point(30, 20);
-            lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(440, 37);
-            lblTitle.TabIndex = 0;
-            lblTitle.Text = "THÔNG TIN SINH VIÊN";
-            lblTitle.TextAlign = ContentAlignment.MiddleCenter;
+            pnlLeftCard.BackColor = Color.Transparent;
+            pnlLeftCard.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlLeftCard.BorderRadius = 12;
+            pnlLeftCard.BorderThickness = 1;
+            pnlLeftCard.Controls.Add(picAvatar);
+            pnlLeftCard.Controls.Add(btnChooseAvatar);
+            pnlLeftCard.Controls.Add(lblSideFullName);
+            pnlLeftCard.Controls.Add(lblSideMssv);
+            pnlLeftCard.Controls.Add(lblBadgeStatus);
+            pnlLeftCard.FillColor = Color.White;
+            pnlLeftCard.Location = new Point(25, 25);
+            pnlLeftCard.Name = "pnlLeftCard";
+            pnlLeftCard.ShadowDecoration.BorderRadius = 12;
+            pnlLeftCard.ShadowDecoration.Color = Color.FromArgb(15, 0, 0, 0);
+            pnlLeftCard.ShadowDecoration.CustomizableEdges = customizableEdges1;
+            pnlLeftCard.ShadowDecoration.Depth = 10;
+            pnlLeftCard.ShadowDecoration.Enabled = true;
+            pnlLeftCard.Size = new Size(270, 715);
+            pnlLeftCard.TabIndex = 0;
             // 
             // picAvatar
             // 
-            picAvatar.BackColor = Color.Transparent;
-            picAvatar.FillColor = Color.FromArgb(240, 242, 245);
+            picAvatar.FillColor = Color.FromArgb(241, 245, 249);
             picAvatar.ImageRotate = 0F;
-            picAvatar.Location = new Point(190, 70);
+            picAvatar.Location = new Point(65, 45);
             picAvatar.Name = "picAvatar";
-            picAvatar.ShadowDecoration.CustomizableEdges = customizableEdges1;
+            picAvatar.ShadowDecoration.CustomizableEdges = customizableEdges2;
             picAvatar.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
-            picAvatar.Size = new Size(120, 120);
+            picAvatar.Size = new Size(140, 140);
             picAvatar.SizeMode = PictureBoxSizeMode.Zoom;
-            picAvatar.TabIndex = 1;
+            picAvatar.TabIndex = 0;
             picAvatar.TabStop = false;
             // 
             // btnChooseAvatar
             // 
             btnChooseAvatar.Animated = true;
-            btnChooseAvatar.BorderRadius = 6;
-            btnChooseAvatar.CustomizableEdges = customizableEdges2;
-            btnChooseAvatar.FillColor = Color.FromArgb(240, 242, 245);
+            btnChooseAvatar.BorderRadius = 20;
+            btnChooseAvatar.BorderThickness = 1;
+            btnChooseAvatar.BorderColor = Color.FromArgb(203, 213, 225);
+            btnChooseAvatar.CustomizableEdges = customizableEdges3;
+            btnChooseAvatar.FillColor = Color.White;
             btnChooseAvatar.Font = new Font("Segoe UI Semibold", 9F);
-            btnChooseAvatar.ForeColor = Color.FromArgb(74, 85, 104);
-            btnChooseAvatar.Location = new Point(195, 200);
+            btnChooseAvatar.ForeColor = Color.FromArgb(71, 85, 105);
+            btnChooseAvatar.Location = new Point(65, 200);
             btnChooseAvatar.Name = "btnChooseAvatar";
-            btnChooseAvatar.ShadowDecoration.CustomizableEdges = customizableEdges3;
-            btnChooseAvatar.Size = new Size(110, 32);
-            btnChooseAvatar.TabIndex = 2;
-            btnChooseAvatar.Text = "Đổi ảnh";
-            btnChooseAvatar.Click += BtnChooseAvatar_Click;
+            btnChooseAvatar.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            btnChooseAvatar.Size = new Size(140, 36);
+            btnChooseAvatar.TabIndex = 1;
+            btnChooseAvatar.Text = "Thay đổi ảnh";
+            // 
+            // lblSideFullName
+            // 
+            lblSideFullName.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
+            lblSideFullName.ForeColor = Color.FromArgb(15, 23, 42);
+            lblSideFullName.Location = new Point(15, 260);
+            lblSideFullName.Name = "lblSideFullName";
+            lblSideFullName.Size = new Size(240, 28);
+            lblSideFullName.TabIndex = 2;
+            lblSideFullName.Text = "Họ Và Tên Sinh Viên";
+            lblSideFullName.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblSideMssv
+            // 
+            lblSideMssv.Font = new Font("Segoe UI", 10F);
+            lblSideMssv.ForeColor = Color.FromArgb(100, 116, 139);
+            lblSideMssv.Location = new Point(15, 292);
+            lblSideMssv.Name = "lblSideMssv";
+            lblSideMssv.Size = new Size(240, 20);
+            lblSideMssv.TabIndex = 3;
+            lblSideMssv.Text = "MSSV: 00000000";
+            lblSideMssv.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblBadgeStatus
+            // 
+            lblBadgeStatus.BackColor = Color.FromArgb(240, 253, 244);
+            lblBadgeStatus.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
+            lblBadgeStatus.ForeColor = Color.FromArgb(22, 163, 74);
+            lblBadgeStatus.Location = new Point(70, 330);
+            lblBadgeStatus.Name = "lblBadgeStatus";
+            lblBadgeStatus.Size = new Size(130, 26);
+            lblBadgeStatus.TabIndex = 4;
+            lblBadgeStatus.Text = "● Đang Học";
+            lblBadgeStatus.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // pnlRightContainer
+            // 
+            pnlRightContainer.BackColor = Color.Transparent;
+            pnlRightContainer.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlRightContainer.BorderRadius = 12;
+            pnlRightContainer.BorderThickness = 1;
+            pnlRightContainer.Controls.Add(lblMainTitle);
+            pnlRightContainer.Controls.Add(grpAcademic);
+            pnlRightContainer.Controls.Add(grpPersonal);
+            pnlRightContainer.Controls.Add(grpAddress);
+            pnlRightContainer.Controls.Add(btnUpdate);
+            pnlRightContainer.FillColor = Color.White;
+            pnlRightContainer.Location = new Point(315, 25);
+            pnlRightContainer.Name = "pnlRightContainer";
+            pnlRightContainer.ShadowDecoration.BorderRadius = 12;
+            pnlRightContainer.ShadowDecoration.Color = Color.FromArgb(15, 0, 0, 0);
+            pnlRightContainer.ShadowDecoration.CustomizableEdges = customizableEdges5;
+            pnlRightContainer.ShadowDecoration.Depth = 10;
+            pnlRightContainer.ShadowDecoration.Enabled = true;
+            pnlRightContainer.Size = new Size(650, 715);
+            pnlRightContainer.TabIndex = 1;
+            // 
+            // lblMainTitle
+            // 
+            lblMainTitle.AutoSize = true;
+            lblMainTitle.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
+            lblMainTitle.ForeColor = Color.FromArgb(30, 41, 59);
+            lblMainTitle.Location = new Point(25, 20);
+            lblMainTitle.Name = "lblMainTitle";
+            lblMainTitle.Size = new Size(244, 30);
+            lblMainTitle.TabIndex = 0;
+            lblMainTitle.Text = "Hồ sơ thông tin chi tiết";
+            // 
+            // grpAcademic
+            // 
+            grpAcademic.BorderColor = Color.FromArgb(241, 245, 249);
+            grpAcademic.BorderRadius = 8;
+            grpAcademic.Controls.Add(lblUsername);
+            grpAcademic.Controls.Add(txtUsername);
+            grpAcademic.Controls.Add(lblStudentId);
+            grpAcademic.Controls.Add(txtStudentId);
+            grpAcademic.Controls.Add(lblClass);
+            grpAcademic.Controls.Add(txtClass);
+            grpAcademic.Controls.Add(lblMajor);
+            grpAcademic.Controls.Add(txtMajor);
+            grpAcademic.CustomBorderColor = Color.FromArgb(248, 250, 252);
+            grpAcademic.CustomBorderThickness = new Padding(0, 32, 0, 0);
+            grpAcademic.CustomizableEdges = customizableEdges6;
+            grpAcademic.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            grpAcademic.ForeColor = Color.FromArgb(71, 85, 105);
+            grpAcademic.Location = new Point(25, 65);
+            grpAcademic.Name = "grpAcademic";
+            grpAcademic.ShadowDecoration.CustomizableEdges = customizableEdges7;
+            grpAcademic.Size = new Size(600, 150);
+            grpAcademic.TabIndex = 1;
+            grpAcademic.Text = "1. THÔNG TIN ĐĂNG NHẬP && HỌC VỤ (HỆ THỐNG KHÓA)";
+            grpAcademic.TextOffset = new Point(6, -3);
             // 
             // lblUsername
             // 
             lblUsername.AutoSize = true;
-            lblUsername.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblUsername.ForeColor = Color.FromArgb(100, 110, 130);
-            lblUsername.Location = new Point(50, 250);
+            lblUsername.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblUsername.Location = new Point(20, 42);
             lblUsername.Name = "lblUsername";
-            lblUsername.Size = new Size(109, 21);
-            lblUsername.TabIndex = 3;
-            lblUsername.Text = "Tên tài khoản:";
+            lblUsername.Size = new Size(108, 15);
+            lblUsername.Text = "Tài khoản (User ID)";
             // 
             // txtUsername
             // 
-            txtUsername.BorderRadius = 8;
-            txtUsername.CustomizableEdges = customizableEdges4;
-            txtUsername.DefaultText = "";
-            txtUsername.Font = new Font("Segoe UI", 10F);
-            txtUsername.ForeColor = Color.FromArgb(43, 54, 116);
-            txtUsername.Location = new Point(50, 275);
-            txtUsername.Margin = new Padding(3, 4, 3, 4);
+            txtUsername.BorderRadius = 4;
+            txtUsername.CustomizableEdges = customizableEdges8;
+            txtUsername.FillColor = Color.FromArgb(248, 250, 252);
+            txtUsername.Font = new Font("Segoe UI", 9F);
+            txtUsername.Location = new Point(20, 60);
             txtUsername.Name = "txtUsername";
-            txtUsername.PlaceholderText = "";
             txtUsername.ReadOnly = true;
-            txtUsername.SelectedText = "";
-            txtUsername.ShadowDecoration.CustomizableEdges = customizableEdges5;
-            txtUsername.Size = new Size(190, 40);
-            txtUsername.TabIndex = 3;
+            txtUsername.Size = new Size(265, 32);
             // 
             // lblStudentId
             // 
             lblStudentId.AutoSize = true;
-            lblStudentId.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblStudentId.ForeColor = Color.FromArgb(100, 110, 130);
-            lblStudentId.Location = new Point(260, 250);
+            lblStudentId.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblStudentId.Location = new Point(310, 42);
             lblStudentId.Name = "lblStudentId";
-            lblStudentId.Size = new Size(125, 21);
-            lblStudentId.TabIndex = 4;
-            lblStudentId.Text = "Mã số sinh viên:";
+            lblStudentId.Size = new Size(89, 15);
+            lblStudentId.Text = "Mã số sinh viên";
             // 
             // txtStudentId
             // 
-            txtStudentId.BorderRadius = 8;
-            txtStudentId.CustomizableEdges = customizableEdges6;
-            txtStudentId.DefaultText = "";
-            txtStudentId.Font = new Font("Segoe UI", 10F);
-            txtStudentId.ForeColor = Color.FromArgb(43, 54, 116);
-            txtStudentId.Location = new Point(260, 275);
-            txtStudentId.Margin = new Padding(3, 4, 3, 4);
+            txtStudentId.BorderRadius = 4;
+            txtStudentId.CustomizableEdges = customizableEdges9;
+            txtStudentId.FillColor = Color.FromArgb(248, 250, 252);
+            txtStudentId.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            txtStudentId.ForeColor = Color.FromArgb(15, 23, 42);
+            txtStudentId.Location = new Point(310, 60);
             txtStudentId.Name = "txtStudentId";
-            txtStudentId.PlaceholderText = "";
             txtStudentId.ReadOnly = true;
-            txtStudentId.SelectedText = "";
-            txtStudentId.ShadowDecoration.CustomizableEdges = customizableEdges7;
-            txtStudentId.Size = new Size(190, 40);
-            txtStudentId.TabIndex = 4;
-            // 
-            // lblName
-            // 
-            lblName.AutoSize = true;
-            lblName.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblName.ForeColor = Color.FromArgb(100, 110, 130);
-            lblName.Location = new Point(50, 330);
-            lblName.Name = "lblName";
-            lblName.Size = new Size(84, 21);
-            lblName.TabIndex = 5;
-            lblName.Text = "Họ và tên:";
-            // 
-            // txtName
-            // 
-            txtName.BorderRadius = 8;
-            txtName.CustomizableEdges = customizableEdges8;
-            txtName.DefaultText = "";
-            txtName.Font = new Font("Segoe UI", 10F);
-            txtName.ForeColor = Color.FromArgb(43, 54, 116);
-            txtName.Location = new Point(50, 355);
-            txtName.Margin = new Padding(3, 4, 3, 4);
-            txtName.Name = "txtName";
-            txtName.PlaceholderText = "Nhập họ và tên...";
-            txtName.SelectedText = "";
-            txtName.ShadowDecoration.CustomizableEdges = customizableEdges9;
-            txtName.Size = new Size(400, 40);
-            txtName.TabIndex = 5;
-            // 
-            // lblEmail
-            // 
-            lblEmail.AutoSize = true;
-            lblEmail.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblEmail.ForeColor = Color.FromArgb(100, 110, 130);
-            lblEmail.Location = new Point(50, 410);
-            lblEmail.Name = "lblEmail";
-            lblEmail.Size = new Size(75, 21);
-            lblEmail.TabIndex = 6;
-            lblEmail.Text = "Email SV:";
-            // 
-            // txtEmail
-            // 
-            txtEmail.BorderRadius = 8;
-            txtEmail.CustomizableEdges = customizableEdges10;
-            txtEmail.DefaultText = "";
-            txtEmail.Font = new Font("Segoe UI", 10F);
-            txtEmail.ForeColor = Color.FromArgb(43, 54, 116);
-            txtEmail.Location = new Point(50, 435);
-            txtEmail.Margin = new Padding(3, 4, 3, 4);
-            txtEmail.Name = "txtEmail";
-            txtEmail.PlaceholderText = "sinhvien@school.edu.vn";
-            txtEmail.SelectedText = "";
-            txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges11;
-            txtEmail.Size = new Size(400, 40);
-            txtEmail.TabIndex = 6;
-            // 
-            // lblPhone
-            // 
-            lblPhone.AutoSize = true;
-            lblPhone.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblPhone.ForeColor = Color.FromArgb(100, 110, 130);
-            lblPhone.Location = new Point(50, 490);
-            lblPhone.Name = "lblPhone";
-            lblPhone.Size = new Size(110, 21);
-            lblPhone.TabIndex = 7;
-            lblPhone.Text = "Số điện thoại:";
-            // 
-            // txtPhone
-            // 
-            txtPhone.BorderRadius = 8;
-            txtPhone.CustomizableEdges = customizableEdges12;
-            txtPhone.DefaultText = "";
-            txtPhone.Font = new Font("Segoe UI", 10F);
-            txtPhone.ForeColor = Color.FromArgb(43, 54, 116);
-            txtPhone.Location = new Point(50, 515);
-            txtPhone.Margin = new Padding(3, 4, 3, 4);
-            txtPhone.Name = "txtPhone";
-            txtPhone.PlaceholderText = "09xx...";
-            txtPhone.SelectedText = "";
-            txtPhone.ShadowDecoration.CustomizableEdges = customizableEdges13;
-            txtPhone.Size = new Size(190, 40);
-            txtPhone.TabIndex = 7;
+            txtStudentId.Size = new Size(265, 32);
             // 
             // lblClass
             // 
             lblClass.AutoSize = true;
-            lblClass.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblClass.ForeColor = Color.FromArgb(100, 110, 130);
-            lblClass.Location = new Point(260, 490);
+            lblClass.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblClass.Location = new Point(20, 97);
             lblClass.Name = "lblClass";
-            lblClass.Size = new Size(112, 21);
-            lblClass.TabIndex = 8;
-            lblClass.Text = "Lớp sinh hoạt:";
+            lblClass.Size = new Size(80, 15);
+            lblClass.Text = "Lớp sinh hoạt";
             // 
             // txtClass
             // 
-            txtClass.BorderRadius = 8;
-            txtClass.CustomizableEdges = customizableEdges14;
-            txtClass.DefaultText = "";
-            txtClass.Font = new Font("Segoe UI", 10F);
-            txtClass.ForeColor = Color.FromArgb(43, 54, 116);
-            txtClass.Location = new Point(260, 515);
-            txtClass.Margin = new Padding(3, 4, 3, 4);
+            txtClass.BorderRadius = 4;
+            txtClass.CustomizableEdges = customizableEdges10;
+            txtClass.FillColor = Color.FromArgb(248, 250, 252);
+            txtClass.Font = new Font("Segoe UI", 9F);
+            txtClass.Location = new Point(20, 115);
             txtClass.Name = "txtClass";
-            txtClass.PlaceholderText = "";
             txtClass.ReadOnly = true;
-            txtClass.SelectedText = "";
-            txtClass.ShadowDecoration.CustomizableEdges = customizableEdges15;
-            txtClass.Size = new Size(190, 40);
-            txtClass.TabIndex = 8;
+            txtClass.Size = new Size(265, 32);
             // 
             // lblMajor
             // 
             lblMajor.AutoSize = true;
-            lblMajor.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblMajor.ForeColor = Color.FromArgb(100, 110, 130);
-            lblMajor.Location = new Point(50, 570);
+            lblMajor.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblMajor.Location = new Point(310, 97);
             lblMajor.Name = "lblMajor";
-            lblMajor.Size = new Size(117, 21);
-            lblMajor.TabIndex = 9;
-            lblMajor.Text = "Chuyên ngành:";
+            lblMajor.Size = new Size(111, 15);
+            lblMajor.Text = "Chuyên ngành học";
             // 
             // txtMajor
             // 
-            txtMajor.BorderRadius = 8;
-            txtMajor.CustomizableEdges = customizableEdges16;
-            txtMajor.DefaultText = "";
-            txtMajor.Font = new Font("Segoe UI", 10F);
-            txtMajor.ForeColor = Color.FromArgb(43, 54, 116);
-            txtMajor.Location = new Point(50, 595);
-            txtMajor.Margin = new Padding(3, 4, 3, 4);
+            txtMajor.BorderRadius = 4;
+            txtMajor.CustomizableEdges = customizableEdges11;
+            txtMajor.FillColor = Color.FromArgb(248, 250, 252);
+            txtMajor.Font = new Font("Segoe UI", 9F);
+            txtMajor.Location = new Point(310, 115);
             txtMajor.Name = "txtMajor";
-            txtMajor.PlaceholderText = "";
             txtMajor.ReadOnly = true;
-            txtMajor.SelectedText = "";
-            txtMajor.ShadowDecoration.CustomizableEdges = customizableEdges17;
-            txtMajor.Size = new Size(400, 40);
-            txtMajor.TabIndex = 9;
+            txtMajor.Size = new Size(265, 32);
+            // 
+            // grpPersonal
+            // 
+            grpPersonal.BorderColor = Color.FromArgb(241, 245, 249);
+            grpPersonal.BorderRadius = 8;
+            grpPersonal.Controls.Add(lblName);
+            grpPersonal.Controls.Add(txtName);
+            grpPersonal.Controls.Add(lblBirthDate);
+            grpPersonal.Controls.Add(dtpBirthDate);
+            grpPersonal.Controls.Add(lblGender);
+            grpPersonal.Controls.Add(cboGender);
+            grpPersonal.Controls.Add(lblEmail);
+            grpPersonal.Controls.Add(txtEmail);
+            grpPersonal.Controls.Add(lblPhone);
+            grpPersonal.Controls.Add(txtPhone);
+            grpPersonal.CustomBorderColor = Color.FromArgb(248, 250, 252);
+            grpPersonal.CustomBorderThickness = new Padding(0, 32, 0, 0);
+            grpPersonal.CustomizableEdges = customizableEdges12;
+            grpPersonal.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            grpPersonal.ForeColor = Color.FromArgb(71, 85, 105);
+            grpPersonal.Location = new Point(25, 230);
+            grpPersonal.Name = "grpPersonal";
+            grpPersonal.ShadowDecoration.CustomizableEdges = customizableEdges13;
+            grpPersonal.Size = new Size(600, 210);
+            grpPersonal.TabIndex = 2;
+            grpPersonal.Text = "2. THÔNG TIN CÁ NHÂN VÀ LIÊN HỆ";
+            grpPersonal.TextOffset = new Point(6, -3);
+            // 
+            // lblName
+            // 
+            lblName.AutoSize = true;
+            lblName.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblName.Location = new Point(20, 42);
+            lblName.Name = "lblName";
+            lblName.Size = new Size(59, 15);
+            lblName.Text = "Họ và tên";
+            // 
+            // txtName
+            // 
+            txtName.BorderRadius = 4;
+            txtName.CustomizableEdges = customizableEdges14;
+            txtName.Font = new Font("Segoe UI", 9F);
+            txtName.Location = new Point(20, 60);
+            txtName.Name = "txtName";
+            txtName.Size = new Size(555, 32);
+            // 
+            // lblBirthDate
+            // 
+            lblBirthDate.AutoSize = true;
+            lblBirthDate.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblBirthDate.Location = new Point(20, 97);
+            lblBirthDate.Name = "lblBirthDate";
+            lblBirthDate.Size = new Size(60, 15);
+            lblBirthDate.Text = "Ngày sinh";
+            // 
+            // dtpBirthDate
+            // 
+            dtpBirthDate.BorderRadius = 4;
+            dtpBirthDate.Checked = true;
+            dtpBirthDate.CustomFormat = "dd/MM/yyyy";
+            dtpBirthDate.CustomizableEdges = customizableEdges15;
+            dtpBirthDate.FillColor = Color.White;
+            dtpBirthDate.BorderThickness = 1;
+            dtpBirthDate.BorderColor = Color.FromArgb(213, 218, 223);
+            dtpBirthDate.Font = new Font("Segoe UI", 9F);
+            dtpBirthDate.ForeColor = Color.Black;
+            dtpBirthDate.Format = DateTimePickerFormat.Custom;
+            dtpBirthDate.Location = new Point(20, 115);
+            dtpBirthDate.Name = "dtpBirthDate";
+            dtpBirthDate.Size = new Size(265, 32);
+            // 
+            // lblGender
+            // 
+            lblGender.AutoSize = true;
+            lblGender.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblGender.Location = new Point(310, 97);
+            lblGender.Name = "lblGender";
+            lblGender.Size = new Size(52, 15);
+            lblGender.Text = "Giới tính";
+            // 
+            // cboGender
+            // 
+            cboGender.BorderRadius = 4;
+            cboGender.CustomizableEdges = customizableEdges16;
+            cboGender.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboGender.Font = new Font("Segoe UI", 9F);
+            cboGender.Items.AddRange(new object[] { "Nam", "Nữ", "Khác" });
+            cboGender.Location = new Point(310, 115);
+            cboGender.Name = "cboGender";
+            cboGender.Size = new Size(265, 32);
+            // 
+            // lblEmail
+            // 
+            lblEmail.AutoSize = true;
+            lblEmail.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblEmail.Location = new Point(20, 152);
+            lblEmail.Name = "lblEmail";
+            lblEmail.Size = new Size(35, 15);
+            lblEmail.Text = "Email";
+            // 
+            // txtEmail
+            // 
+            txtEmail.BorderRadius = 4;
+            txtEmail.CustomizableEdges = customizableEdges17;
+            txtEmail.Font = new Font("Segoe UI", 9F);
+            txtEmail.Location = new Point(20, 170);
+            txtEmail.Name = "txtEmail";
+            txtEmail.Size = new Size(265, 32);
+            // 
+            // lblPhone
+            // 
+            lblPhone.AutoSize = true;
+            lblPhone.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblPhone.Location = new Point(310, 152);
+            lblPhone.Name = "lblPhone";
+            lblPhone.Size = new Size(77, 15);
+            lblPhone.Text = "Số điện thoại";
+            // 
+            // txtPhone
+            // 
+            txtPhone.BorderRadius = 4;
+            txtPhone.CustomizableEdges = customizableEdges18;
+            txtPhone.Font = new Font("Segoe UI", 9F);
+            txtPhone.Location = new Point(310, 170);
+            txtPhone.Name = "txtPhone";
+            txtPhone.Size = new Size(265, 32);
+            // 
+            // grpAddress
+            // 
+            grpAddress.BorderColor = Color.FromArgb(241, 245, 249);
+            grpAddress.BorderRadius = 8;
+            grpAddress.Controls.Add(lblHometown);
+            grpAddress.Controls.Add(txtHometown);
+            grpAddress.Controls.Add(lblAddress);
+            grpAddress.Controls.Add(txtAddress);
+            grpAddress.CustomBorderColor = Color.FromArgb(248, 250, 252);
+            grpAddress.CustomBorderThickness = new Padding(0, 32, 0, 0);
+            grpAddress.CustomizableEdges = customizableEdges19;
+            grpAddress.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            grpAddress.ForeColor = Color.FromArgb(71, 85, 105);
+            grpAddress.Location = new Point(25, 455);
+            grpAddress.Name = "grpAddress";
+            grpAddress.ShadowDecoration.CustomizableEdges = customizableEdges20;
+            grpAddress.Size = new Size(600, 175);
+            grpAddress.TabIndex = 3;
+            grpAddress.Text = "3. HÀNH CHÍNH QUẢN LÝ VÀ ĐỊA CHỈ CƯ TRÚ";
+            grpAddress.TextOffset = new Point(6, -3);
+            // 
+            // lblHometown
+            // 
+            lblHometown.AutoSize = true;
+            lblHometown.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblHometown.Location = new Point(20, 42);
+            lblHometown.Name = "lblHometown";
+            lblHometown.Size = new Size(116, 15);
+            lblHometown.Text = "Nguyên quán (Tỉnh)";
+            // 
+            // txtHometown
+            // 
+            txtHometown.BorderRadius = 4;
+            txtHometown.CustomizableEdges = customizableEdges21;
+            txtHometown.Font = new Font("Segoe UI", 9F);
+            txtHometown.Location = new Point(20, 60);
+            txtHometown.Name = "txtHometown";
+            txtHometown.Size = new Size(555, 32);
+            // 
+            // lblAddress
+            // 
+            lblAddress.AutoSize = true;
+            lblAddress.Font = new Font("Segoe UI Semibold", 8.5F);
+            lblAddress.Location = new Point(20, 97);
+            lblAddress.Name = "lblAddress";
+            lblAddress.Size = new Size(157, 15);
+            lblAddress.Text = "Địa chỉ cư trú (Tạm trú/Thường trú)";
+            // 
+            // txtAddress
+            // 
+            txtAddress.BorderRadius = 4;
+            txtAddress.CustomizableEdges = customizableEdges22;
+            txtAddress.Font = new Font("Segoe UI", 9F);
+            txtAddress.Location = new Point(20, 115);
+            txtAddress.Multiline = true;
+            txtAddress.Name = "txtAddress";
+            txtAddress.Size = new Size(555, 48);
             // 
             // btnUpdate
             // 
             btnUpdate.Animated = true;
-            btnUpdate.BorderRadius = 8;
-            btnUpdate.CustomizableEdges = customizableEdges18;
-            btnUpdate.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
+            btnUpdate.BorderRadius = 6;
+            btnUpdate.FillColor = Color.FromArgb(79, 70, 229);
+            btnUpdate.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             btnUpdate.ForeColor = Color.White;
-            btnUpdate.Location = new Point(50, 680);
+            btnUpdate.Location = new Point(425, 650);
             btnUpdate.Name = "btnUpdate";
-            btnUpdate.ShadowDecoration.CustomizableEdges = customizableEdges19;
-            btnUpdate.Size = new Size(400, 45);
-            btnUpdate.TabIndex = 10;
-            btnUpdate.Text = "Cập nhật thông tin";
-            btnUpdate.Click += BtnUpdate_Click;
+            btnUpdate.Size = new Size(200, 42);
+            btnUpdate.TabIndex = 4;
+            btnUpdate.Text = "Cập nhật hồ sơ";
             // 
             // ofdAvatar
             // 
-            ofdAvatar.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.gif";
-            ofdAvatar.Title = "Chọn ảnh đại diện";
+            ofdAvatar.Filter = "Image Files|*.jpg;*.jpeg;*.png";
             // 
             // ProfileForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(240, 242, 245);
-            ClientSize = new Size(592, 850);
-            Controls.Add(pnlCard);
+            BackColor = Color.FromArgb(248, 250, 252);
+            ClientSize = new Size(990, 765);
+            Controls.Add(pnlLeftCard);
+            Controls.Add(pnlRightContainer);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
-            MinimizeBox = false;
             Name = "ProfileForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Hồ sơ sinh viên";
-            Load += ProfileForm_Load;
-            pnlCard.ResumeLayout(false);
-            pnlCard.PerformLayout();
+            Text = "Hồ sơ cá nhân Sinh viên - Chuẩn Doanh Nghiệp";
+            pnlLeftCard.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)picAvatar).EndInit();
+            pnlRightContainer.ResumeLayout(false);
+            pnlRightContainer.PerformLayout();
+            grpAcademic.ResumeLayout(false);
+            grpAcademic.PerformLayout();
+            grpPersonal.ResumeLayout(false);
+            grpPersonal.PerformLayout();
+            grpAddress.ResumeLayout(false);
+            grpAddress.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private Guna.UI2.WinForms.Guna2Panel pnlCard;
-        private Label lblTitle;
+        private Guna.UI2.WinForms.Guna2Panel pnlLeftCard;
         private Guna.UI2.WinForms.Guna2CirclePictureBox picAvatar;
         private Guna.UI2.WinForms.Guna2Button btnChooseAvatar;
+        private Label lblSideFullName;
+        private Label lblSideMssv;
+        private Label lblBadgeStatus;
 
+        private Guna.UI2.WinForms.Guna2Panel pnlRightContainer;
+        private Label lblMainTitle;
+
+        private Guna.UI2.WinForms.Guna2GroupBox grpAcademic;
         private Label lblUsername;
         private Guna.UI2.WinForms.Guna2TextBox txtUsername;
-
         private Label lblStudentId;
         private Guna.UI2.WinForms.Guna2TextBox txtStudentId;
+        private Label lblClass;
+        private Guna.UI2.WinForms.Guna2TextBox txtClass;
+        private Label lblMajor;
+        private Guna.UI2.WinForms.Guna2TextBox txtMajor;
 
+        private Guna.UI2.WinForms.Guna2GroupBox grpPersonal;
         private Label lblName;
         private Guna.UI2.WinForms.Guna2TextBox txtName;
-
+        private Label lblBirthDate;
+        private Guna.UI2.WinForms.Guna2DateTimePicker dtpBirthDate;
+        private Label lblGender;
+        private Guna.UI2.WinForms.Guna2ComboBox cboGender;
         private Label lblEmail;
         private Guna.UI2.WinForms.Guna2TextBox txtEmail;
-
         private Label lblPhone;
         private Guna.UI2.WinForms.Guna2TextBox txtPhone;
 
-        private Label lblClass;
-        private Guna.UI2.WinForms.Guna2TextBox txtClass;
-
-        private Label lblMajor;
-        private Guna.UI2.WinForms.Guna2TextBox txtMajor;
+        private Guna.UI2.WinForms.Guna2GroupBox grpAddress;
+        private Label lblHometown;
+        private Guna.UI2.WinForms.Guna2TextBox txtHometown;
+        private Label lblAddress;
+        private Guna.UI2.WinForms.Guna2TextBox txtAddress;
 
         private Guna.UI2.WinForms.Guna2Button btnUpdate;
         private OpenFileDialog ofdAvatar;

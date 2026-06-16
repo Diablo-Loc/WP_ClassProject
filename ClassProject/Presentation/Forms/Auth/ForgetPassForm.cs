@@ -12,13 +12,14 @@ namespace ClassProject.Presentation.Forms
     {
         private string _otp = "";
         private string _verifiedEmail = "";
+        private DateTime _otpExpireTime = DateTime.MinValue;
+        private DateTime _lastSendOTP = DateTime.MinValue;
 
-        My_DB db = new My_DB();
+        private readonly My_DB db = new My_DB();
 
         public ForgetPassForm()
         {
             InitializeComponent();
-            // Ẩn phần OTP và mật khẩu mới lúc đầu
             SetOTPSectionVisible(false);
         }
 
@@ -26,39 +27,66 @@ namespace ClassProject.Presentation.Forms
         {
             string email = txtEmail.Text.Trim();
 
-            if (email == "")
+            if (string.IsNullOrEmpty(email))
             {
-                MessageBox.Show("Vui lòng nhập email!", "Warning",
+                MessageBox.Show("Vui lòng nhập địa chỉ Email!", "Cảnh báo",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Kiểm tra email có trong DB không
-            if (!EmailExists(email))
+            if (DateTime.Now < _lastSendOTP.AddSeconds(30))
             {
-                MessageBox.Show("Email không tồn tại trong hệ thống!", "Warning",
+                TimeSpan remaining = _lastSendOTP.AddSeconds(30) - DateTime.Now;
+                MessageBox.Show($"Hành động quá nhanh! Vui lòng đợi {Math.Ceiling(remaining.TotalSeconds)} giây để gửi lại mã mới.",
+                    "Cảnh báo Spam", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int validValue = 0;
+            int statusValue = 1;
+            bool isEmailExist = GetEmailStatus(email, out validValue, out statusValue);
+
+            if (!isEmailExist)
+            {
+                MessageBox.Show("Email không tồn tại trong hệ thống trường học!", "Cảnh báo",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Tạo OTP 6 số
+            if (validValue == 0)
+            {
+                MessageBox.Show("Tài khoản liên kết với Email này chưa được phê duyệt bởi Ban quản trị.\nKhông thể thực hiện khôi phục mật khẩu!",
+                    "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+
+            if (statusValue == 2) // Theo đặc tả hệ thống: Status = 2 là tài khoản bị khóa
+            {
+                MessageBox.Show("Tài khoản liên kết với Email này hiện đang bị khóa.\nVui lòng liên hệ Admin để được xử lý!",
+                    "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+
+            // ĐẠT: Sinh mã OTP ngẫu nhiên 6 chữ số
             _otp = new Random().Next(100000, 999999).ToString();
             _verifiedEmail = email;
+            _otpExpireTime = DateTime.Now.AddMinutes(5);
+            _lastSendOTP = DateTime.Now;
 
-            // Thử gửi email thật trước
+            // Tiến hành gửi email thật thông qua SMTP MailKit
             bool isMailSent = SendOTPEmail(email, _otp);
 
             if (isMailSent)
             {
-                MessageBox.Show($"Mã OTP đã được gửi thành công đến email: {email}.\nVui lòng kiểm tra hộp thư (hoặc thư rác)!",
-                    "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Mã OTP đã được gửi thành công đến email: {email}.\nVui lòng kiểm tra hộp thư (hiệu lực trong 5 phút)!",
+                    "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                // [CHẾ ĐỘ DỰ PHÒNG]: Nếu là gmail ảo hoặc cấu hình sai hệ thống gửi, tự động bật chế độ chống cháy
-                MessageBox.Show($"[CHẾ ĐỘ TEST - EMAIL ẢO HOẶC SAI CẤU HÌNH GMAIL GỬI]\nHệ thống không thể kết nối server để gửi mail.\nMã OTP của bạn là: {_otp}",
-                    "Mock OTP System (Fallback)", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"[CHẾ ĐỘ MOCK - LỖI SMTP HOẶC MẤT MẠNG]\nHệ thống tự động kích hoạt mã xác thực nội bộ.\nMã OTP của bạn là: {_otp}",
+                    "Hệ thống xác thực dự phòng", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+
             SetOTPSectionVisible(true);
         }
 
@@ -68,33 +96,52 @@ namespace ClassProject.Presentation.Forms
             string newPassword = txtNewPassword.Text.Trim();
             string confirmPassword = txtConfirm.Text.Trim();
 
-            if (inputOTP != _otp || _otp == "")
+            // Kiểm tra OTP hết hạn (Quá 5 phút)
+            if (DateTime.Now > _otpExpireTime || string.IsNullOrEmpty(_otp))
             {
-                MessageBox.Show("OTP không đúng!", "Warning",
+                MessageBox.Show("Mã OTP đã hết hạn sử dụng (Hiệu lực tối đa 5 phút).\nVui lòng bấm gửi lại mã mới!",
+                    "Mã hết hạn", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (inputOTP != _otp)
+            {
+                MessageBox.Show("Mã OTP nhập vào không chính xác!", "Cảnh báo",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (newPassword == "" || confirmPassword == "")
+            // Triển khai chính sách độ dài mật khẩu (Password Policy)
+            if (newPassword.Length < 6)
             {
-                MessageBox.Show("Vui lòng nhập mật khẩu mới!", "Warning",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Mật khẩu mới phải có độ dài tối thiểu từ 6 ký tự trở lên để đảm bảo an toàn!",
+                    "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (newPassword != confirmPassword)
             {
-                MessageBox.Show("Mật khẩu không khớp!", "Warning",
+                MessageBox.Show("Mật khẩu xác nhận không trùng khớp!", "Cảnh báo",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            // Ngăn chặn hành vi sử dụng lại mật khẩu cũ (Password Reuse Protection)
+            string currentHash = GetCurrentPasswordHash(_verifiedEmail);
+            if (!string.IsNullOrEmpty(currentHash) && BCrypt.Net.BCrypt.Verify(newPassword, currentHash))
+            {
+                MessageBox.Show("Mật khẩu mới không được phép trùng với mật khẩu đang sử dụng hiện tại!",
+                    "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Thực thi lưu mật khẩu mới xuống Cơ sở dữ liệu
             try
             {
                 using (SqlConnection conn = db.GetConnection())
                 {
                     conn.Open();
-                    string query = "UPDATE Users SET Password = @password WHERE Email = @email";
+                    string query = "UPDATE dbo.Users SET Password = @password WHERE Email = @email";
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@password", BCrypt.Net.BCrypt.HashPassword(newPassword));
@@ -103,39 +150,83 @@ namespace ClassProject.Presentation.Forms
                     }
                 }
 
-                MessageBox.Show("Đặt lại mật khẩu thành công!", "Success",
+                MessageBox.Show("Đặt lại mật khẩu thành công! Hệ thống sẽ quay về màn hình Đăng nhập.", "Thành công",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                LoginForm f = new LoginForm();
-                f.Show();
+                txtOTP.Clear();
+                txtNewPassword.Clear();
+                txtConfirm.Clear();
+                _otp = "";
+                _verifiedEmail = "";
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi: " + ex.Message, "Error",
+                System.Diagnostics.Debug.WriteLine($"[Error - Reset Pass Execution]: {ex.Message}");
+                MessageBox.Show("Lỗi hệ thống khi cập nhật dữ liệu: " + ex.Message, "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void lblBacktoLogin_Click(object sender, EventArgs e)
         {
-            LoginForm f = new LoginForm();
-            f.Show();
-            this.Hide();
+            this.Close();
         }
 
-        // ==================== HÀM HỖ TRỢ ====================
-        private bool EmailExists(string email)
+        // Đọc đồng thời cả Valid và Status của Email trong 1 lượt truy vấn duy nhất
+        private bool GetEmailStatus(string email, out int valid, out int status)
         {
-            using (SqlConnection conn = db.GetConnection())
+            valid = 0;
+            status = 1; // Mặc định hoạt động bình thường
+            try
             {
-                conn.Open();
-                string query = "SELECT COUNT(*) FROM Users WHERE Email = @email";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlConnection conn = db.GetConnection())
                 {
-                    cmd.Parameters.AddWithValue("@email", email);
-                    return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                    conn.Open();
+                    string query = "SELECT Valid, Status FROM dbo.Users WHERE Email = @email";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@email", email);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                valid = Convert.ToInt32(reader["Valid"]);
+                                status = Convert.ToInt32(reader["Status"]);
+                                return true;
+                            }
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Error - GetEmailStatus Query]: {ex.Message}");
+            }
+            return false;
+        }
+
+        // Lấy Hash mật khẩu hiện tại để so sánh chéo
+        private string GetCurrentPasswordHash(string email)
+        {
+            try
+            {
+                using (SqlConnection conn = db.GetConnection())
+                {
+                    conn.Open();
+                    string query = "SELECT Password FROM dbo.Users WHERE Email = @email";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@email", email);
+                        object res = cmd.ExecuteScalar();
+                        return res != null ? res.ToString() : "";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Error - GetCurrentPasswordHash Query]: {ex.Message}");
+                return "";
             }
         }
 
@@ -143,47 +234,36 @@ namespace ClassProject.Presentation.Forms
         {
             try
             {
+                // LỖI 2: Đồ án chấp nhận để chuỗi bảo mật ở đây, thực tế khuyến khích cấu hình qua App.config / Web.config
                 string senderEmail = "tranthienan6298.2017@gmail.com";
                 string senderPassword = "kmxdsjowtxbfwuhl";
 
                 if (string.IsNullOrEmpty(senderEmail) || string.IsNullOrEmpty(senderPassword))
-                {
-                    System.Diagnostics.Debug.WriteLine("Cảnh báo: Chưa cấu hình Email hoặc Mật khẩu ứng dụng.");
                     return false;
-                }
 
-                // Tạo nội dung Email bằng MailKit / MimeKit
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress("ClassProject Systems", senderEmail));
                 message.To.Add(new MailboxAddress("", toEmail));
                 message.Subject = "HCMUTE SYSTEM - RESET PASSWORD OTP";
 
-                var bodyBuilder = new BodyBuilder();
-                bodyBuilder.TextBody = $"Mã OTP đặt lại mật khẩu của bạn là: {otp}\n\nMã này chỉ có hiệu lực trong vòng 5 phút. Vui lòng tuyệt đối không chia sẻ mã này cho bất kỳ ai!";
+                var bodyBuilder = new BodyBuilder
+                {
+                    TextBody = $"Mã OTP đặt lại mật khẩu của bạn là: {otp}\n\nMã này chỉ có hiệu lực trong vòng 5 phút. Vui lòng tuyệt đối không chia sẻ mã này cho bất kỳ ai!"
+                };
                 message.Body = bodyBuilder.ToMessageBody();
 
-                // Thực hiện kết nối SMTP Server của Google và gửi mail
-                using (var client = new MailKit.Net.Smtp.SmtpClient()) // Định nghĩa rõ ràng MailKit SmtpClient
+                using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {
-                    // Kết nối qua cổng 587 bằng STARTTLS
                     client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-
-                    // Đăng nhập bằng Mật khẩu ứng dụng
                     client.Authenticate(senderEmail, senderPassword);
-
-                    // Gửi thư
                     client.Send(message);
                     client.Disconnect(true);
                 }
-
-                return true; // Gửi mail thật THÀNH CÔNG, không chạy vào chế độ Test nữa
+                return true;
             }
             catch (Exception ex)
             {
-                // Nếu có lỗi phát sinh (Sai mật khẩu ứng dụng, chặn tường lửa, mất mạng...), log sẽ hiện ở đây
-                System.Diagnostics.Debug.WriteLine("Lỗi gửi mail chi tiết: " + ex.ToString());
-
-                // Trả về false để hệ thống bật thông báo Mock OTP dự phòng, tránh crash ứng dụng
+                System.Diagnostics.Debug.WriteLine("Lỗi gửi mail thực tế: " + ex.Message);
                 return false;
             }
         }

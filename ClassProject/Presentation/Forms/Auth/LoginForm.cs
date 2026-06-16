@@ -6,11 +6,15 @@ using ClassProject.Presentation.Forms.Main;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Windows.Forms;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ClassProject
 {
     public partial class LoginForm : Form
     {
+        private readonly My_DB _db = new My_DB();
+
         public LoginForm(string registeredUser = "")
         {
             InitializeComponent();
@@ -26,7 +30,6 @@ namespace ClassProject
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            // 1. Tối ưu UX: Báo lỗi và focus đúng ô
             if (string.IsNullOrEmpty(username))
             {
                 MessageBox.Show("Vui lòng nhập Username!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -40,55 +43,60 @@ namespace ClassProject
                 return;
             }
 
-            My_DB db = new My_DB();
+            bool userExists = false;
+            string hashedPassword = string.Empty;
+            int userId = 0;
+            int roleId = -1;
+            int valid = 0;
+            int status = 0;
+            int failedAttempts = 0;
+            DateTime? lockoutEnd = null;
 
-            using (SqlConnection conn = db.GetConnection())
+            // BỔ SUNG: Biến hứng Email từ DB phục vụ UserSession
+            string email = string.Empty;
+
+            using (SqlConnection conn = _db.GetConnection())
             {
                 try
                 {
                     conn.Open();
 
-                    // 2. CẬP NHẬT TRUY VẤN: Lấy thêm cột Status từ bảng Users
-                    string query = @"SELECT Id, Password, RoleId, 
+                    // CẬP NHẬT: Thêm cột Email vào SELECT query
+                    string query = @"SELECT Id, Password, RoleId, Email,
                                             ISNULL(Valid, 0) AS Valid, 
                                             ISNULL(Status, 0) AS Status, 
                                             ISNULL(FailedAttempts, 0) AS FailedAttempts, 
                                             LockoutEnd 
                                      FROM Users WHERE Username = @user";
 
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@user", username);
-
-                    bool userExists = false;
-                    string hashedPassword = "";
-                    int userId = 0;
-                    int roleId = -1;
-                    int valid = 0;
-                    int status = 0;
-                    int failedAttempts = 0;
-                    DateTime? lockoutEnd = null;
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        if (reader.Read())
+                        cmd.Parameters.AddWithValue("@user", username);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            userExists = true;
-                            hashedPassword = reader["Password"].ToString();
-                            userId = Convert.ToInt32(reader["Id"]);
-                            roleId = Convert.ToInt32(reader["RoleId"]);
-                            valid = Convert.ToInt32(reader["Valid"]);
-                            status = Convert.ToInt32(reader["Status"]);
-                            failedAttempts = Convert.ToInt32(reader["FailedAttempts"]);
-
-                            if (reader["LockoutEnd"] != DBNull.Value)
+                            if (reader.Read())
                             {
-                                lockoutEnd = Convert.ToDateTime(reader["LockoutEnd"]);
+                                userExists = true;
+                                hashedPassword = reader["Password"].ToString();
+                                userId = Convert.ToInt32(reader["Id"]);
+                                roleId = Convert.ToInt32(reader["RoleId"]);
+                                valid = Convert.ToInt32(reader["Valid"]);
+                                status = Convert.ToInt32(reader["Status"]);
+                                failedAttempts = Convert.ToInt32(reader["FailedAttempts"]);
+
+                                // BỔ SUNG: Đọc dữ liệu Email một cách an toàn
+                                email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : string.Empty;
+
+                                if (reader["LockoutEnd"] != DBNull.Value)
+                                {
+                                    lockoutEnd = DateTime.SpecifyKind(Convert.ToDateTime(reader["LockoutEnd"]), DateTimeKind.Local);
+                                }
                             }
                         }
                     }
 
-                    // 3. Xử lý các case bảo mật và nghiệp vụ
-                    if (!userExists)
+                    // BƯỚC 1: KIỂM TRA SỰ TỒN TẠI CỦA TÀI KHOẢN
+                    if (!userExists || status == -1) // status = -1 là xóa mềm
                     {
                         MessageBox.Show("Sai tài khoản hoặc mật khẩu!", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         txtPassword.Clear();
@@ -96,97 +104,85 @@ namespace ClassProject
                         return;
                     }
 
-                    // Case 3a: Tài khoản đã bị Admin khóa hệ thống (Status = 2)
-                    if (status == 2)
-                    {
-                        MessageBox.Show("Tài khoản của bạn đã bị Admin KHÓA TRUY CẬP hệ thống.\nVui lòng liên hệ phòng quản lý để được hỗ trợ!",
-                                        "Tài khoản bị khóa", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                        return;
-                    }
-
-                    // Case 3b: Tài khoản đã bị Admin từ chối phê duyệt thẳng thừng (Status = 3)
-                    if (status == 3)
-                    {
-                        MessageBox.Show("Yêu cầu đăng ký tài khoản này đã bị Admin TỪ CHỐI phê duyệt!",
-                                        "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                        return;
-                    }
-
-                    // Case 3c: Tài khoản đã bị xóa mềm (Status = -1), coi như không tồn tại nữa
-                    if (status == -1)
-                    {
-                        MessageBox.Show("Sai tài khoản hoặc mật khẩu!", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        txtPassword.Clear();
-                        txtUsername.Focus();
-                        return;
-                    }
-
-                    // Case: Tài khoản đang bị khóa tạm thời do tự nhập sai pass nhiều lần (LockoutEnd)
+                    // BƯỚC 2: KIỂM TRA KHÓA LOCKOUT TẠM THỜI (ANTI BRUTE-FORCE)
                     if (lockoutEnd.HasValue && lockoutEnd.Value > DateTime.Now)
                     {
                         TimeSpan waitTime = lockoutEnd.Value - DateTime.Now;
-                        MessageBox.Show($"Tài khoản đang bị khóa do nhập sai nhiều lần.\nVui lòng thử lại sau {waitTime.Minutes} phút {waitTime.Seconds} giây.",
+                        string timeString = waitTime.Minutes > 0
+                            ? $"{waitTime.Minutes} phút {waitTime.Seconds} giây"
+                            : $"{waitTime.Seconds} giây";
+
+                        MessageBox.Show($"Tài khoản đang bị khóa do nhập sai quá 5 lần.\nVui lòng thử lại sau {timeString}.",
                                         "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        txtPassword.Clear();
+                        txtPassword.Focus();
                         return;
                     }
 
-                    // Case: Tài khoản chưa được Admin duyệt (VALID = 0 hoặc Status = 0)
-                    if (valid == 0 || status == 0)
-                    {
-                        MessageBox.Show("Tài khoản của bạn đang chờ duyệt, chưa được Admin phê duyệt vào hệ thống!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                        return;
-                    }
-
-                    // 4. Xác thực Mật khẩu qua BCrypt
+                    // BƯỚC 3: XÁC THỰC MẬT KHẨU BĂM (BCRYPT)
                     if (BCrypt.Net.BCrypt.Verify(password, hashedPassword))
                     {
-                        // Đăng nhập THÀNH CÔNG: Reset số lần sai về 0
+                        // ĐẶC CÁCH BẢO MẬT: Nếu là Admin (roleId == 0), bỏ qua mọi bước check duyệt hệ thống
+                        if (roleId != 0)
+                        {
+                            // Kiểm tra trạng thái Phê duyệt tài khoản (Valid)
+                            if (valid == 0)
+                            {
+                                MessageBox.Show("Tài khoản của bạn đang chờ duyệt, chưa được Admin phê duyệt vào hệ thống!",
+                                                "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                return;
+                            }
+                            if (valid == 2)
+                            {
+                                MessageBox.Show("Yêu cầu đăng ký tài khoản này đã bị Admin TỪ CHỐI phê duyệt!",
+                                                "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                return;
+                            }
+
+                            // Kiểm tra trạng thái Khóa tài khoản điều hành (Status)
+                            if (status == 1)
+                            {
+                                MessageBox.Show("Tài khoản của bạn đã bị Admin KHÓA TRUY CẬP hệ thống.\nVui lòng liên hệ phòng quản lý để được hỗ trợ!",
+                                                "Tài khoản bị khóa", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                return;
+                            }
+                        }
+
+                        // ĐĂNG NHẬP THÀNH CÔNG -> Reset bộ đếm lỗi về 0
                         UpdateLoginStatus(conn, username, 0, null);
 
-                        // 🌟 BƯỚC THAY ĐỔI QUAN TRỌNG: Nạp thông tin phiên đăng nhập toàn cục (Global Session)
-                        UserSession.UserId = userId;
-                        UserSession.RoleId = roleId;
-                        UserSession.Username = username;
-                        // (Lưu ý: Thuộc tính UserSession.MSSV tạm thời để trống, f_main sẽ tự truy vấn sau nếu roleId == 1)
+                        // CẬP NHẬT CHUẨN GLOBAL: Khởi tạo Identity Passport có kèm Email
+                        // Do mới đăng nhập nên ta để trống mssv và teacherId để form Main đồng bộ sau
+                        UserSession.Initialize(userId, username, roleId, email, "", "");
 
-                        // Lưu trạng thái Remember Me
-                        Properties.Settings.Default.Username = chkRememberMe.Checked ? username : "";
-                        Properties.Settings.Default.Password = chkRememberMe.Checked ? password : "";
-                        Properties.Settings.Default.RememberMe = chkRememberMe.Checked;
+                        // Xử lý Remember Me (DPAPI Bảo mật)
+                        if (chkRememberMe.Checked)
+                        {
+                            Properties.Settings.Default.Username = username;
+                            Properties.Settings.Default.Password = EncryptPassword(password);
+                            Properties.Settings.Default.RememberMe = true;
+                        }
+                        else
+                        {
+                            Properties.Settings.Default.Username = string.Empty;
+                            Properties.Settings.Default.Password = string.Empty;
+                            Properties.Settings.Default.RememberMe = false;
+                        }
                         Properties.Settings.Default.Save();
 
-                        string roleName = roleId == 0 ? "Admin" : (roleId == 1 ? "Sinh viên" : "Giảng viên");
-                        MessageBox.Show($"Đăng nhập {roleName} thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        this.Hide();
-
-                        // 🌟 BƯỚC THAY ĐỔI QUAN TRỌNG: Khởi tạo f_main() trống không cần truyền tham số
-                        using (f_main mainForm = new f_main())
-                        {
-                            mainForm.ShowDialog();
-                        }
-
-                        if (Application.OpenForms.Count > 0)
-                        {
-                            this.Show();
-                            txtPassword.Clear();
-                            txtPassword.Focus();
-                        }
+                        MessageBox.Show($"Đăng nhập vào hệ thống với vai trò [{UserSession.RoleName}] thành công!",
+                                        "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
-                        // Đăng nhập THẤT BẠI
+                        // THẤT BẠI: Tăng số lần gõ sai mật khẩu
+                        failedAttempts++;
                         DateTime? newLockout = null;
-
-                        if (failedAttempts < 5)
-                        {
-                            failedAttempts++;
-                        }
 
                         if (failedAttempts >= 5)
                         {
-                            newLockout = DateTime.Now.AddMinutes(15); // Khóa tạm thời 15 phút
-                            MessageBox.Show("Sai mật khẩu! Tài khoản đã bị khóa tạm thời 15 phút.", "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            newLockout = DateTime.Now.AddMinutes(15);
+                            MessageBox.Show("Sai mật khẩu quá 5 lần! Tài khoản của bạn đã bị khóa tạm thời 15 phút.", "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                         else
                         {
@@ -197,12 +193,68 @@ namespace ClassProject
 
                         txtPassword.Clear();
                         txtPassword.Focus();
+                        return;
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Lỗi kết nối CSDL: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Lỗi kết nối hoặc thực thi CSDL: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
+            } // Khối kết nối đóng hoàn toàn tại đây, giải phóng Connection cực kỳ an toàn trước khi chuyển Form
+
+            // BƯỚC 4: ĐIỀU HƯỚNG SANG FORM CHÍNH NGOÀI CONNECTION POOL
+            this.Hide();
+            using (f_main mainForm = new f_main())
+            {
+                mainForm.ShowDialog();
+            }
+
+            // Xử lý sau khi Form Main đóng (Đăng xuất hoặc thoát)
+            if (Application.OpenForms.Count > 0)
+            {
+                this.Show();
+                if (!Properties.Settings.Default.RememberMe)
+                {
+                    txtUsername.Clear();
+                    txtPassword.Clear();
+                    txtUsername.Focus();
+                }
+                else
+                {
+                    txtPassword.Clear();
+                    txtPassword.Focus();
+                }
+            }
+        }
+
+        private string EncryptPassword(string plainText)
+        {
+            if (string.IsNullOrEmpty(plainText)) return string.Empty;
+            try
+            {
+                byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+                byte[] encryptedBytes = ProtectedData.Protect(plainBytes, null, DataProtectionScope.CurrentUser);
+                return Convert.ToBase64String(encryptedBytes);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private string DecryptPassword(string cipherText)
+        {
+            if (string.IsNullOrEmpty(cipherText)) return string.Empty;
+            try
+            {
+                byte[] cipherBytes = Convert.FromBase64String(cipherText);
+                byte[] decryptedBytes = ProtectedData.Unprotect(cipherBytes, null, DataProtectionScope.CurrentUser);
+                return Encoding.UTF8.GetString(decryptedBytes);
+            }
+            catch
+            {
+                return string.Empty;
             }
         }
 
@@ -225,16 +277,19 @@ namespace ClassProject
 
         private void LoginForm_Load(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtUsername.Text))
+            if (Properties.Settings.Default.RememberMe)
             {
-                if (Properties.Settings.Default.RememberMe)
-                {
-                    txtUsername.Text = Properties.Settings.Default.Username;
-                    txtPassword.Text = Properties.Settings.Default.Password;
-                    chkRememberMe.Checked = true;
-                }
+                txtUsername.Text = Properties.Settings.Default.Username;
+                string savedPassword = Properties.Settings.Default.Password;
+                txtPassword.Text = DecryptPassword(savedPassword);
+                chkRememberMe.Checked = true;
             }
-            if (!string.IsNullOrEmpty(txtUsername.Text))
+
+            if (!string.IsNullOrEmpty(txtUsername.Text) && !string.IsNullOrEmpty(txtPassword.Text))
+            {
+                btnLogin.Focus();
+            }
+            else if (!string.IsNullOrEmpty(txtUsername.Text))
             {
                 txtPassword.Focus();
             }

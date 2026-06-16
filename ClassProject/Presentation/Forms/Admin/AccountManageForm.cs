@@ -1,43 +1,52 @@
-﻿using ClassProject.DataAccess.Db;
-using Microsoft.Data.SqlClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.Runtime.Intrinsics.X86;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using ClassProject.Commons.DTOs;
+using ClassProject.Data.Repositories;
 
 namespace ClassProject.Presentation.Forms.Admin
 {
     public partial class AccountManageForm : Form
     {
-        private My_DB db = new My_DB();
-        private DataTable dtAccounts;
+        private readonly IAccountRepository _accountRepository;
+        private List<UserDTO> _originalAccountList; // Lưu danh sách gốc để hỗ trợ tìm kiếm Local mượt mà
+        private bool isHeaderChecked = false;       // Trạng thái nút chọn tất cả trên Header
 
         public AccountManageForm()
         {
             InitializeComponent();
+            _accountRepository = new AccountRepository();
         }
 
         private void AccountManageForm_Load(object sender, EventArgs e)
         {
-            // Làm sạch và gắn sự kiện
+            // Hủy đăng ký để tránh trùng lặp sự kiện khi Load lại Form
             dgvPendingUsers.CellContentClick -= dgvPendingUsers_CellContentClick;
             dgvPendingUsers.CellContentClick += dgvPendingUsers_CellContentClick;
             dgvPendingUsers.CellDoubleClick -= dgvPendingUsers_CellDoubleClick;
             dgvPendingUsers.CellDoubleClick += dgvPendingUsers_CellDoubleClick;
-
             dgvPendingUsers.Paint -= dgvPendingUsers_Paint;
             dgvPendingUsers.Paint += dgvPendingUsers_Paint;
-
-            // Đăng ký sự kiện CellPainting để tự động vẽ Checkbox tổng lên tiêu đề cột "Chọn"
             dgvPendingUsers.CellPainting -= dgvPendingUsers_CellPainting;
             dgvPendingUsers.CellPainting += dgvPendingUsers_CellPainting;
             dgvPendingUsers.CellClick -= dgvPendingUsers_CellClick;
             dgvPendingUsers.CellClick += dgvPendingUsers_CellClick;
             dgvPendingUsers.CurrentCellDirtyStateChanged -= dgvPendingUsers_CurrentCellDirtyStateChanged;
             dgvPendingUsers.CurrentCellDirtyStateChanged += dgvPendingUsers_CurrentCellDirtyStateChanged;
+
+            // Ánh xạ an toàn các Control tìm kiếm và nút bấm từ Designer hệ thống cũ
+            BindControlEvents();
+
+            // Tải dữ liệu lên Grid
+            LoadAllAccounts();
+        }
+
+        private void BindControlEvents()
+        {
             if (this.Controls.Find("txtSearchPending", true).Length > 0)
             {
                 TextBox txtSearch = (TextBox)this.Controls.Find("txtSearchPending", true)[0];
@@ -48,7 +57,6 @@ namespace ClassProject.Presentation.Forms.Admin
             if (this.Controls.Find("btnBulkAccept", true).Length > 0)
             {
                 Button btnAcceptAll = (Button)this.Controls.Find("btnBulkAccept", true)[0];
-                btnAcceptAll.Visible = true;
                 btnAcceptAll.Click -= BtnBulkAccept_Click;
                 btnAcceptAll.Click += BtnBulkAccept_Click;
             }
@@ -56,76 +64,71 @@ namespace ClassProject.Presentation.Forms.Admin
             if (this.Controls.Find("btnBulkDelete", true).Length > 0)
             {
                 Button btnDeleteAll = (Button)this.Controls.Find("btnBulkDelete", true)[0];
-                btnDeleteAll.Visible = true;
                 btnDeleteAll.Click -= BtnBulkDelete_Click;
                 btnDeleteAll.Click += BtnBulkDelete_Click;
             }
-
-            LoadAllAccounts();
         }
 
         private void LoadAllAccounts()
         {
             try
             {
-                using (SqlConnection conn = db.GetConnection())
+                // BẢO MẬT: Lấy danh sách tài khoản, loại bỏ Admin (RoleId != 0) và tài khoản đã bị xóa mềm (Status != -1)
+                _originalAccountList = _accountRepository.GetAllAccounts()
+                                        .Where(u => u.Status != -1 && u.RoleId != 0)
+                                        .ToList();
+
+                // Làm sạch các cột tự tạo cũ tránh bị nhân bản cột khi refresh
+                string[] customCols = { "colSelect", "colAccept", "colLock", "colDelete" };
+                foreach (var col in customCols)
                 {
-                    string query = @"SELECT u.Username, r.RoleName AS Position, u.Status 
-                             FROM dbo.Users u 
-                             INNER JOIN dbo.Roles r ON u.RoleId = r.Id 
-                             WHERE u.RoleId != 0 AND u.Status != -1";
+                    if (dgvPendingUsers.Columns[col] != null)
+                        dgvPendingUsers.Columns.Remove(col);
+                }
 
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        dtAccounts = new DataTable();
-                        da.Fill(dtAccounts);
+                // Gán dữ liệu nguồn
+                dgvPendingUsers.DataSource = null;
+                dgvPendingUsers.DataSource = _originalAccountList;
 
-                        if (dgvPendingUsers.Columns["colSelect"] != null) dgvPendingUsers.Columns.Remove("colSelect");
-                        if (dgvPendingUsers.Columns["colAccept"] != null) dgvPendingUsers.Columns.Remove("colAccept");
-                        if (dgvPendingUsers.Columns["colLock"] != null) dgvPendingUsers.Columns.Remove("colLock");
-                        if (dgvPendingUsers.Columns["colDelete"] != null) dgvPendingUsers.Columns.Remove("colDelete");
+                // Cấu hình hiển thị chuẩn UI
+                dgvPendingUsers.AllowUserToAddRows = false;
+                dgvPendingUsers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                dgvPendingUsers.RowHeadersVisible = false;
+                dgvPendingUsers.EnableHeadersVisualStyles = false;
+                dgvPendingUsers.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(240, 240, 240);
+                dgvPendingUsers.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+                dgvPendingUsers.ColumnHeadersHeight = 32;
 
-                        dgvPendingUsers.DataSource = dtAccounts;
+                // Định danh lại Header của DTO
+                if (dgvPendingUsers.Columns["Username"] != null) dgvPendingUsers.Columns["Username"].HeaderText = "Tên tài khoản";
+                if (dgvPendingUsers.Columns["RoleName"] != null) dgvPendingUsers.Columns["RoleName"].HeaderText = "Chức vụ / Quyền";
+                if (dgvPendingUsers.Columns["Status"] != null) dgvPendingUsers.Columns["Status"].HeaderText = "Trạng thái hệ thống";
 
-                        dgvPendingUsers.AllowUserToAddRows = false;
-                        dgvPendingUsers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                        dgvPendingUsers.RowHeadersVisible = false;
+                // Ẩn các cột bổ trợ kỹ thuật của DTO không cần hiển thị lên Grid diện rộng
+                string[] hiddenCols = { "Id", "Email", "RoleId", "Valid", "FailedAttempts", "LockoutEnd", "LastLogin", "CreatedAt" };
+                foreach (var col in hiddenCols)
+                {
+                    if (dgvPendingUsers.Columns[col] != null) dgvPendingUsers.Columns[col].Visible = false;
+                }
 
-                        // Cấu hình phông nền tiêu đề hiện đại
-                        dgvPendingUsers.EnableHeadersVisualStyles = false;
-                        dgvPendingUsers.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(240, 240, 240);
-                        dgvPendingUsers.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-                        dgvPendingUsers.ColumnHeadersHeight = 32;
+                dgvPendingUsers.CellFormatting -= dgvPendingUsers_CellFormatting;
+                dgvPendingUsers.CellFormatting += dgvPendingUsers_CellFormatting;
 
-                        if (dgvPendingUsers.Columns["Username"] != null) dgvPendingUsers.Columns["Username"].HeaderText = "Tên tài khoản";
-                        if (dgvPendingUsers.Columns["Position"] != null) dgvPendingUsers.Columns["Position"].HeaderText = "Chức vụ / Quyền";
-                        if (dgvPendingUsers.Columns["Status"] != null) dgvPendingUsers.Columns["Status"].HeaderText = "Trạng thái hệ thống";
+                // Khởi tạo lại các cột nút bấm chức năng nhanh
+                DataGridButtonInit();
 
-                        dgvPendingUsers.CellFormatting -= dgvPendingUsers_CellFormatting;
-                        dgvPendingUsers.CellFormatting += dgvPendingUsers_CellFormatting;
+                // Phân quyền tương tác trên ô dữ liệu
+                dgvPendingUsers.ReadOnly = false;
+                dgvPendingUsers.EditMode = DataGridViewEditMode.EditOnEnter;
 
-                        DataGridButtonInit();
-
-                        // 1. Cho phép chỉnh sửa trên tổng thể GridView
-                        dgvPendingUsers.ReadOnly = false;
-
-                        // 2. Chế độ kích hoạt chỉnh sửa ngay khi con trỏ chuột vừa đi vào ô (giúp tích nhạy hơn)
-                        dgvPendingUsers.EditMode = DataGridViewEditMode.EditOnEnter;
-
-                        // 3. Khóa không cho sửa nội dung chữ của các cột dữ liệu lấy từ SQL
-                        if (dgvPendingUsers.Columns["Username"] != null) dgvPendingUsers.Columns["Username"].ReadOnly = true;
-                        if (dgvPendingUsers.Columns["Position"] != null) dgvPendingUsers.Columns["Position"].ReadOnly = true;
-                        if (dgvPendingUsers.Columns["Status"] != null) dgvPendingUsers.Columns["Status"].ReadOnly = true;
-
-                        // 4. Đảm bảo cột Checkbox được phép tương tác tích chọn thoải mái
-                        if (dgvPendingUsers.Columns["colSelect"] != null) dgvPendingUsers.Columns["colSelect"].ReadOnly = false;
-                    }
+                foreach (DataGridViewColumn col in dgvPendingUsers.Columns)
+                {
+                    if (col.Name != "colSelect") col.ReadOnly = true;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi hiển thị danh sách tài khoản: " + ex.Message, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi lấy danh sách tài khoản từ hệ thống: " + ex.Message, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -133,15 +136,14 @@ namespace ClassProject.Presentation.Forms.Admin
         {
             if (dgvPendingUsers.Columns["colSelect"] == null)
             {
-                DataGridViewCheckBoxColumn checkCol = new DataGridViewCheckBoxColumn();
-                checkCol.Name = "colSelect";
-                checkCol.HeaderText = "";
-
-                checkCol.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-                checkCol.Width = 45;
-                checkCol.Resizable = DataGridViewTriState.False;
-                checkCol.SortMode = DataGridViewColumnSortMode.NotSortable;
-
+                DataGridViewCheckBoxColumn checkCol = new DataGridViewCheckBoxColumn
+                {
+                    Name = "colSelect",
+                    HeaderText = "",
+                    Width = 45,
+                    Resizable = DataGridViewTriState.False,
+                    SortMode = DataGridViewColumnSortMode.NotSortable
+                };
                 checkCol.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 checkCol.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 dgvPendingUsers.Columns.Insert(0, checkCol);
@@ -149,42 +151,46 @@ namespace ClassProject.Presentation.Forms.Admin
 
             if (dgvPendingUsers.Columns["colAccept"] == null)
             {
-                DataGridViewButtonColumn btnAccept = new DataGridViewButtonColumn();
-                btnAccept.Name = "colAccept";
-                btnAccept.HeaderText = "Duyệt";
-                btnAccept.Text = "✔ Duyệt";
-                btnAccept.UseColumnTextForButtonValue = true;
-                btnAccept.FlatStyle = FlatStyle.Flat;
-                btnAccept.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-                btnAccept.Width = 85;
+                DataGridViewButtonColumn btnAccept = new DataGridViewButtonColumn
+                {
+                    Name = "colAccept",
+                    HeaderText = "Duyệt",
+                    Text = "✔ Duyệt",
+                    UseColumnTextForButtonValue = true,
+                    FlatStyle = FlatStyle.Flat,
+                    Width = 85
+                };
                 btnAccept.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 dgvPendingUsers.Columns.Add(btnAccept);
             }
 
             if (dgvPendingUsers.Columns["colLock"] == null)
             {
-                DataGridViewButtonColumn btnLock = new DataGridViewButtonColumn();
-                btnLock.Name = "colLock";
-                btnLock.HeaderText = "Khóa hệ thống";
-                btnLock.FlatStyle = FlatStyle.Flat;
-                btnLock.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-                btnLock.Width = 110;
+                DataGridViewButtonColumn btnLock = new DataGridViewButtonColumn
+                {
+                    Name = "colLock",
+                    HeaderText = "Khóa hệ thống",
+                    FlatStyle = FlatStyle.Flat,
+                    Width = 110
+                };
                 btnLock.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 dgvPendingUsers.Columns.Add(btnLock);
             }
 
             if (dgvPendingUsers.Columns["colDelete"] == null)
             {
-                DataGridViewButtonColumn btnDelete = new DataGridViewButtonColumn();
-                btnDelete.Name = "colDelete";
-                btnDelete.HeaderText = "Xóa/Từ chối";
-                btnDelete.FlatStyle = FlatStyle.Flat;
-                btnDelete.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-                btnDelete.Width = 110;
+                DataGridViewButtonColumn btnDelete = new DataGridViewButtonColumn
+                {
+                    Name = "colDelete",
+                    HeaderText = "Xóa/Từ chối",
+                    FlatStyle = FlatStyle.Flat,
+                    Width = 110
+                };
                 btnDelete.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 dgvPendingUsers.Columns.Add(btnDelete);
             }
 
+            // Sắp xếp thứ tự hiển thị trực quan các cột tính năng
             dgvPendingUsers.Columns["colSelect"].DisplayIndex = 0;
             dgvPendingUsers.Columns["colAccept"].DisplayIndex = dgvPendingUsers.Columns.Count - 3;
             dgvPendingUsers.Columns["colLock"].DisplayIndex = dgvPendingUsers.Columns.Count - 2;
@@ -195,43 +201,71 @@ namespace ClassProject.Presentation.Forms.Admin
         {
             if (e.RowIndex < 0 || e.RowIndex >= dgvPendingUsers.Rows.Count) return;
 
+            // ĐỒNG BỘ LOGIC HIỂN THỊ TRỰC QUAN CHUẨN:
             if (dgvPendingUsers.Columns[e.ColumnIndex].Name == "Status" && e.Value != null)
             {
                 int statusVal = Convert.ToInt32(e.Value);
-                if (statusVal == 0) { e.Value = "⏳ Chờ phê duyệt"; e.CellStyle.ForeColor = Color.Orange; }
-                else if (statusVal == 1) { e.Value = "🟢 Đang hoạt động"; e.CellStyle.ForeColor = Color.Green; }
-                else if (statusVal == 2) { e.Value = "🔴 Đã khóa"; e.CellStyle.ForeColor = Color.Red; }
-                else if (statusVal == 3) { e.Value = "❌ Đã từ chối"; e.CellStyle.ForeColor = Color.Gray; }
+                int validVal = Convert.ToInt32(dgvPendingUsers.Rows[e.RowIndex].Cells["Valid"].Value ?? 0);
+
+                if (validVal == 0)
+                {
+                    e.Value = "⏳ Chờ phê duyệt";
+                    e.CellStyle.ForeColor = Color.Orange;
+                }
+                else if (validVal == 2)
+                {
+                    e.Value = "❌ Đã từ chối";
+                    e.CellStyle.ForeColor = Color.Gray;
+                }
+                else // Khi Valid == 1 (Đã duyệt)
+                {
+                    if (statusVal == 0) { e.Value = "🟢 Đang hoạt động"; e.CellStyle.ForeColor = Color.Green; }
+                    else if (statusVal == 1) { e.Value = "🔴 Đã khóa"; e.CellStyle.ForeColor = Color.Red; }
+                }
             }
 
+            // Đổi text hiển thị động cho nút bấm Khóa/Mở khóa
             if (dgvPendingUsers.Columns[e.ColumnIndex].Name == "colLock")
             {
                 var statusCell = dgvPendingUsers.Rows[e.RowIndex].Cells["Status"];
                 if (statusCell != null && statusCell.Value != null)
                 {
                     int statusVal = Convert.ToInt32(statusCell.Value);
-                    e.Value = (statusVal == 2) ? "🔓 Mở khóa" : "🔒 Khóa";
+                    e.Value = (statusVal == 1) ? "🔓 Mở khóa" : "🔒 Khóa";
                 }
             }
 
+            // Đổi text hiển thị động cho nút bấm Từ chối / Xóa mềm
             if (dgvPendingUsers.Columns[e.ColumnIndex].Name == "colDelete")
             {
-                var statusCell = dgvPendingUsers.Rows[e.RowIndex].Cells["Status"];
-                if (statusCell != null && statusCell.Value != null)
+                var validCell = dgvPendingUsers.Rows[e.RowIndex].Cells["Valid"];
+                if (validCell != null && Convert.ToInt32(validCell.Value) == 0)
                 {
-                    int statusVal = Convert.ToInt32(statusCell.Value);
-                    e.Value = (statusVal == 0) ? "✖ Từ chối" : "🗑 Xóa mềm";
+                    e.Value = "✖ Từ chối";
+                }
+                else
+                {
+                    e.Value = "🗑 Xóa mềm";
                 }
             }
         }
 
         private void TxtSearchPending_TextChanged(object sender, EventArgs e)
         {
-            if (dtAccounts == null) return;
+            if (_originalAccountList == null) return;
             TextBox txt = sender as TextBox;
             if (txt == null) return;
-            string keyword = txt.Text.Replace("'", "''");
-            dtAccounts.DefaultView.RowFilter = string.Format("Username LIKE '%{0}%' OR Position LIKE '%{0}%'", keyword);
+
+            string keyword = txt.Text.Trim().ToLower();
+
+            var filteredList = _originalAccountList.Where(u =>
+                u.Username.ToLower().Contains(keyword) ||
+                u.RoleName.ToLower().Contains(keyword)
+            ).ToList();
+
+            dgvPendingUsers.DataSource = null;
+            dgvPendingUsers.DataSource = filteredList;
+            DataGridButtonInit();
         }
 
         private void dgvPendingUsers_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -241,84 +275,70 @@ namespace ClassProject.Presentation.Forms.Admin
             string colName = dgvPendingUsers.Columns[e.ColumnIndex].Name;
             string selectedUsername = dgvPendingUsers.Rows[e.RowIndex].Cells["Username"].Value.ToString();
             int currentStatus = Convert.ToInt32(dgvPendingUsers.Rows[e.RowIndex].Cells["Status"].Value);
+            int currentValid = Convert.ToInt32(dgvPendingUsers.Rows[e.RowIndex].Cells["Valid"].Value);
 
+            // Xử lý Hành động nút Duyệt tài khoản
             if (colName == "colAccept")
             {
-                if (currentStatus == 1)
+                if (currentValid == 1 && currentStatus == 0)
                 {
-                    MessageBox.Show("Tài khoản này đã ở trạng thái hoạt động!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Tài khoản này đã ở trạng thái hoạt động bình thường!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
-                string query = "UPDATE dbo.Users SET Status = 1, Valid = 1 WHERE Username = @user";
-                ExecuteDatabaseQuery(query, selectedUsername, $"Kích hoạt thành công tài khoản: {selectedUsername}");
+
+                if (_accountRepository.UpdateSingleStatus(selectedUsername, 0, 1))
+                {
+                    MessageBox.Show($"Kích hoạt thành công tài khoản: {selectedUsername}", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadAllAccounts();
+                }
             }
+            // Xử lý Hành động nút Khóa/Mở Khóa
             else if (colName == "colLock")
             {
-                if (currentStatus == 0 || currentStatus == 3)
+                if (currentValid == 0)
                 {
-                    MessageBox.Show("Tài khoản chưa phê duyệt hoặc đã bị từ chối, không thể thực hiện khóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Tài khoản chưa được phê duyệt, không thể thực hiện khóa hệ thống!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                int targetStatus = (currentStatus == 2) ? 1 : 2;
-                string confirmText = (targetStatus == 2) ? $"Xác nhận KHÓA tài khoản {selectedUsername}?" : $"Xác nhận MỞ KHÓA tài khoản {selectedUsername}?";
-                string successText = (targetStatus == 2) ? $"Đã khóa tài khoản: {selectedUsername}" : $"Đã mở khóa tài khoản: {selectedUsername}";
+                int targetStatus = (currentStatus == 1) ? 0 : 1;
+                string confirmText = (targetStatus == 1) ? $"Xác nhận KHÓA tài khoản {selectedUsername}?" : $"Xác nhận MỞ KHÓA tài khoản {selectedUsername}?";
+                string successText = (targetStatus == 1) ? $"Đã khóa tài khoản: {selectedUsername}" : $"Đã mở khóa tài khoản: {selectedUsername}";
 
-                if (MessageBox.Show(confirmText, "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show(confirmText, "Xác nhận hành động", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    string query = "UPDATE dbo.Users SET Status = @targetStatus WHERE Username = @user";
-                    ExecuteDatabaseQueryWithParam(query, selectedUsername, targetStatus, successText);
-                }
-            }
-            else if (colName == "colDelete")
-            {
-                if (currentStatus == 0)
-                {
-                    if (MessageBox.Show($"Từ chối yêu cầu đăng ký của tài khoản {selectedUsername}?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    if (_accountRepository.UpdateSingleStatus(selectedUsername, targetStatus, 1))
                     {
-                        string query = "UPDATE dbo.Users SET Status = 3 WHERE Username = @user";
-                        ExecuteDatabaseQuery(query, selectedUsername, $"Đã từ chối tài khoản {selectedUsername}");
-                    }
-                }
-                else
-                {
-                    if (MessageBox.Show($"Bạn có chắc chắn muốn XÓA MỀM tài khoản {selectedUsername}? (Dữ liệu lịch sử, bảng điểm vẫn được lưu trữ an toàn trong hệ thống)", "Xác nhận xóa an toàn", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-                    {
-                        string query = "UPDATE dbo.Users SET Status = -1 WHERE Username = @user";
-                        ExecuteDatabaseQuery(query, selectedUsername, $"Đã xóa mềm tài khoản {selectedUsername} khỏi danh sách hiển thị.");
-                    }
-                }
-            }
-        }
-
-        private void ExecuteDatabaseQuery(string query, string username, string successNotify)
-        {
-            ExecuteDatabaseQueryWithParam(query, username, null, successNotify);
-        }
-
-        private void ExecuteDatabaseQueryWithParam(string query, string username, int? status, string successNotify)
-        {
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@user", username);
-                        if (status.HasValue)
-                        {
-                            cmd.Parameters.AddWithValue("@targetStatus", status.Value);
-                        }
-                        conn.Open();
-                        cmd.ExecuteNonQuery();
-                        MessageBox.Show(successNotify, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(successText, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadAllAccounts();
                     }
                 }
             }
-            catch (Exception ex)
+            // Xử lý Hành động nút Xóa mềm / Từ chối đăng ký
+            else if (colName == "colDelete")
             {
-                MessageBox.Show("Lỗi xử lý Database: " + ex.Message, "Lỗi SQL", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (currentValid == 0)
+                {
+                    if (MessageBox.Show($"Từ chối yêu cầu đăng ký của tài khoản {selectedUsername}?", "Xác nhận từ chối", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        if (_accountRepository.UpdateSingleStatus(selectedUsername, 0, 2))
+                        {
+                            MessageBox.Show($"Đã từ chối tài khoản {selectedUsername}", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadAllAccounts();
+                        }
+                    }
+                }
+                else
+                {
+                    if (MessageBox.Show($"Bạn có chắc chắn muốn XÓA MỀM tài khoản {selectedUsername}?", "Xác nhận xóa an toàn", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    {
+                        if (_accountRepository.UpdateSingleStatus(selectedUsername, -1, currentValid))
+                        {
+                            MessageBox.Show($"Đã xóa mềm tài khoản {selectedUsername} khỏi danh sách hiển thị quản trị.", "Hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadAllAccounts();
+                        }
+                    }
+                }
             }
         }
 
@@ -345,7 +365,8 @@ namespace ClassProject.Presentation.Forms.Admin
             {
                 if (row.Cells["colSelect"] != null && Convert.ToBoolean(row.Cells["colSelect"].Value) == true)
                 {
-                    if (Convert.ToInt32(row.Cells["Status"].Value) == 0)
+                    int validVal = Convert.ToInt32(row.Cells["Valid"].Value ?? 0);
+                    if (validVal == 0)
                     {
                         selectedUsers.Add(row.Cells["Username"].Value.ToString());
                     }
@@ -354,13 +375,17 @@ namespace ClassProject.Presentation.Forms.Admin
 
             if (selectedUsers.Count == 0)
             {
-                MessageBox.Show("Vui lòng tích chọn ít nhất một tài khoản 'Chờ phê duyệt'!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng tích chọn ít nhất một tài khoản ở trạng thái 'Chờ phê duyệt'!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (MessageBox.Show($"Xác nhận duyệt hàng loạt {selectedUsers.Count} tài khoản đã chọn?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show($"Xác nhận duyệt phê duyệt hàng loạt {selectedUsers.Count} tài khoản đã chọn?", "Xác nhận hàng loạt", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                ExecuteBulkStatusUpdate(selectedUsers, 1, "Đã phê duyệt hàng loạt các tài khoản thành công!");
+                if (_accountRepository.UpdateBulkStatus(selectedUsers, 0, 1))
+                {
+                    MessageBox.Show("Đã phê duyệt hàng loạt các tài khoản thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadAllAccounts();
+                }
             }
         }
 
@@ -374,30 +399,30 @@ namespace ClassProject.Presentation.Forms.Admin
                 if (row.Cells["colSelect"] != null && Convert.ToBoolean(row.Cells["colSelect"].Value) == true)
                 {
                     string uName = row.Cells["Username"].Value.ToString();
-                    int status = Convert.ToInt32(row.Cells["Status"].Value);
+                    int valid = Convert.ToInt32(row.Cells["Valid"].Value ?? 0);
 
-                    if (status == 0) selectedPendingUsers.Add(uName);
-                    else if (status == 1 || status == 2) selectedActiveUsers.Add(uName);
+                    if (valid == 0) selectedPendingUsers.Add(uName);
+                    else selectedActiveUsers.Add(uName);
                 }
             }
 
             if (selectedPendingUsers.Count == 0 && selectedActiveUsers.Count == 0)
             {
-                MessageBox.Show("Vui lòng tích chọn ít nhất một tài khoản!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng tích chọn ít nhất một tài khoản để xử lý!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             string confirmMsg = $"Bạn có chắc chắn muốn xử lý hàng loạt các tài khoản đã chọn?\n" +
-                               $"- Từ chối {selectedPendingUsers.Count} tài khoản đăng ký mới.\n" +
-                               $"- Xóa mềm {selectedActiveUsers.Count} tài khoản đang hoạt động (Bảo toàn dữ liệu lịch sử).";
+                                $"- Từ chối {selectedPendingUsers.Count} yêu cầu đăng ký mới.\n" +
+                                $"- Xóa mềm {selectedActiveUsers.Count} tài khoản đang hoạt động hệ thống.";
 
-            if (MessageBox.Show(confirmMsg, "Cảnh báo xử lý hàng loạt", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            if (MessageBox.Show(confirmMsg, "Cảnh báo xử lý diện rộng", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 if (selectedPendingUsers.Count > 0)
-                    ExecuteBulkStatusUpdate(selectedPendingUsers, 3, null);
+                    _accountRepository.UpdateBulkStatus(selectedPendingUsers, 0, 2);
 
                 if (selectedActiveUsers.Count > 0)
-                    ExecuteBulkStatusUpdate(selectedActiveUsers, -1, null);
+                    _accountRepository.UpdateBulkStatus(selectedActiveUsers, -1, 1);
 
                 MessageBox.Show("Đã xử lý thay đổi trạng thái hàng loạt thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -409,65 +434,17 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        private void ExecuteBulkStatusUpdate(List<string> usernames, int targetStatus, string successMessage)
-        {
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    conn.Open();
-                    StringBuilder sb = new StringBuilder();
-                    int validVal = (targetStatus == 1) ? 1 : 0;
-                    sb.Append($"UPDATE dbo.Users SET Status = {targetStatus}, Valid = {validVal} WHERE Username IN (");
-
-                    using (SqlCommand cmd = new SqlCommand())
-                    {
-                        for (int i = 0; i < usernames.Count; i++)
-                        {
-                            string paramName = "@u" + i;
-                            sb.Append(paramName);
-                            if (i < usernames.Count - 1) sb.Append(",");
-
-                            cmd.Parameters.AddWithValue(paramName, usernames[i]);
-                        }
-                        sb.Append(")");
-
-                        cmd.CommandText = sb.ToString();
-                        cmd.Connection = conn;
-                        cmd.ExecuteNonQuery();
-
-                        if (!string.IsNullOrEmpty(successMessage))
-                        {
-                            MessageBox.Show(successMessage, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            LoadAllAccounts();
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi xử lý hàng loạt: " + ex.Message, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // TỰ ĐỘNG VẼ Ô "CHỌN TẤT CẢ" LÊN TIÊU ĐỀ GRIDVIEW
-        private bool isHeaderChecked = false;
-
         private void dgvPendingUsers_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
-            // Kiểm tra xem có phải ô tiêu đề của cột "colSelect" hay không
             if (e.RowIndex == -1 && e.ColumnIndex >= 0 && dgvPendingUsers.Columns[e.ColumnIndex].Name == "colSelect")
             {
                 e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.ContentForeground);
-
-                // Xác định kích thước và vị trí chính giữa của ô Checkbox tổng
                 Size checkboxSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal);
                 Point pt = new Point(
                     e.CellBounds.X + (e.CellBounds.Width - checkboxSize.Width) / 2,
                     e.CellBounds.Y + (e.CellBounds.Height - checkboxSize.Height) / 2
                 );
 
-                // Vẽ trạng thái Checkbox dựa trên biến điều khiển toàn cục
                 System.Windows.Forms.VisualStyles.CheckBoxState state = isHeaderChecked ?
                     System.Windows.Forms.VisualStyles.CheckBoxState.CheckedNormal :
                     System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal;
@@ -479,13 +456,11 @@ namespace ClassProject.Presentation.Forms.Admin
 
         private void dgvPendingUsers_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Người dùng click vào tiêu đề cột Chọn
             if (e.RowIndex == -1 && e.ColumnIndex >= 0 && dgvPendingUsers.Columns[e.ColumnIndex].Name == "colSelect")
             {
                 isHeaderChecked = !isHeaderChecked;
                 dgvPendingUsers.InvalidateCell(e.ColumnIndex, e.RowIndex);
 
-                // Cập nhật tích chọn/bỏ tích toàn bộ các hàng bên dưới
                 foreach (DataGridViewRow row in dgvPendingUsers.Rows)
                 {
                     row.Cells["colSelect"].Value = isHeaderChecked;
@@ -496,7 +471,6 @@ namespace ClassProject.Presentation.Forms.Admin
 
         private void dgvPendingUsers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Đảm bảo click vào hàng hợp lệ và KHÔNG click trúng các cột nút bấm hành động hoặc Checkbox
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {
                 string colName = dgvPendingUsers.Columns[e.ColumnIndex].Name;
@@ -505,15 +479,13 @@ namespace ClassProject.Presentation.Forms.Admin
                     if (dgvPendingUsers.Rows[e.RowIndex].Cells["Username"]?.Value != null)
                     {
                         string selectedUsername = dgvPendingUsers.Rows[e.RowIndex].Cells["Username"].Value.ToString();
-
-                        // Khởi tạo Form chi tiết và truyền Username sang
                         AccountDetailForm detailForm = new AccountDetailForm(selectedUsername);
                         detailForm.ShowDialog();
                     }
                 }
             }
         }
-        // Sự kiện ép DataGridView cập nhật giá trị Checkbox ngay lập tức khi người dùng vừa tích chọn
+
         private void dgvPendingUsers_CurrentCellDirtyStateChanged(object sender, EventArgs e)
         {
             if (dgvPendingUsers.IsCurrentCellDirty && dgvPendingUsers.CurrentCell is DataGridViewCheckBoxCell)

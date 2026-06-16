@@ -3,7 +3,7 @@ using ClassProject.DataAccess.Repositories;
 using System;
 using System.Data;
 using System.Drawing;
-using Microsoft.Data.SqlClient;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using LiveCharts;
 using LiveCharts.Wpf;
@@ -13,46 +13,145 @@ namespace ClassProject.Presentation.Forms.Admin
     public partial class StatisticsForm : Form
     {
         private readonly StatisticRepository _statRepo;
-        private readonly My_DB db = new My_DB();
+        private readonly My_DB _db = new My_DB();
         private LiveCharts.WinForms.PieChart livePieChart;
+        private bool _isDataLoading = false;
 
-        public StatisticsForm()
+        // Lưu thông tin phân quyền của người dùng hiện tại
+        private readonly string _currentUserRole;
+        private readonly int _currentUserId;
+
+        /// <summary>
+        /// Constructor nhận thông tin phân quyền từ Form chính (MainForm)
+        /// </summary>
+        /// <param name="role">"Admin", "HR", hoặc "Giảng viên"</param>
+        /// <param name="userId">ID của người dùng đăng nhập (đặc biệt cần cho Giảng viên)</param>
+        public StatisticsForm(string role, int userId = 0)
         {
             InitializeComponent();
-            _statRepo = new StatisticRepository(db.GetConnection().ConnectionString);
+            _currentUserRole = role;
+            _currentUserId = userId;
+
+            _statRepo = new StatisticRepository(_db.GetConnection().ConnectionString);
         }
 
-        private void StatisticsForm_Load(object sender, EventArgs e)
+        private async void StatisticsForm_Load(object sender, EventArgs e)
         {
             this.BackColor = Color.FromArgb(241, 245, 249);
 
             InitializeLiveChart();
-
             StyleDashboardGrid();
 
-            RefreshDashboardData();
+            // Áp dụng thiết lập UI theo vai trò trước khi nạp dữ liệu
+            ApplyRoleBasedUI();
+
+            await RefreshDashboardDataAsync();
         }
 
-        private void BtnRefresh_Click(object sender, EventArgs e)
+        private async void BtnRefresh_Click(object sender, EventArgs e)
         {
-            RefreshDashboardData();
+            await RefreshDashboardDataAsync();
         }
 
-        private void RefreshDashboardData()
+        /// <summary>
+        /// Ẩn/Hiện các thành phần giao diện dựa trên vai trò người dùng
+        /// </summary>
+        private void ApplyRoleBasedUI()
         {
-            this.Cursor = Cursors.WaitCursor; // Hiển thị con trỏ chuột chờ xử lý chuyên nghiệp
+            if (_currentUserRole == "HR")
+            {
+                // Ví dụ: HR chỉ cần xem biểu đồ tỉ lệ học lực, không cần xem danh sách chi tiết Top 10
+                if (dgvTopRanking != null) dgvTopRanking.Visible = false;
+
+                // Thay đổi tiêu đề form hoặc panel để HR biết phạm vi quyền hạn của mình
+                this.Text = "Thống Kê Phân Tích Dành Cho Nhân Sự (HR)";
+            }
+            else if (_currentUserRole == "Giảng viên")
+            {
+                this.Text = "Thống Kê Lớp Học & Điểm Số - Giảng Viên";
+                // Giảng viên xem được cả bảng điểm lẫn biểu đồ nhưng chỉ thuộc phạm vi lớp họ dạy
+            }
+            else // Admin
+            {
+                this.Text = "Bảng Điều Khiển Quản Trị Hệ Thống (Admin)";
+            }
+        }
+
+        /// <summary>
+        /// Xử lý nghiệp vụ chính: Đọc, gộp và tải dữ liệu theo phân quyền của từng Role
+        /// </summary>
+        private async Task RefreshDashboardDataAsync()
+        {
+            if (_isDataLoading) return;
+
             try
             {
-                LoadDashboardCards();
-                LoadDashboardData();
+                _isDataLoading = true;
+
+                if (btnRefresh != null) btnRefresh.Enabled = false;
+                this.Cursor = Cursors.WaitCursor;
+
+                // Khởi tạo các Task rỗng để tránh lỗi chưa gán giá trị
+                Task<DataRow> cardMetricsTask = null;
+                Task<DataTable> topStudentsTask = Task.FromResult(new DataTable());
+                Task<DataTable> academicRankingTask = Task.FromResult(new DataTable());
+
+                // PHÂN LUỒNG TRUY VẤN THEO VAI TRÒ
+                if (_currentUserRole == "Giảng viên")
+                {
+                    cardMetricsTask = _statRepo.GetDashboardCardMetricsByInstructorAsync(_currentUserId.ToString());
+                    topStudentsTask = Task.Run(() => _statRepo.GetTopStudentsByInstructor(_currentUserId.ToString()));
+                    academicRankingTask = Task.Run(() => _statRepo.GetAcademicRankingStatsByInstructor(_currentUserId.ToString()));
+                }
+                else if (_currentUserRole == "HR")
+                {
+                    // HR xem toàn trường giống Admin nhưng không cần nạp Task danh sách sinh viên
+                    cardMetricsTask = _statRepo.GetDashboardCardMetricsAsync();
+                    academicRankingTask = Task.Run(() => _statRepo.GetAcademicRankingStats());
+                }
+                else // Admin hoặc các quyền cao nhất
+                {
+                    cardMetricsTask = _statRepo.GetDashboardCardMetricsAsync();
+                    topStudentsTask = Task.Run(() => _statRepo.GetTopStudents());
+                    academicRankingTask = Task.Run(() => _statRepo.GetAcademicRankingStats());
+                }
+
+                // Đợi các luồng được chỉ định hoàn thành
+                await Task.WhenAll(cardMetricsTask, topStudentsTask, academicRankingTask);
+
+                // 1. CẬP NHẬT 3 THẺ KPI CARDS
+                DataRow drMetrics = cardMetricsTask.Result;
+                if (drMetrics != null)
+                {
+                    int totalStudents = drMetrics["TotalStudents"] != DBNull.Value ? Convert.ToInt32(drMetrics["TotalStudents"]) : 0;
+                    double avgGpa = drMetrics["AvgGPA"] != DBNull.Value ? Convert.ToDouble(drMetrics["AvgGPA"]) : 0.0;
+                    double excellentRate = drMetrics["ExcellentRate"] != DBNull.Value ? Convert.ToDouble(drMetrics["ExcellentRate"]) : 0.0;
+
+                    if (lblTotalStudentsValue != null) lblTotalStudentsValue.Text = totalStudents.ToString("N0");
+                    if (lblAvgGPAValue != null) lblAvgGPAValue.Text = avgGpa.ToString("0.00");
+                    if (lblExcellentRateValue != null) lblExcellentRateValue.Text = Math.Round(excellentRate, 1).ToString("0.0") + "%";
+                }
+
+                // 2. ĐỔ DỮ LIỆU VÀO BẢNG XẾP HẠNG (Chỉ thực hiện nếu không phải HR)
+                if (_currentUserRole != "HR" && dgvTopRanking != null)
+                {
+                    dgvTopRanking.DataSource = topStudentsTask.Result;
+                    FormatGridColumns();
+                }
+
+                // 3. VẼ BIỂU ĐỒ TRÒN PHÂN PHỐI HỌC LỰC
+                SetupLivePieChart(academicRankingTask.Result);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Có lỗi xảy ra khi làm mới dữ liệu: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Lỗi hệ thống khi tải dữ liệu phân tích Dashboard: {ex.Message}",
+                                "Lỗi Truy Vấn Dữ Liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                this.Cursor = Cursors.Default; // Trả con trỏ chuột về trạng thái bình thường
+                _isDataLoading = false;
+                if (btnRefresh != null) btnRefresh.Enabled = true;
+                this.Cursor = Cursors.Default;
             }
         }
 
@@ -62,7 +161,7 @@ namespace ClassProject.Presentation.Forms.Admin
 
             livePieChart = new LiveCharts.WinForms.PieChart();
             livePieChart.Dock = DockStyle.Fill;
-            livePieChart.LegendLocation = LegendLocation.Bottom; // Chú thích nằm dưới đáy biểu đồ
+            livePieChart.LegendLocation = LegendLocation.Bottom;
 
             livePieChart.DefaultLegend.Foreground = System.Windows.Media.Brushes.DarkSlateGray;
             livePieChart.DefaultLegend.FontSize = 13;
@@ -82,6 +181,7 @@ namespace ClassProject.Presentation.Forms.Admin
             dgvTopRanking.GridColor = Color.FromArgb(241, 245, 249);
             dgvTopRanking.BackgroundColor = Color.White;
             dgvTopRanking.BorderStyle = BorderStyle.None;
+            dgvTopRanking.ReadOnly = true;
 
             dgvTopRanking.RowHeadersVisible = true;
             dgvTopRanking.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
@@ -102,13 +202,14 @@ namespace ClassProject.Presentation.Forms.Admin
             dgvTopRanking.DefaultCellStyle.SelectionBackColor = Color.FromArgb(239, 246, 255);
             dgvTopRanking.DefaultCellStyle.SelectionForeColor = Color.FromArgb(37, 99, 235);
 
-            dgvTopRanking.RowPostPaint -= dgvTopRanking_RowPostPaint; // Gỡ sự kiện cũ tránh trùng lặp
+            dgvTopRanking.RowPostPaint -= dgvTopRanking_RowPostPaint;
             dgvTopRanking.RowPostPaint += dgvTopRanking_RowPostPaint;
         }
 
         private void dgvTopRanking_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
             var grid = sender as DataGridView;
+            if (grid == null) return;
             string rankText = (e.RowIndex + 1).ToString();
 
             using (Brush brush = new SolidBrush(Color.FromArgb(100, 116, 139)))
@@ -124,68 +225,8 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        // GỘP VÀ CHUẨN HÓA TOÀN BỘ LOGIC ĐỌC CARD DỮ LIỆU TỪ DATABASE
-        private void LoadDashboardCards()
-        {
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    conn.Open();
-
-                    // 1. Đếm tổng số sinh viên toàn trường
-                    SqlCommand cmd1 = new SqlCommand("SELECT COUNT(*) FROM Students", conn);
-                    int totalStudents = Convert.ToInt32(cmd1.ExecuteScalar());
-                    if (lblTotalStudentsValue != null) lblTotalStudentsValue.Text = totalStudents.ToString("N0");
-
-                    // 2. Tính điểm GPA trung bình hệ thống từ cột DiemTK mới
-                    SqlCommand cmd2 = new SqlCommand("SELECT AVG(DiemTK) FROM Score", conn);
-                    object avgGpaObj = cmd2.ExecuteScalar();
-                    double avgGpa = (avgGpaObj != DBNull.Value) ? Convert.ToDouble(avgGpaObj) : 0.0;
-
-                    if (lblAvgGPAValue != null)
-                        lblAvgGPAValue.Text = avgGpa.ToString("0.00");
-
-                    // 3. Tính tỷ lệ sinh viên xuất sắc (DiemTK từ 9.0 trở lên)
-                    SqlCommand cmd3 = new SqlCommand(@"
-                        SELECT 
-                            CASE WHEN COUNT(DISTINCT MSSV) = 0 THEN 0 
-                            ELSE (COUNT(DISTINCT CASE WHEN DiemTK >= 9.0 THEN MSSV END) * 100.0 / COUNT(DISTINCT MSSV)) END
-                        FROM Score", conn);
-                    double excellentRate = Convert.ToDouble(cmd3.ExecuteScalar());
-
-                    if (lblExcellentRateValue != null)
-                        lblExcellentRateValue.Text = Math.Round(excellentRate, 1).ToString("0.0") + "%";
-                }
-            }
-            catch
-            {
-                // Khóa an toàn chống sập ứng dụng khi database trống rỗng
-            }
-        }
-
-        private void LoadDashboardData()
-        {
-            try
-            {
-                // Tải dữ liệu bảng xếp hạng học lực Top 10 sinh viên
-                DataTable dtTop = _statRepo.GetTopStudents();
-                dgvTopRanking.DataSource = dtTop;
-                FormatGridColumns();
-
-                // Lấy dữ liệu phân loại học lực và kích hoạt biểu đồ tròn
-                DataTable dtChart = _statRepo.GetAcademicRankingStats();
-                SetupLivePieChart(dtChart);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi xử lý dữ liệu thống kê: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
         private void FormatGridColumns()
         {
-            // Bảo hiểm: Bật hiển thị tên cột lên một lần nữa khi nạp nguồn dữ liệu mới
             dgvTopRanking.ColumnHeadersVisible = true;
 
             if (dgvTopRanking.Columns.Count > 0)
@@ -197,7 +238,6 @@ namespace ClassProject.Presentation.Forms.Admin
 
                 dgvTopRanking.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-                // Cân đối tỷ lệ các cột dữ liệu trên bảng xếp hạng Top 10
                 if (dgvTopRanking.Columns.Contains("MSSV")) dgvTopRanking.Columns["MSSV"].FillWeight = 70;
                 if (dgvTopRanking.Columns.Contains("FullName")) dgvTopRanking.Columns["FullName"].FillWeight = 140;
                 if (dgvTopRanking.Columns.Contains("GPA")) dgvTopRanking.Columns["GPA"].FillWeight = 60;
@@ -212,20 +252,18 @@ namespace ClassProject.Presentation.Forms.Admin
             SeriesCollection seriesCollection = new SeriesCollection();
 
             System.Windows.Media.Color[] colors = new System.Windows.Media.Color[] {
-                System.Windows.Media.Color.FromRgb(16, 185, 129), // Xuất sắc
-                System.Windows.Media.Color.FromRgb(59, 130, 246), // Giỏi
-                System.Windows.Media.Color.FromRgb(245, 158, 11), // Khá
-                System.Windows.Media.Color.FromRgb(235, 94, 40),  // Trung bình
-                System.Windows.Media.Color.FromRgb(239, 68, 68)   // Yếu
+                System.Windows.Media.Color.FromRgb(16, 185, 129),  // Xuất sắc
+                System.Windows.Media.Color.FromRgb(59, 130, 246),  // Giỏi
+                System.Windows.Media.Color.FromRgb(245, 158, 11),  // Khá
+                System.Windows.Media.Color.FromRgb(107, 114, 128), // Trung bình
+                System.Windows.Media.Color.FromRgb(239, 68, 68)    // Yếu
             };
-
-            livePieChart.Series = seriesCollection;
 
             int idx = 0;
             foreach (DataRow row in dt.Rows)
             {
-                string title = row["RankingGroup"].ToString();
-                int count = Convert.ToInt32(row["StudentCount"]);
+                string title = row["RankingGroup"] != DBNull.Value ? row["RankingGroup"].ToString() : "Chưa phân loại";
+                int count = row["StudentCount"] != DBNull.Value ? Convert.ToInt32(row["StudentCount"]) : 0;
 
                 var fillBrush = new System.Windows.Media.SolidColorBrush(colors[idx % colors.Length]);
                 fillBrush.Freeze();
@@ -235,7 +273,7 @@ namespace ClassProject.Presentation.Forms.Admin
                     Title = title,
                     Values = new ChartValues<int> { count },
                     DataLabels = true,
-                    LabelPoint = chartPoint => string.Format("{0} ({1:P1})", chartPoint.Y, chartPoint.Participation),
+                    LabelPoint = chartPoint => string.Format("{0} SV ({1:P1})", chartPoint.Y, chartPoint.Participation),
                     Fill = fillBrush,
                     PushOut = 2,
                     Stroke = System.Windows.Media.Brushes.White,
@@ -245,6 +283,8 @@ namespace ClassProject.Presentation.Forms.Admin
                 seriesCollection.Add(pieSeries);
                 idx++;
             }
+
+            livePieChart.Series = seriesCollection;
         }
     }
 }

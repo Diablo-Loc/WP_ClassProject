@@ -1,34 +1,57 @@
 ﻿using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
-using ClassProject.DataAccess.Db; // Định vị không gian tên chứa thực thể cơ sở dữ liệu My_DB
+using Microsoft.Data.SqlClient;
+using ClassProject.DataAccess.Db;
+using ClassProject.DataAccess.Repositories;
+using ClassProject.Models;
 
 namespace ClassProject.Presentation.Forms.Course
 {
     public partial class ManageCourseForm : Form
     {
         private readonly My_DB db = new My_DB();
+        private readonly CourseRepository _courseRepo;
 
         public ManageCourseForm()
         {
             InitializeComponent();
+
+            _courseRepo = new CourseRepository();
+
             ConfigCustomUI();
         }
 
         private void ManageCourseForm_Load(object sender, EventArgs e)
         {
+            // 🌟 CHỐT CHẶN BẢO MẬT TẦNG 1: Chỉ Admin (Role 0) hoặc Giáo vụ/HR (Role 2) mới có quyền quản lý danh mục môn học
+            if (!UserSession.IsLoggedIn || (!UserSession.IsAdmin && !UserSession.IsStaff))
+            {
+                MessageBox.Show("Quyền truy cập bị từ chối! Chức năng cấu hình danh mục môn học gốc chỉ dành cho Ban quản trị hoặc phòng Giáo vụ/HR.",
+                                "Cảnh Báo An Ninh", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+
+                // Đóng form an toàn tránh xung đột luồng UI khi Form đang load
+                this.BeginInvoke(new MethodInvoker(this.Close));
+                return;
+            }
+
+            // Phòng thủ kiểm soát độ dài chuỗi nhập liệu tránh tràn bộ đệm (Data Overflow)
+            txtCourseID.MaxLength = 20;   // Khớp CHAR/VARCHAR trong DB
+            txtCourseName.MaxLength = 100; // Khớp NVARCHAR trong DB
+            if (txtSearch != null) txtSearch.MaxLength = 100;
+
             InitSemesterComboBox();
             LoadCourseData();
+            ResetFields(); // Đưa form về trạng thái mặc định ban đầu
         }
 
-        /// Cấu hình các thuộc tính giao diện nâng cao trực tiếp bằng mã nguồn để đảm bảo độ mịn UI/UX hiện đại
+        // Cấu hình giao diện nâng cao trực tiếp bằng mã nguồn (Modern Flat)
         private void ConfigCustomUI()
         {
-            this.BackColor = Color.FromArgb(246, 248, 251); // Màu nền chuẩn hệ thống
+            this.BackColor = Color.FromArgb(246, 248, 251);
 
-            // Tinh chỉnh lưới hiển thị Guna2DataGridView sang thiết kế Modern Flat
+            // Tinh chỉnh lưới hiển thị Guna2DataGridView
             dgvCourses.AllowUserToAddRows = false;
             dgvCourses.RowHeadersVisible = false;
             dgvCourses.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -45,9 +68,12 @@ namespace ClassProject.Presentation.Forms.Course
             dgvCourses.RowTemplate.Height = 32;
             dgvCourses.DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Regular);
             dgvCourses.DefaultCellStyle.ForeColor = Color.FromArgb(60, 65, 75);
+
+            // Gán sự kiện thời gian thực cho ô Tìm kiếm và Chặn nhập chữ ô Số tuần
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            txtWeeks.KeyPress += txtWeeks_KeyPress;
         }
 
-        /// Khởi tạo dữ liệu mẫu cho ComboBox Học kỳ
         private void InitSemesterComboBox()
         {
             cboSemester.Items.Clear();
@@ -57,110 +83,114 @@ namespace ClassProject.Presentation.Forms.Course
             cboSemester.SelectedIndex = 0;
         }
 
-        /// Đổ dữ liệu danh sách học phần gốc lên lưới hiển thị (UC-12) - KHỚP 100% CSDL SCRIPT
+        // Đổ dữ liệu lên Grid thông qua Repository (Đồng bộ các cột)
         private void LoadCourseData()
         {
             try
             {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    // Đã sửa chính xác tên cột theo SQL: MaMH, TenMH, SoTC, Tuan, Hky, NamHoc, Mota
-                    string query = "SELECT MaMH AS [Mã Môn], TenMH AS [Tên Môn Học], SoTC AS [Số Tín Chỉ], Tuan AS [Số Tuần], Hky AS [Học Kỳ], NamHoc AS [Năm Học], Mota AS [Mô Tả] FROM Course";
+                DataTable dt = _courseRepo.GetCourses();
+                dgvCourses.DataSource = dt;
 
-                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
-                    DataTable dt = new DataTable();
-                    adapter.Fill(dt);
-                    dgvCourses.DataSource = dt;
+                // Đổi tên cột hiển thị thân thiện trên Grid
+                if (dgvCourses.Columns["MaMH"] != null) dgvCourses.Columns["MaMH"].HeaderText = "Mã Môn";
+                if (dgvCourses.Columns["TenMH"] != null) dgvCourses.Columns["TenMH"].HeaderText = "Tên Môn Học";
+                if (dgvCourses.Columns["SoTC"] != null) dgvCourses.Columns["SoTC"].HeaderText = "Số Tín Chỉ";
+                if (dgvCourses.Columns["Tuan"] != null) dgvCourses.Columns["Tuan"].HeaderText = "Số Tuần";
+                if (dgvCourses.Columns["Hky"] != null) dgvCourses.Columns["Hky"].HeaderText = "Học Kỳ";
+                if (dgvCourses.Columns["NamHoc"] != null) dgvCourses.Columns["NamHoc"].HeaderText = "Năm Học";
+                if (dgvCourses.Columns["Mota"] != null) dgvCourses.Columns["Mota"].HeaderText = "Mô Tả";
 
-                    // Định độ rộng cột hiển thị thông minh
-                    if (dgvCourses.Columns["Mã Môn"] != null) dgvCourses.Columns["Mã Môn"].Width = 90;
-                    if (dgvCourses.Columns["Số Tín Chỉ"] != null) dgvCourses.Columns["Số Tín Chỉ"].Width = 90;
-                    if (dgvCourses.Columns["Học Kỳ"] != null) dgvCourses.Columns["Học Kỳ"].Width = 80;
-                }
+                // Định độ rộng cột hiển thị thông minh
+                if (dgvCourses.Columns["MaMH"] != null) dgvCourses.Columns["MaMH"].Width = 90;
+                if (dgvCourses.Columns["SoTC"] != null) dgvCourses.Columns["SoTC"].Width = 90;
+                if (dgvCourses.Columns["Hky"] != null) dgvCourses.Columns["Hky"].Width = 80;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Hệ thống không thể truy xuất dữ liệu: {ex.Message}", "Lỗi cấu trúc", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Hệ thống không thể truy xuất dữ liệu môn học: {ex.Message}", "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        /// Đẩy ngược dữ liệu từ dòng được chọn ở bảng trắng lên panel cấu hình nhập liệu bên trái
+        // Đẩy ngược dữ liệu từ dòng được chọn lên các Control nhập liệu
         private void dgvCourses_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 DataGridViewRow row = dgvCourses.Rows[e.RowIndex];
 
-                txtCourseID.Text = row.Cells["Mã Môn"].Value.ToString();
-                txtCourseName.Text = row.Cells["Tên Môn Học"].Value.ToString();
-                numCredits.Value = Convert.ToDecimal(row.Cells["Số Tín Chỉ"].Value);
-                txtWeeks.Text = row.Cells["Số Tuần"].Value.ToString();
-                txtDescription.Text = row.Cells["Mô Tả"].Value.ToString();
+                txtCourseID.Text = row.Cells["MaMH"].Value?.ToString()?.Trim() ?? "";
+                txtCourseName.Text = row.Cells["TenMH"].Value?.ToString() ?? "";
 
-                // Đồng bộ Năm học nếu form giao diện có TextBox riêng, nếu không có bạn có thể bỏ qua dòng dưới
-                // txtAcademicYear.Text = row.Cells["Năm Học"].Value.ToString();
+                numCredits.Value = row.Cells["SoTC"].Value != DBNull.Value ? Convert.ToDecimal(row.Cells["SoTC"].Value) : 3;
+                txtWeeks.Text = row.Cells["Tuan"].Value?.ToString() ?? "15";
+                txtDescription.Text = row.Cells["Mota"].Value?.ToString() ?? "";
 
-                // Chuyển đổi giá trị số INT (1,2,3) từ CSDL ngược lại thành text ComboBox
-                string hkyValue = row.Cells["Học Kỳ"].Value.ToString();
+                string hkyValue = row.Cells["Hky"].Value?.ToString() ?? "1";
                 if (hkyValue == "2") cboSemester.SelectedIndex = 1;
                 else if (hkyValue == "3") cboSemester.SelectedIndex = 2;
                 else cboSemester.SelectedIndex = 0;
 
-                txtCourseID.ReadOnly = true; // Khóa trường khóa chính tránh xung đột dữ liệu toàn vẹn
+                // Quản lý trạng thái điều khiển
+                txtCourseID.ReadOnly = true;
+                btnAdd.Enabled = false;
+                btnEdit.Enabled = true;
+
+                // 🌟 QUẢN LÝ QUYỀN NÚT XÓA: Chỉ Admin mới được mở nút Xóa, Giáo vụ (HR) bị khóa nút
+                if (UserSession.IsAdmin)
+                {
+                    btnDelete.Enabled = true;
+                }
+                else
+                {
+                    btnDelete.Enabled = false;
+                }
             }
         }
 
-        /// Xử lý nghiệp vụ THÊM MÔN HỌC MỚI (UC-10) - KHỚP 100% CSDL SCRIPT
+        // Nghiệp vụ THÊM MÔN HỌC MỚI (Admin & Giáo vụ đều thực hiện được)
         private void btnAdd_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtCourseID.Text) || string.IsNullOrWhiteSpace(txtCourseName.Text))
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ các thông tin bắt buộc (Mã môn và Tên môn)!", "Cảnh báo nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin Mã môn và Tên môn học!", "Dữ Liệu Hợp Lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
-                using (SqlConnection conn = db.GetConnection())
+                int semesterInt = 1;
+                if (cboSemester.Text.Contains("2")) semesterInt = 2;
+                else if (cboSemester.Text.Contains("3")) semesterInt = 3;
+
+                var newCourse = new Models.Course
                 {
-                    // Lệnh SQL chèn dữ liệu chuẩn hoá theo cấu trúc thực tế bảng Course
-                    string query = "INSERT INTO Course (MaMH, TenMH, SoTC, Tuan, Hky, NamHoc, Mota) VALUES (@MaMH, @TenMH, @SoTC, @Tuan, @Hky, @NamHoc, @Mota)";
-                    SqlCommand cmd = new SqlCommand(query, conn);
+                    MaMH = txtCourseID.Text.Trim().ToUpper(), // Tự động chuẩn hóa viết hoa mã học phần
+                    TenMH = txtCourseName.Text.Trim(),
+                    SoTC = (int)numCredits.Value,
+                    Tuan = string.IsNullOrWhiteSpace(txtWeeks.Text) ? 15 : Convert.ToInt32(txtWeeks.Text.Trim()),
+                    Hky = semesterInt,
+                    NamHoc = "2026-2027",
+                    Mota = txtDescription.Text.Trim()
+                };
 
-                    cmd.Parameters.AddWithValue("@MaMH", txtCourseID.Text.Trim().ToUpper());
-                    cmd.Parameters.AddWithValue("@TenMH", txtCourseName.Text.Trim());
-                    cmd.Parameters.AddWithValue("@SoTC", (int)numCredits.Value);
-                    cmd.Parameters.AddWithValue("@Tuan", string.IsNullOrWhiteSpace(txtWeeks.Text) ? 15 : Convert.ToInt32(txtWeeks.Text.Trim()));
-
-                    // Logic bóc tách chuỗi chữ từ ComboBox (VD: "Học kỳ 2") thành số nguyên INT (2) để đẩy vào DB
-                    int semesterInt = 1;
-                    if (cboSemester.Text.Contains("2")) semesterInt = 2;
-                    else if (cboSemester.Text.Contains("3")) semesterInt = 3;
-                    cmd.Parameters.AddWithValue("@Hky", semesterInt);
-
-                    // Gán năm học mặc định khớp theo script (2026-2027) hoặc từ ô nhập liệu của bạn
-                    cmd.Parameters.AddWithValue("@NamHoc", "2026-2027");
-                    cmd.Parameters.AddWithValue("@Mota", txtDescription.Text.Trim());
-
-                    conn.Open();
-                    cmd.ExecuteNonQuery();
-                    MessageBox.Show("Tạo mới học phần gốc thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
+                if (_courseRepo.AddCourse(newCourse))
+                {
+                    MessageBox.Show("Tạo mới học phần gốc vào danh mục thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ResetFields();
                     LoadCourseData();
                 }
             }
-            catch (SqlException ex) when (ex.Number == 2627) // Lỗi trùng lặp dữ liệu khóa chính Primary Key trong SQL
+            catch (InvalidOperationException ex)
             {
-                MessageBox.Show("Mã môn học này đã tồn tại trên hệ thống dữ liệu!", "Xung đột khóa chính", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                MessageBox.Show(ex.Message, "Cảnh báo nghiệp vụ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi thêm dữ liệu: {ex.Message}", "Lỗi nghiệp vụ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi thêm dữ liệu: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        /// Xử lý nghiệp vụ SỬA THÔNG TIN MÔN HỌC GỐC (UC-11) - KHỚP 100% CSDL SCRIPT
+        // Nghiệp vụ CẬP NHẬT THÔNG TIN MÔN HỌC (Admin & Giáo vụ đều thực hiện được)
         private void btnEdit_Click(object sender, EventArgs e)
         {
             if (!txtCourseID.ReadOnly)
@@ -171,31 +201,31 @@ namespace ClassProject.Presentation.Forms.Course
 
             try
             {
-                using (SqlConnection conn = db.GetConnection())
+                int semesterInt = 1;
+                if (cboSemester.Text.Contains("2")) semesterInt = 2;
+                else if (cboSemester.Text.Contains("3")) semesterInt = 3;
+
+                var updatedCourse = new Models.Course
                 {
-                    // Lệnh UPDATE chuẩn hoá tên cột trường dữ liệu
-                    string query = "UPDATE Course SET TenMH = @TenMH, SoTC = @SoTC, Tuan = @Tuan, Hky = @Hky, Mota = @Mota WHERE MaMH = @MaMH";
-                    SqlCommand cmd = new SqlCommand(query, conn);
+                    MaMH = txtCourseID.Text.Trim(),
+                    TenMH = txtCourseName.Text.Trim(),
+                    SoTC = (int)numCredits.Value,
+                    Tuan = string.IsNullOrWhiteSpace(txtWeeks.Text) ? 15 : Convert.ToInt32(txtWeeks.Text.Trim()),
+                    Hky = semesterInt,
+                    NamHoc = "2026-2027",
+                    Mota = txtDescription.Text.Trim()
+                };
 
-                    cmd.Parameters.AddWithValue("@MaMH", txtCourseID.Text.Trim());
-                    cmd.Parameters.AddWithValue("@TenMH", txtCourseName.Text.Trim());
-                    cmd.Parameters.AddWithValue("@SoTC", (int)numCredits.Value);
-                    cmd.Parameters.AddWithValue("@Tuan", Convert.ToInt32(txtWeeks.Text.Trim()));
-
-                    int semesterInt = 1;
-                    if (cboSemester.Text.Contains("2")) semesterInt = 2;
-                    else if (cboSemester.Text.Contains("3")) semesterInt = 3;
-                    cmd.Parameters.AddWithValue("@Hky", semesterInt);
-
-                    cmd.Parameters.AddWithValue("@Mota", txtDescription.Text.Trim());
-
-                    conn.Open();
-                    cmd.ExecuteNonQuery();
+                if (_courseRepo.UpdateCourse(updatedCourse))
+                {
                     MessageBox.Show("Cập nhật thông tin học phần thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                     ResetFields();
                     LoadCourseData();
                 }
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Cảnh báo nghiệp vụ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
@@ -203,36 +233,36 @@ namespace ClassProject.Presentation.Forms.Course
             }
         }
 
-        /// Xử lý nghiệp vụ XÓA MÔN HỌC KHỎI HỆ THỐNG GỐC (UC-12) - BẢO VỆ TOÀN VẸN RÀNG BUỘC KHÓA NGOẠI
+        // Nghiệp vụ XÓA MÔN HỌC (Chỉ có quyền Admin)
         private void btnDelete_Click(object sender, EventArgs e)
         {
+            // 🌟 CHỐT CHẶN BẢO MẬT VÒNG 2: Ngăn chặn triệt để hành vi cố tình bypass nút bấm
+            if (!UserSession.IsAdmin)
+            {
+                MessageBox.Show("Quyền hạn bị từ chối! Tài khoản thuộc vai trò Giáo vụ/HR không được phép hủy hoặc xóa môn học gốc khỏi hệ thống.",
+                                "Hạn Chế Thẩm Quyền", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(txtCourseID.Text)) return;
 
-            DialogResult confirm = MessageBox.Show($"Bạn có chắc chắn muốn xóa vĩnh viễn môn học [{txtCourseID.Text.Trim()}] ra khỏi danh mục đào tạo gốc không?",
+            DialogResult confirm = MessageBox.Show($"Bạn có chắc chắn muốn xóa vĩnh viễn môn học [{txtCourseID.Text.Trim()}] ra khỏi danh mục đào tạo không?\nHành động này chỉ thành công nếu môn chưa mở bất kỳ lớp học phần nào.",
                 "Hành động nguy hiểm", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
             if (confirm == DialogResult.Yes)
             {
                 try
                 {
-                    using (SqlConnection conn = db.GetConnection())
+                    if (_courseRepo.DeleteCourse(txtCourseID.Text.Trim()))
                     {
-                        string query = "DELETE FROM Course WHERE MaMH = @MaMH";
-                        SqlCommand cmd = new SqlCommand(query, conn);
-                        cmd.Parameters.AddWithValue("@MaMH", txtCourseID.Text.Trim());
-
-                        conn.Open();
-                        cmd.ExecuteNonQuery();
                         MessageBox.Show("Hệ thống đã loại bỏ môn học thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                         ResetFields();
                         LoadCourseData();
                     }
                 }
-                catch (SqlException ex) when (ex.Number == 547) // Bắt lỗi 547: Vi phạm ràng buộc khóa ngoại (Foreign Key) sang bảng DKMH hoặc Score
+                catch (InvalidOperationException ex)
                 {
-                    MessageBox.Show("Lỗi ràng buộc hệ thống: Học phần này hiện đang có dữ liệu sinh viên đăng ký học phần (bảng DKMH) hoặc đã có dữ liệu nhập điểm số (bảng Score), không thể xóa bỏ thô để bảo toàn tính minh bạch!",
-                        "Từ chối hành động", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    MessageBox.Show(ex.Message, "Từ chối hành động", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 }
                 catch (Exception ex)
                 {
@@ -241,33 +271,18 @@ namespace ClassProject.Presentation.Forms.Course
             }
         }
 
-        /// Tìm kiếm thời gian thực (Real-time Search) khi gõ ký tự vào ô tìm kiếm trên Grid
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
             try
             {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    string query = @"SELECT MaMH AS [Mã Môn], TenMH AS [Tên Môn Học], SoTC AS [Số Tín Chỉ], Tuan AS [Số Tuần], Hky AS [Học Kỳ], Mota AS [Mô Tả] 
-                                     FROM Course 
-                                     WHERE TenMH LIKE @Search OR MaMH LIKE @Search";
-
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@Search", "%" + txtSearch.Text.Trim() + "%");
-
-                    SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    adapter.Fill(dt);
-                    dgvCourses.DataSource = dt;
-                }
+                dgvCourses.DataSource = _courseRepo.SearchCourses(txtSearch.Text.Trim());
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Lỗi tìm kiếm: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("Lỗi tìm kiếm môn học: " + ex.Message);
             }
         }
 
-        /// Làm trống toàn bộ form nhập liệu để sẵn sàng tạo môn mới
         private void ResetFields()
         {
             txtCourseID.Text = "";
@@ -276,9 +291,23 @@ namespace ClassProject.Presentation.Forms.Course
             txtWeeks.Text = "15";
             cboSemester.SelectedIndex = 0;
             txtDescription.Text = "";
-            txtCourseID.ReadOnly = false; // Mở khóa cho phép nhập mã môn học mới
+
+            txtCourseID.ReadOnly = false;
+            dgvCourses.ClearSelection();
+
+            btnAdd.Enabled = true;
+            btnEdit.Enabled = false;
+            btnDelete.Enabled = false; // Trạng thái mặc định luôn tắt nút xóa cho đến khi chọn dòng và thỏa mãn vai trò Admin
         }
 
         private void btnClear_Click(object sender, EventArgs e) => ResetFields();
+
+        private void txtWeeks_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
     }
 }

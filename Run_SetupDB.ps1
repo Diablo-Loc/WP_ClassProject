@@ -48,12 +48,10 @@ if ([string]::IsNullOrWhiteSpace($UserInput)) {
 $DatabaseName = "LoginDB"    
 
 $SqlFiles = @(
-    "SQL\001_init_schema.sql",
-    "SQL\Table_classroom.sql",
-    "SQL\Teaching_Assignment.sql",
-    "SQL\Create_Procedures_Statistics.sql"
-    "SQL\006.sql"
-    "sql\005_dashboard_trends.sql"
+    "SQL\01_init_tables.sql",
+    "SQL\02_stored_procedures.sql",
+    "SQL\03_seed_data.sql",
+    "SQL\04_DatabaseTriggers.sql"
 )
 
 Write-Host ""

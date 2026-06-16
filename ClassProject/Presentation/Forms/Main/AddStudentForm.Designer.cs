@@ -33,36 +33,40 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges38 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges35 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges36 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges39 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges40 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges41 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges42 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges43 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges44 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges45 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges46 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges47 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges48 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges49 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges50 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges51 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges52 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges53 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges54 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges55 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges56 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges57 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges58 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges59 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges60 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges61 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges62 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges63 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges64 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges65 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges66 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges67 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges68 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges33 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges34 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges31 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges32 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges27 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges25 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges26 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges23 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             guna2ElipseForm = new Guna.UI2.WinForms.Guna2Elipse(components);
             lblFormTitle = new Label();
             lblFormSubTitle = new Label();
@@ -94,6 +98,8 @@
             btnSave = new Guna.UI2.WinForms.Guna2Button();
             btnCloseFormX = new Guna.UI2.WinForms.Guna2ControlBox();
             picTitleIcon = new Guna.UI2.WinForms.Guna2PictureBox();
+            cboMaNganh = new Guna.UI2.WinForms.Guna2ComboBox();
+            cboMaLop = new Guna.UI2.WinForms.Guna2ComboBox();
             panelImageBorder.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picStudent).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picLogoUte).BeginInit();
@@ -110,10 +116,10 @@
             lblFormTitle.AutoSize = true;
             lblFormTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblFormTitle.ForeColor = Color.FromArgb(30, 41, 59);
-            lblFormTitle.Location = new Point(84, 28);
-            lblFormTitle.Margin = new Padding(4, 0, 4, 0);
+            lblFormTitle.Location = new Point(96, 37);
+            lblFormTitle.Margin = new Padding(5, 0, 5, 0);
             lblFormTitle.Name = "lblFormTitle";
-            lblFormTitle.Size = new Size(168, 30);
+            lblFormTitle.Size = new Size(209, 37);
             lblFormTitle.TabIndex = 0;
             lblFormTitle.Text = "Thêm sinh viên";
             // 
@@ -122,10 +128,10 @@
             lblFormSubTitle.AutoSize = true;
             lblFormSubTitle.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblFormSubTitle.ForeColor = Color.FromArgb(148, 163, 184);
-            lblFormSubTitle.Location = new Point(86, 67);
-            lblFormSubTitle.Margin = new Padding(4, 0, 4, 0);
+            lblFormSubTitle.Location = new Point(98, 89);
+            lblFormSubTitle.Margin = new Padding(5, 0, 5, 0);
             lblFormSubTitle.Name = "lblFormSubTitle";
-            lblFormSubTitle.Size = new Size(309, 17);
+            lblFormSubTitle.Size = new Size(369, 21);
             lblFormSubTitle.TabIndex = 1;
             lblFormSubTitle.Text = "Nhập thông tin để thêm sinh viên mới vào hệ thống";
             // 
@@ -136,11 +142,11 @@
             panelImageBorder.BorderThickness = 1;
             panelImageBorder.Controls.Add(picStudent);
             panelImageBorder.CustomizableEdges = customizableEdges37;
-            panelImageBorder.Location = new Point(47, 133);
-            panelImageBorder.Margin = new Padding(4, 3, 4, 3);
+            panelImageBorder.Location = new Point(54, 177);
+            panelImageBorder.Margin = new Padding(5, 4, 5, 4);
             panelImageBorder.Name = "panelImageBorder";
             panelImageBorder.ShadowDecoration.CustomizableEdges = customizableEdges38;
-            panelImageBorder.Size = new Size(187, 231);
+            panelImageBorder.Size = new Size(214, 308);
             panelImageBorder.TabIndex = 2;
             // 
             // picStudent
@@ -149,11 +155,11 @@
             picStudent.CustomizableEdges = customizableEdges35;
             picStudent.FillColor = Color.FromArgb(248, 250, 252);
             picStudent.ImageRotate = 0F;
-            picStudent.Location = new Point(5, 4);
-            picStudent.Margin = new Padding(4, 3, 4, 3);
+            picStudent.Location = new Point(6, 5);
+            picStudent.Margin = new Padding(5, 4, 5, 4);
             picStudent.Name = "picStudent";
             picStudent.ShadowDecoration.CustomizableEdges = customizableEdges36;
-            picStudent.Size = new Size(180, 224);
+            picStudent.Size = new Size(206, 299);
             picStudent.SizeMode = PictureBoxSizeMode.Zoom;
             picStudent.TabIndex = 2;
             picStudent.TabStop = false;
@@ -163,10 +169,10 @@
             lblDragDropHint.BackColor = Color.Transparent;
             lblDragDropHint.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblDragDropHint.ForeColor = Color.FromArgb(148, 163, 184);
-            lblDragDropHint.Location = new Point(52, 375);
-            lblDragDropHint.Margin = new Padding(4, 0, 4, 0);
+            lblDragDropHint.Location = new Point(59, 500);
+            lblDragDropHint.Margin = new Padding(5, 0, 5, 0);
             lblDragDropHint.Name = "lblDragDropHint";
-            lblDragDropHint.Size = new Size(163, 40);
+            lblDragDropHint.Size = new Size(186, 53);
             lblDragDropHint.TabIndex = 1;
             lblDragDropHint.Text = "Kéo thả ảnh vào đây hoặc";
             lblDragDropHint.TextAlign = ContentAlignment.MiddleCenter;
@@ -174,15 +180,15 @@
             // btnChooseImage
             // 
             btnChooseImage.BorderRadius = 6;
-            btnChooseImage.CustomizableEdges = customizableEdges39;
+            btnChooseImage.CustomizableEdges = customizableEdges7;
             btnChooseImage.FillColor = Color.FromArgb(13, 110, 253);
             btnChooseImage.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnChooseImage.ForeColor = Color.White;
-            btnChooseImage.Location = new Point(74, 418);
-            btnChooseImage.Margin = new Padding(4, 3, 4, 3);
+            btnChooseImage.Location = new Point(85, 557);
+            btnChooseImage.Margin = new Padding(5, 4, 5, 4);
             btnChooseImage.Name = "btnChooseImage";
-            btnChooseImage.ShadowDecoration.CustomizableEdges = customizableEdges40;
-            btnChooseImage.Size = new Size(117, 37);
+            btnChooseImage.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            btnChooseImage.Size = new Size(134, 49);
             btnChooseImage.TabIndex = 0;
             btnChooseImage.Text = "Chọn ảnh";
             btnChooseImage.Click += btnChooseImage_Click;
@@ -190,14 +196,14 @@
             // picLogoUte
             // 
             picLogoUte.BorderRadius = 6;
-            picLogoUte.CustomizableEdges = customizableEdges41;
+            picLogoUte.CustomizableEdges = customizableEdges33;
             picLogoUte.FillColor = Color.Transparent;
             picLogoUte.ImageRotate = 0F;
-            picLogoUte.Location = new Point(47, 381);
-            picLogoUte.Margin = new Padding(4, 3, 4, 3);
+            picLogoUte.Location = new Point(54, 508);
+            picLogoUte.Margin = new Padding(5, 4, 5, 4);
             picLogoUte.Name = "picLogoUte";
-            picLogoUte.ShadowDecoration.CustomizableEdges = customizableEdges42;
-            picLogoUte.Size = new Size(187, 127);
+            picLogoUte.ShadowDecoration.CustomizableEdges = customizableEdges34;
+            picLogoUte.Size = new Size(214, 169);
             picLogoUte.SizeMode = PictureBoxSizeMode.Zoom;
             picLogoUte.TabIndex = 3;
             picLogoUte.TabStop = false;
@@ -207,10 +213,10 @@
             lblImageFormatHint.AutoSize = true;
             lblImageFormatHint.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblImageFormatHint.ForeColor = Color.FromArgb(148, 163, 184);
-            lblImageFormatHint.Location = new Point(47, 480);
-            lblImageFormatHint.Margin = new Padding(4, 0, 4, 0);
+            lblImageFormatHint.Location = new Point(54, 640);
+            lblImageFormatHint.Margin = new Padding(5, 0, 5, 0);
             lblImageFormatHint.Name = "lblImageFormatHint";
-            lblImageFormatHint.Size = new Size(180, 13);
+            lblImageFormatHint.Size = new Size(220, 19);
             lblImageFormatHint.TabIndex = 4;
             lblImageFormatHint.Text = "Định dạng: JPG, PNG (Tối đa 2MB)";
             // 
@@ -219,10 +225,10 @@
             lblLabelMssv.AutoSize = true;
             lblLabelMssv.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLabelMssv.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLabelMssv.Location = new Point(274, 133);
-            lblLabelMssv.Margin = new Padding(4, 0, 4, 0);
+            lblLabelMssv.Location = new Point(313, 177);
+            lblLabelMssv.Margin = new Padding(5, 0, 5, 0);
             lblLabelMssv.Name = "lblLabelMssv";
-            lblLabelMssv.Size = new Size(50, 15);
+            lblLabelMssv.Size = new Size(64, 20);
             lblLabelMssv.TabIndex = 5;
             lblLabelMssv.Text = "Mã SV *";
             // 
@@ -231,7 +237,7 @@
             txtMSSV.BorderColor = Color.FromArgb(226, 232, 240);
             txtMSSV.BorderRadius = 6;
             txtMSSV.Cursor = Cursors.IBeam;
-            txtMSSV.CustomizableEdges = customizableEdges43;
+            txtMSSV.CustomizableEdges = customizableEdges31;
             txtMSSV.DefaultText = "";
             txtMSSV.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
             txtMSSV.DisabledState.FillColor = Color.FromArgb(226, 232, 240);
@@ -239,13 +245,13 @@
             txtMSSV.FocusedState.BorderColor = Color.FromArgb(13, 110, 253);
             txtMSSV.Font = new Font("Segoe UI", 9.5F);
             txtMSSV.ForeColor = Color.FromArgb(64, 64, 64);
-            txtMSSV.Location = new Point(274, 156);
-            txtMSSV.Margin = new Padding(4, 3, 4, 3);
+            txtMSSV.Location = new Point(313, 208);
+            txtMSSV.Margin = new Padding(5, 4, 5, 4);
             txtMSSV.Name = "txtMSSV";
             txtMSSV.PlaceholderText = "Nhập mã số sinh viên...";
             txtMSSV.SelectedText = "";
-            txtMSSV.ShadowDecoration.CustomizableEdges = customizableEdges44;
-            txtMSSV.Size = new Size(268, 42);
+            txtMSSV.ShadowDecoration.CustomizableEdges = customizableEdges32;
+            txtMSSV.Size = new Size(306, 56);
             txtMSSV.TabIndex = 6;
             // 
             // lblLabelLastName
@@ -253,10 +259,10 @@
             lblLabelLastName.AutoSize = true;
             lblLabelLastName.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLabelLastName.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLabelLastName.Location = new Point(274, 213);
-            lblLabelLastName.Margin = new Padding(4, 0, 4, 0);
+            lblLabelLastName.Location = new Point(313, 284);
+            lblLabelLastName.Margin = new Padding(5, 0, 5, 0);
             lblLabelLastName.Name = "lblLabelLastName";
-            lblLabelLastName.Size = new Size(98, 15);
+            lblLabelLastName.Size = new Size(122, 20);
             lblLabelLastName.TabIndex = 7;
             lblLabelLastName.Text = "Họ và tên đệm *";
             // 
@@ -265,18 +271,18 @@
             txtFirstName.BorderColor = Color.FromArgb(226, 232, 240);
             txtFirstName.BorderRadius = 6;
             txtFirstName.Cursor = Cursors.IBeam;
-            txtFirstName.CustomizableEdges = customizableEdges45;
+            txtFirstName.CustomizableEdges = customizableEdges29;
             txtFirstName.DefaultText = "";
             txtFirstName.FocusedState.BorderColor = Color.FromArgb(13, 110, 253);
             txtFirstName.Font = new Font("Segoe UI", 9.5F);
             txtFirstName.ForeColor = Color.FromArgb(64, 64, 64);
-            txtFirstName.Location = new Point(274, 237);
-            txtFirstName.Margin = new Padding(4, 3, 4, 3);
+            txtFirstName.Location = new Point(313, 316);
+            txtFirstName.Margin = new Padding(5, 4, 5, 4);
             txtFirstName.Name = "txtFirstName";
             txtFirstName.PlaceholderText = "Ví dụ: Nguyễn Quốc";
             txtFirstName.SelectedText = "";
-            txtFirstName.ShadowDecoration.CustomizableEdges = customizableEdges46;
-            txtFirstName.Size = new Size(268, 42);
+            txtFirstName.ShadowDecoration.CustomizableEdges = customizableEdges30;
+            txtFirstName.Size = new Size(306, 56);
             txtFirstName.TabIndex = 8;
             // 
             // lblLabelFirstName
@@ -284,10 +290,10 @@
             lblLabelFirstName.AutoSize = true;
             lblLabelFirstName.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLabelFirstName.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLabelFirstName.Location = new Point(572, 213);
-            lblLabelFirstName.Margin = new Padding(4, 0, 4, 0);
+            lblLabelFirstName.Location = new Point(654, 284);
+            lblLabelFirstName.Margin = new Padding(5, 0, 5, 0);
             lblLabelFirstName.Name = "lblLabelFirstName";
-            lblLabelFirstName.Size = new Size(35, 15);
+            lblLabelFirstName.Size = new Size(45, 20);
             lblLabelFirstName.TabIndex = 9;
             lblLabelFirstName.Text = "Tên *";
             // 
@@ -296,18 +302,18 @@
             txtLastName.BorderColor = Color.FromArgb(226, 232, 240);
             txtLastName.BorderRadius = 6;
             txtLastName.Cursor = Cursors.IBeam;
-            txtLastName.CustomizableEdges = customizableEdges47;
+            txtLastName.CustomizableEdges = customizableEdges27;
             txtLastName.DefaultText = "";
             txtLastName.FocusedState.BorderColor = Color.FromArgb(13, 110, 253);
             txtLastName.Font = new Font("Segoe UI", 9.5F);
             txtLastName.ForeColor = Color.FromArgb(64, 64, 64);
-            txtLastName.Location = new Point(572, 237);
-            txtLastName.Margin = new Padding(4, 3, 4, 3);
+            txtLastName.Location = new Point(654, 316);
+            txtLastName.Margin = new Padding(5, 4, 5, 4);
             txtLastName.Name = "txtLastName";
             txtLastName.PlaceholderText = "Ví dụ: An";
             txtLastName.SelectedText = "";
-            txtLastName.ShadowDecoration.CustomizableEdges = customizableEdges48;
-            txtLastName.Size = new Size(268, 42);
+            txtLastName.ShadowDecoration.CustomizableEdges = customizableEdges28;
+            txtLastName.Size = new Size(306, 56);
             txtLastName.TabIndex = 10;
             // 
             // lblLabelDob
@@ -315,10 +321,10 @@
             lblLabelDob.AutoSize = true;
             lblLabelDob.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLabelDob.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLabelDob.Location = new Point(274, 375);
-            lblLabelDob.Margin = new Padding(4, 0, 4, 0);
+            lblLabelDob.Location = new Point(313, 500);
+            lblLabelDob.Margin = new Padding(5, 0, 5, 0);
             lblLabelDob.Name = "lblLabelDob";
-            lblLabelDob.Size = new Size(60, 15);
+            lblLabelDob.Size = new Size(79, 20);
             lblLabelDob.TabIndex = 11;
             lblLabelDob.Text = "Ngày sinh";
             // 
@@ -328,17 +334,17 @@
             dtpDateOfBirth.BorderRadius = 6;
             dtpDateOfBirth.BorderThickness = 1;
             dtpDateOfBirth.Checked = true;
-            dtpDateOfBirth.CustomizableEdges = customizableEdges49;
+            dtpDateOfBirth.CustomizableEdges = customizableEdges25;
             dtpDateOfBirth.FillColor = Color.White;
             dtpDateOfBirth.Font = new Font("Segoe UI", 9.5F);
             dtpDateOfBirth.Format = DateTimePickerFormat.Short;
-            dtpDateOfBirth.Location = new Point(274, 398);
-            dtpDateOfBirth.Margin = new Padding(4, 3, 4, 3);
+            dtpDateOfBirth.Location = new Point(313, 531);
+            dtpDateOfBirth.Margin = new Padding(5, 4, 5, 4);
             dtpDateOfBirth.MaxDate = new DateTime(9998, 12, 31, 0, 0, 0, 0);
             dtpDateOfBirth.MinDate = new DateTime(1753, 1, 1, 0, 0, 0, 0);
             dtpDateOfBirth.Name = "dtpDateOfBirth";
-            dtpDateOfBirth.ShadowDecoration.CustomizableEdges = customizableEdges50;
-            dtpDateOfBirth.Size = new Size(268, 42);
+            dtpDateOfBirth.ShadowDecoration.CustomizableEdges = customizableEdges26;
+            dtpDateOfBirth.Size = new Size(306, 56);
             dtpDateOfBirth.TabIndex = 12;
             dtpDateOfBirth.Value = new DateTime(2006, 6, 15, 0, 0, 0, 0);
             // 
@@ -347,10 +353,10 @@
             lblLabelPhone.AutoSize = true;
             lblLabelPhone.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLabelPhone.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLabelPhone.Location = new Point(572, 375);
-            lblLabelPhone.Margin = new Padding(4, 0, 4, 0);
+            lblLabelPhone.Location = new Point(654, 500);
+            lblLabelPhone.Margin = new Padding(5, 0, 5, 0);
             lblLabelPhone.Name = "lblLabelPhone";
-            lblLabelPhone.Size = new Size(80, 15);
+            lblLabelPhone.Size = new Size(100, 20);
             lblLabelPhone.TabIndex = 13;
             lblLabelPhone.Text = "Số điện thoại";
             // 
@@ -359,18 +365,18 @@
             txtPhone.BorderColor = Color.FromArgb(226, 232, 240);
             txtPhone.BorderRadius = 6;
             txtPhone.Cursor = Cursors.IBeam;
-            txtPhone.CustomizableEdges = customizableEdges51;
+            txtPhone.CustomizableEdges = customizableEdges23;
             txtPhone.DefaultText = "";
             txtPhone.FocusedState.BorderColor = Color.FromArgb(13, 110, 253);
             txtPhone.Font = new Font("Segoe UI", 9.5F);
             txtPhone.ForeColor = Color.FromArgb(64, 64, 64);
-            txtPhone.Location = new Point(572, 398);
-            txtPhone.Margin = new Padding(4, 3, 4, 3);
+            txtPhone.Location = new Point(654, 531);
+            txtPhone.Margin = new Padding(5, 4, 5, 4);
             txtPhone.Name = "txtPhone";
             txtPhone.PlaceholderText = "Nhập số điện thoại...";
             txtPhone.SelectedText = "";
-            txtPhone.ShadowDecoration.CustomizableEdges = customizableEdges52;
-            txtPhone.Size = new Size(268, 42);
+            txtPhone.ShadowDecoration.CustomizableEdges = customizableEdges24;
+            txtPhone.Size = new Size(306, 56);
             txtPhone.TabIndex = 14;
             // 
             // lblLabelAddress
@@ -378,10 +384,10 @@
             lblLabelAddress.AutoSize = true;
             lblLabelAddress.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLabelAddress.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLabelAddress.Location = new Point(274, 459);
-            lblLabelAddress.Margin = new Padding(4, 0, 4, 0);
+            lblLabelAddress.Location = new Point(313, 612);
+            lblLabelAddress.Margin = new Padding(5, 0, 5, 0);
             lblLabelAddress.Name = "lblLabelAddress";
-            lblLabelAddress.Size = new Size(44, 15);
+            lblLabelAddress.Size = new Size(56, 20);
             lblLabelAddress.TabIndex = 15;
             lblLabelAddress.Text = "Địa chỉ";
             // 
@@ -390,18 +396,18 @@
             txtAddress.BorderColor = Color.FromArgb(226, 232, 240);
             txtAddress.BorderRadius = 6;
             txtAddress.Cursor = Cursors.IBeam;
-            txtAddress.CustomizableEdges = customizableEdges53;
+            txtAddress.CustomizableEdges = customizableEdges21;
             txtAddress.DefaultText = "";
             txtAddress.FocusedState.BorderColor = Color.FromArgb(13, 110, 253);
             txtAddress.Font = new Font("Segoe UI", 9.5F);
             txtAddress.ForeColor = Color.FromArgb(64, 64, 64);
-            txtAddress.Location = new Point(274, 480);
-            txtAddress.Margin = new Padding(4, 3, 4, 3);
+            txtAddress.Location = new Point(313, 640);
+            txtAddress.Margin = new Padding(5, 4, 5, 4);
             txtAddress.Name = "txtAddress";
             txtAddress.PlaceholderText = "Ví dụ: TP.HCM";
             txtAddress.SelectedText = "";
-            txtAddress.ShadowDecoration.CustomizableEdges = customizableEdges54;
-            txtAddress.Size = new Size(566, 42);
+            txtAddress.ShadowDecoration.CustomizableEdges = customizableEdges22;
+            txtAddress.Size = new Size(647, 56);
             txtAddress.TabIndex = 16;
             // 
             // lblLabelGender
@@ -409,10 +415,10 @@
             lblLabelGender.AutoSize = true;
             lblLabelGender.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLabelGender.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLabelGender.Location = new Point(572, 133);
-            lblLabelGender.Margin = new Padding(4, 0, 4, 0);
+            lblLabelGender.Location = new Point(654, 177);
+            lblLabelGender.Margin = new Padding(5, 0, 5, 0);
             lblLabelGender.Name = "lblLabelGender";
-            lblLabelGender.Size = new Size(55, 15);
+            lblLabelGender.Size = new Size(69, 20);
             lblLabelGender.TabIndex = 17;
             lblLabelGender.Text = "Giới tính";
             // 
@@ -421,7 +427,7 @@
             cboGender.BackColor = Color.Transparent;
             cboGender.BorderColor = Color.FromArgb(226, 232, 240);
             cboGender.BorderRadius = 6;
-            cboGender.CustomizableEdges = customizableEdges55;
+            cboGender.CustomizableEdges = customizableEdges19;
             cboGender.DrawMode = DrawMode.OwnerDrawFixed;
             cboGender.DropDownStyle = ComboBoxStyle.DropDownList;
             cboGender.FocusedColor = Color.FromArgb(13, 110, 253);
@@ -430,11 +436,11 @@
             cboGender.ForeColor = Color.FromArgb(64, 64, 64);
             cboGender.ItemHeight = 30;
             cboGender.Items.AddRange(new object[] { "Nam", "Nữ", "Khác" });
-            cboGender.Location = new Point(572, 156);
-            cboGender.Margin = new Padding(4, 3, 4, 3);
+            cboGender.Location = new Point(654, 208);
+            cboGender.Margin = new Padding(5, 4, 5, 4);
             cboGender.Name = "cboGender";
-            cboGender.ShadowDecoration.CustomizableEdges = customizableEdges56;
-            cboGender.Size = new Size(268, 36);
+            cboGender.ShadowDecoration.CustomizableEdges = customizableEdges20;
+            cboGender.Size = new Size(306, 36);
             cboGender.TabIndex = 18;
             // 
             // lblLabelEmail
@@ -442,10 +448,10 @@
             lblLabelEmail.AutoSize = true;
             lblLabelEmail.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLabelEmail.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLabelEmail.Location = new Point(274, 294);
-            lblLabelEmail.Margin = new Padding(4, 0, 4, 0);
+            lblLabelEmail.Location = new Point(313, 392);
+            lblLabelEmail.Margin = new Padding(5, 0, 5, 0);
             lblLabelEmail.Name = "lblLabelEmail";
-            lblLabelEmail.Size = new Size(36, 15);
+            lblLabelEmail.Size = new Size(47, 20);
             lblLabelEmail.TabIndex = 19;
             lblLabelEmail.Text = "Email";
             // 
@@ -454,18 +460,18 @@
             txtEmail.BorderColor = Color.FromArgb(226, 232, 240);
             txtEmail.BorderRadius = 6;
             txtEmail.Cursor = Cursors.IBeam;
-            txtEmail.CustomizableEdges = customizableEdges57;
+            txtEmail.CustomizableEdges = customizableEdges17;
             txtEmail.DefaultText = "";
             txtEmail.FocusedState.BorderColor = Color.FromArgb(13, 110, 253);
             txtEmail.Font = new Font("Segoe UI", 9.5F);
             txtEmail.ForeColor = Color.FromArgb(64, 64, 64);
-            txtEmail.Location = new Point(274, 317);
-            txtEmail.Margin = new Padding(4, 3, 4, 3);
+            txtEmail.Location = new Point(313, 423);
+            txtEmail.Margin = new Padding(5, 4, 5, 4);
             txtEmail.Name = "txtEmail";
             txtEmail.PlaceholderText = "Ví dụ: an@gmail.com";
             txtEmail.SelectedText = "";
-            txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges58;
-            txtEmail.Size = new Size(268, 42);
+            txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges18;
+            txtEmail.Size = new Size(306, 56);
             txtEmail.TabIndex = 20;
             // 
             // lblLabelHometown
@@ -473,10 +479,10 @@
             lblLabelHometown.AutoSize = true;
             lblLabelHometown.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblLabelHometown.ForeColor = Color.FromArgb(30, 41, 59);
-            lblLabelHometown.Location = new Point(572, 294);
-            lblLabelHometown.Margin = new Padding(4, 0, 4, 0);
+            lblLabelHometown.Location = new Point(654, 392);
+            lblLabelHometown.Margin = new Padding(5, 0, 5, 0);
             lblLabelHometown.Name = "lblLabelHometown";
-            lblLabelHometown.Size = new Size(60, 15);
+            lblLabelHometown.Size = new Size(76, 20);
             lblLabelHometown.TabIndex = 21;
             lblLabelHometown.Text = "Quê quán";
             // 
@@ -485,18 +491,18 @@
             txtHometown.BorderColor = Color.FromArgb(226, 232, 240);
             txtHometown.BorderRadius = 6;
             txtHometown.Cursor = Cursors.IBeam;
-            txtHometown.CustomizableEdges = customizableEdges59;
+            txtHometown.CustomizableEdges = customizableEdges15;
             txtHometown.DefaultText = "";
             txtHometown.FocusedState.BorderColor = Color.FromArgb(13, 110, 253);
             txtHometown.Font = new Font("Segoe UI", 9.5F);
             txtHometown.ForeColor = Color.FromArgb(64, 64, 64);
-            txtHometown.Location = new Point(572, 317);
-            txtHometown.Margin = new Padding(4, 3, 4, 3);
+            txtHometown.Location = new Point(654, 423);
+            txtHometown.Margin = new Padding(5, 4, 5, 4);
             txtHometown.Name = "txtHometown";
             txtHometown.PlaceholderText = "Ví dụ: Bến Tre";
             txtHometown.SelectedText = "";
-            txtHometown.ShadowDecoration.CustomizableEdges = customizableEdges60;
-            txtHometown.Size = new Size(268, 42);
+            txtHometown.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            txtHometown.Size = new Size(306, 56);
             txtHometown.TabIndex = 22;
             // 
             // btnCancel
@@ -504,15 +510,15 @@
             btnCancel.BorderColor = Color.FromArgb(226, 232, 240);
             btnCancel.BorderRadius = 6;
             btnCancel.BorderThickness = 1;
-            btnCancel.CustomizableEdges = customizableEdges61;
+            btnCancel.CustomizableEdges = customizableEdges13;
             btnCancel.FillColor = Color.White;
             btnCancel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnCancel.ForeColor = Color.FromArgb(100, 116, 139);
-            btnCancel.Location = new Point(274, 549);
-            btnCancel.Margin = new Padding(4, 3, 4, 3);
+            btnCancel.Location = new Point(313, 732);
+            btnCancel.Margin = new Padding(5, 4, 5, 4);
             btnCancel.Name = "btnCancel";
-            btnCancel.ShadowDecoration.CustomizableEdges = customizableEdges62;
-            btnCancel.Size = new Size(122, 42);
+            btnCancel.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            btnCancel.Size = new Size(139, 56);
             btnCancel.TabIndex = 23;
             btnCancel.Text = "Hủy bỏ";
             btnCancel.Click += btnCancel_Click;
@@ -520,15 +526,15 @@
             // btnSave
             // 
             btnSave.BorderRadius = 6;
-            btnSave.CustomizableEdges = customizableEdges63;
+            btnSave.CustomizableEdges = customizableEdges11;
             btnSave.FillColor = Color.FromArgb(13, 110, 253);
             btnSave.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnSave.ForeColor = Color.White;
-            btnSave.Location = new Point(444, 549);
-            btnSave.Margin = new Padding(4, 3, 4, 3);
+            btnSave.Location = new Point(507, 732);
+            btnSave.Margin = new Padding(5, 4, 5, 4);
             btnSave.Name = "btnSave";
-            btnSave.ShadowDecoration.CustomizableEdges = customizableEdges64;
-            btnSave.Size = new Size(134, 42);
+            btnSave.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            btnSave.Size = new Size(153, 56);
             btnSave.TabIndex = 24;
             btnSave.Text = "Lưu sinh viên";
             btnSave.Click += btnSave_Click;
@@ -537,36 +543,80 @@
             // 
             btnCloseFormX.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnCloseFormX.BorderRadius = 4;
-            btnCloseFormX.CustomizableEdges = customizableEdges65;
+            btnCloseFormX.CustomizableEdges = customizableEdges9;
             btnCloseFormX.FillColor = Color.Transparent;
             btnCloseFormX.IconColor = Color.FromArgb(148, 163, 184);
-            btnCloseFormX.Location = new Point(834, 18);
-            btnCloseFormX.Margin = new Padding(4, 3, 4, 3);
+            btnCloseFormX.Location = new Point(953, 24);
+            btnCloseFormX.Margin = new Padding(5, 4, 5, 4);
             btnCloseFormX.Name = "btnCloseFormX";
-            btnCloseFormX.ShadowDecoration.CustomizableEdges = customizableEdges66;
-            btnCloseFormX.Size = new Size(37, 37);
+            btnCloseFormX.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            btnCloseFormX.Size = new Size(42, 49);
             btnCloseFormX.TabIndex = 25;
             // 
             // picTitleIcon
             // 
-            picTitleIcon.CustomizableEdges = customizableEdges67;
+            picTitleIcon.CustomizableEdges = customizableEdges5;
             picTitleIcon.FillColor = Color.Transparent;
             picTitleIcon.ImageRotate = 0F;
-            picTitleIcon.Location = new Point(47, 30);
-            picTitleIcon.Margin = new Padding(4, 3, 4, 3);
+            picTitleIcon.Location = new Point(54, 40);
+            picTitleIcon.Margin = new Padding(5, 4, 5, 4);
             picTitleIcon.Name = "picTitleIcon";
-            picTitleIcon.ShadowDecoration.CustomizableEdges = customizableEdges68;
-            picTitleIcon.Size = new Size(30, 30);
+            picTitleIcon.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            picTitleIcon.Size = new Size(34, 40);
             picTitleIcon.SizeMode = PictureBoxSizeMode.Zoom;
             picTitleIcon.TabIndex = 26;
             picTitleIcon.TabStop = false;
             // 
+            // cboMaNganh
+            // 
+            cboMaNganh.BackColor = Color.Transparent;
+            cboMaNganh.BorderColor = Color.FromArgb(226, 232, 240);
+            cboMaNganh.BorderRadius = 6;
+            cboMaNganh.CustomizableEdges = customizableEdges3;
+            cboMaNganh.DrawMode = DrawMode.OwnerDrawFixed;
+            cboMaNganh.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboMaNganh.FocusedColor = Color.FromArgb(13, 110, 253);
+            cboMaNganh.FocusedState.BorderColor = Color.FromArgb(13, 110, 253);
+            cboMaNganh.Font = new Font("Segoe UI", 9.5F);
+            cboMaNganh.ForeColor = Color.FromArgb(64, 64, 64);
+            cboMaNganh.ItemHeight = 30;
+            cboMaNganh.Items.AddRange(new object[] { "Nam", "Nữ", "Khác" });
+            cboMaNganh.Location = new Point(14, 688);
+            cboMaNganh.Margin = new Padding(5, 4, 5, 4);
+            cboMaNganh.Name = "cboMaNganh";
+            cboMaNganh.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            cboMaNganh.Size = new Size(156, 36);
+            cboMaNganh.TabIndex = 27;
+            // 
+            // cboMaLop
+            // 
+            cboMaLop.BackColor = Color.Transparent;
+            cboMaLop.BorderColor = Color.FromArgb(226, 232, 240);
+            cboMaLop.BorderRadius = 6;
+            cboMaLop.CustomizableEdges = customizableEdges1;
+            cboMaLop.DrawMode = DrawMode.OwnerDrawFixed;
+            cboMaLop.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboMaLop.FocusedColor = Color.FromArgb(13, 110, 253);
+            cboMaLop.FocusedState.BorderColor = Color.FromArgb(13, 110, 253);
+            cboMaLop.Font = new Font("Segoe UI", 9.5F);
+            cboMaLop.ForeColor = Color.FromArgb(64, 64, 64);
+            cboMaLop.ItemHeight = 30;
+            cboMaLop.Items.AddRange(new object[] { "Nam", "Nữ", "Khác" });
+            cboMaLop.Location = new Point(14, 752);
+            cboMaLop.Margin = new Padding(5, 4, 5, 4);
+            cboMaLop.Name = "cboMaLop";
+            cboMaLop.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            cboMaLop.Size = new Size(156, 36);
+            cboMaLop.TabIndex = 28;
+            // 
             // AddStudentForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(887, 646);
+            ClientSize = new Size(1014, 861);
+            Controls.Add(cboMaLop);
+            Controls.Add(cboMaNganh);
             Controls.Add(lblDragDropHint);
             Controls.Add(picTitleIcon);
             Controls.Add(btnChooseImage);
@@ -597,7 +647,7 @@
             Controls.Add(lblFormSubTitle);
             Controls.Add(lblFormTitle);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(4, 3, 4, 3);
+            Margin = new Padding(5, 4, 5, 4);
             Name = "AddStudentForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Thêm sinh viên";
@@ -644,5 +694,7 @@
         private Guna.UI2.WinForms.Guna2Button btnCancel;
         private Guna.UI2.WinForms.Guna2ControlBox btnCloseFormX;
         private Guna.UI2.WinForms.Guna2PictureBox picTitleIcon;
+        private Guna.UI2.WinForms.Guna2ComboBox cboMaLop;
+        private Guna.UI2.WinForms.Guna2ComboBox cboMaNganh;
     }
 }

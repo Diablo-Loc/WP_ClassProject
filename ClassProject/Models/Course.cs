@@ -1,267 +1,80 @@
-﻿using ClassProject.DataAccess.Db;
-using Microsoft.Data.SqlClient;
-using System;
-using System.Data;
+﻿using System;
 
 namespace ClassProject.Models
 {
     public class Course
     {
-        private My_DB db = new My_DB();
+        private string _maMH;
+        private string _tenMH;
+        private int? _soTC;
+        private int? _tuan;
 
-        // =========================
-        // Properties
-        // =========================
-        public string Mamh { get; set; }
-        public string Tenmh { get; set; }
-        public int Sotc { get; set; }
-        public int Tuan { get; set; }
-        public int Hocky { get; set; }
-        public string Description { get; set; }
+        // Khóa chính: NVARCHAR(10) trong DB mới -> dùng string, tự động viết hoa
+        public string MaMH
+        {
+            get => _maMH;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new InvalidOperationException("Mã môn học không được để trống!");
+                _maMH = value.Trim().ToUpper();
+            }
+        }
 
-        // =========================
-        // Constructor
-        // =========================
+        // TC06: Chặn trống, giới hạn tối đa 100 ký tự theo đúng Schema của bạn
+        public string TenMH
+        {
+            get => _tenMH;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new InvalidOperationException("Tên môn học không được để trống!");
+                if (value.Trim().Length > 100)
+                    throw new InvalidOperationException("[TC06] Tên môn học không được vượt quá 100 ký tự!");
+                _tenMH = value.Trim();
+            }
+        }
+
+        // TC03 & TC04: Giới hạn số tín chỉ từ 1 đến 10
+        public int? SoTC
+        {
+            get => _soTC;
+            set
+            {
+                if (value.HasValue && (value.Value < 1 || value.Value > 10))
+                    throw new InvalidOperationException("[TC03/TC04] Số tín chỉ phải nằm trong khoảng từ 1 đến 10!");
+                _soTC = value;
+            }
+        }
+
+        // TC05: Số tuần học phải > 0 và <= 30
+        public int? Tuan
+        {
+            get => _tuan;
+            set
+            {
+                if (value.HasValue && (value.Value <= 0 || value.Value > 30))
+                    throw new InvalidOperationException("[TC05] Số tuần học phải lớn hơn 0 và không quá 30 tuần!");
+                _tuan = value;
+            }
+        }
+
+        public int? Hky { get; set; }
+        public string NamHoc { get; set; } // Phục vụ quản lý năm học của môn nếu có
+        public string Mota { get; set; }   // Khớp với cột Mota NVARCHAR(500)
+        public DateTime? Created_At { get; set; }
+        public DateTime? Updated_At { get; set; }
+
         public Course() { }
 
-        public Course(string mamh, string tenmh,
-                      int sotc, int tuan,
-                      int hocky, string description)
+        public Course(string maMH, string tenMH, int soTC, int tuan, int hky, string mota)
         {
-            Mamh = mamh;
-            Tenmh = tenmh;
-            Sotc = sotc;
-            Tuan = tuan;
-            Hocky = hocky;
-            Description = description;
-        }
-
-        // =========================
-        // 1. Add Course
-        // =========================
-        public bool AddCourse()
-        {
-            string query = @"INSERT INTO Courses
-                            (MaMH, TenMH, SoTC, Tuan, Hky, Mota)
-                            VALUES
-                            (@ma, @ten, @tc, @tuan, @hk, @mota)";
-
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@ma", Mamh);
-                        cmd.Parameters.AddWithValue("@ten", Tenmh);
-                        cmd.Parameters.AddWithValue("@tc", Sotc);
-                        cmd.Parameters.AddWithValue("@tuan", Tuan);
-                        cmd.Parameters.AddWithValue("@hk", Hocky);
-                        cmd.Parameters.AddWithValue("@mota", Description ?? "");
-
-                        return cmd.ExecuteNonQuery() > 0;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-        }
-
-        // =========================
-        // 2. Edit Course
-        // =========================
-        public bool EditCourse()
-        {
-            string query = @"UPDATE Courses
-                             SET TenMH = @ten,
-                                 SoTC = @tc,
-                                 Tuan = @tuan,
-                                 Hky = @hk,
-                                 Mota = @mota
-                             WHERE MaMH = @ma";
-
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@ma", Mamh);
-                        cmd.Parameters.AddWithValue("@ten", Tenmh);
-                        cmd.Parameters.AddWithValue("@tc", Sotc);
-                        cmd.Parameters.AddWithValue("@tuan", Tuan);
-                        cmd.Parameters.AddWithValue("@hk", Hocky);
-                        cmd.Parameters.AddWithValue("@mota", Description ?? "");
-
-                        return cmd.ExecuteNonQuery() > 0;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-        }
-
-        // =========================
-        // 3. Delete Course
-        // =========================
-        public bool DeleteCourse(string mamh)
-        {
-            string query = "DELETE FROM Courses WHERE MaMH = @ma";
-
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@ma", mamh);
-
-                        return cmd.ExecuteNonQuery() > 0;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-        }
-
-        // =========================
-        // 4. Get All Courses
-        // =========================
-        public DataTable GetCourses()
-        {
-            DataTable table = new DataTable();
-
-            string query = "SELECT * FROM Courses";
-
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(table);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return table;
-        }
-
-        // =========================
-        // 5. Search Course
-        // =========================
-        public DataTable SearchCourse(string keyword)
-        {
-            DataTable table = new DataTable();
-
-            string query = @"SELECT * FROM Courses
-                             WHERE MaMH LIKE @kw
-                             OR TenMH LIKE @kw";
-
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@kw", "%" + keyword + "%");
-
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(table);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return table;
-        }
-
-        // =========================
-        // 6. Get Course By Semester
-        // =========================
-        public DataTable GetCoursesBySemester(int semester)
-        {
-            DataTable table = new DataTable();
-
-            string query = "SELECT * FROM Courses WHERE Hky = @hk";
-
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@hk", semester);
-
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(table);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return table;
-        }
-
-        // =========================
-        // 7. Check Course Exists
-        // =========================
-        public bool CourseExists(string mamh)
-        {
-            string query = "SELECT COUNT(*) FROM Courses WHERE MaMH = @ma";
-
-            try
-            {
-                using (SqlConnection conn = db.GetConnection())
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@ma", mamh);
-
-                        int count = (int)cmd.ExecuteScalar();
-
-                        return count > 0;
-                    }
-                }
-            }
-            catch
-            {
-                return false;
-            }
+            this.MaMH = maMH;
+            this.TenMH = tenMH;
+            this.SoTC = soTC;
+            this.Tuan = tuan;
+            this.Hky = hky;
+            this.Mota = mota;
         }
     }
 }

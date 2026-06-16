@@ -1,6 +1,6 @@
 ﻿namespace ClassProject.Presentation.Forms.Admin
 {
-    partial class f_main
+    partial class AdminApproveRequestForm
     {
         private System.ComponentModel.IContainer components = null;
 

@@ -6,10 +6,10 @@ namespace ClassProject.Models
     {
         // Fields
         private int? _userId;
-        private int _mssv;
+        private string _mssv;
         private string _firstName;
         private string _lastName;
-        private DateTime _dateOfBirth;
+        private DateTime? _dateOfBirth;
         private string _gender;
         private string _phone;
         private string _address;
@@ -23,19 +23,19 @@ namespace ClassProject.Models
             get { return _userId; }
             set
             {
-                // Nếu có giá trị (không null) và giá trị đó <= 0 thì mới báo lỗi
                 if (value.HasValue && value.Value <= 0)
-                    throw new Exception("UserId không hợp lệ!");
+                    throw new InvalidOperationException("UserId không hợp lệ!");
                 _userId = value;
             }
         }
-        public int Mssv
+
+        public string Mssv
         {
             get { return _mssv; }
             set
             {
-                if (value <= 0)
-                    throw new Exception("MSSV không hợp lệ!");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new InvalidOperationException("MSSV không được để trống!");
                 _mssv = value;
             }
         }
@@ -45,8 +45,8 @@ namespace ClassProject.Models
             get { return _firstName; }
             set
             {
-                if (string.IsNullOrEmpty(value))
-                    throw new Exception("Tên không được để trống!");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new InvalidOperationException("Tên không được để trống!");
                 _firstName = value;
             }
         }
@@ -56,19 +56,24 @@ namespace ClassProject.Models
             get { return _lastName; }
             set
             {
-                if (string.IsNullOrEmpty(value))
-                    throw new Exception("Họ không được để trống!");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new InvalidOperationException("Họ không được để trống!");
                 _lastName = value;
             }
         }
 
-        public DateTime DateOfBirth
+        public DateTime? DateOfBirth
         {
             get { return _dateOfBirth; }
             set
             {
-                if (value > DateTime.Now)
-                    throw new Exception("Ngày sinh không được lớn hơn hiện tại!");
+                // Chỉ validate nếu có giá trị, tránh bẫy crash ứng dụng
+                if (value.HasValue && value.Value > DateTime.Now)
+                    throw new InvalidOperationException("Ngày sinh không được lớn hơn hiện tại!");
+
+                if (value.HasValue && value.Value < new DateTime(1753, 1, 1))
+                    throw new InvalidOperationException("Ngày sinh không hợp lệ cho hệ thống dữ liệu!");
+
                 _dateOfBirth = value;
             }
         }
@@ -78,8 +83,9 @@ namespace ClassProject.Models
             get { return _gender; }
             set
             {
-                if (value != "Nam" && value != "Nữ")
-                    throw new Exception("Giới tính chỉ được là 'Nam' hoặc 'Nữ'!");
+                // Cho phép null hoặc chuỗi rỗng vì DB cho phép NULL, nếu có giá trị thì phải chuẩn Nam/Nữ
+                if (!string.IsNullOrEmpty(value) && value != "Nam" && value != "Nữ")
+                    throw new InvalidOperationException("Giới tính chỉ được là 'Nam' hoặc 'Nữ'!");
                 _gender = value;
             }
         }
@@ -89,8 +95,13 @@ namespace ClassProject.Models
             get { return _phone; }
             set
             {
-                if (string.IsNullOrEmpty(value) || value.Length < 10 || value.Length > 11)
-                    throw new Exception("Số điện thoại không hợp lệ!");
+                // Chống crash NullReference: Chỉ check độ dài khi chuỗi có dữ liệu
+                if (!string.IsNullOrEmpty(value))
+                {
+                    string temp = value.Trim();
+                    if (temp.Length < 10 || temp.Length > 11)
+                        throw new InvalidOperationException("Số điện thoại phải từ 10 đến 11 số!");
+                }
                 _phone = value;
             }
         }
@@ -112,8 +123,9 @@ namespace ClassProject.Models
             get { return _email; }
             set
             {
-                if (string.IsNullOrEmpty(value) || !value.Contains("@"))
-                    throw new Exception("Email không hợp lệ!");
+                // Chống crash NullReference: Chỉ validate định dạng nếu Email khác null
+                if (!string.IsNullOrEmpty(value) && !value.Contains("@"))
+                    throw new InvalidOperationException("Định dạng Email không hợp lệ (Thiếu ký tự @)!");
                 _email = value;
             }
         }
@@ -123,17 +135,25 @@ namespace ClassProject.Models
             get { return _picture; }
             set
             {
-                if (value != null && value.Length > 5 * 1024 * 1024)
-                    throw new Exception("Ảnh không được vượt quá 5MB!");
+                // Đồng bộ chuẩn 2MB chống phình DB như đã cam kết ở tầng giao diện
+                if (value != null && value.Length > 2 * 1024 * 1024)
+                    throw new InvalidOperationException("Dung lượng hình ảnh vượt quá giới hạn cho phép (Tối đa 2MB)!");
                 _picture = value;
             }
         }
 
-        // Constructor
-        public Student(){ }
-        public Student(int? userId, int mssv, string firstName, string lastName, DateTime dateOfBirth,
+        // Auto-implemented Properties bổ trợ hiển thị danh mục
+        public string MaLop { get; set; }
+        public string TenLop { get; set; }
+        public string MaNganh { get; set; }
+        public string TenNganh { get; set; }
+
+        // Constructors
+        public Student() { }
+
+        public Student(int? userId, string mssv, string firstName, string lastName, DateTime? dateOfBirth,
                string gender, string phone, string address, string hometown,
-               string email, byte[] picture = null)
+               string email, byte[] picture = null, string maLop = null, string maNganh = null)
         {
             UserId = userId;
             Mssv = mssv;
@@ -146,23 +166,25 @@ namespace ClassProject.Models
             Hometown = hometown;
             Email = email;
             Picture = picture;
+            MaLop = maLop;
+            MaNganh = maNganh;
         }
 
-        // Họ tên đầy đủ
         public string FullName => $"{LastName} {FirstName}";
 
-        // Hiển thị thông tin
         public override string ToString()
         {
             return $"MSSV      : {Mssv}\n" +
                    $"Họ tên    : {FullName}\n" +
-                   $"Ngày sinh : {DateOfBirth:dd/MM/yyyy}\n" +
-                   $"Giới tính : {Gender}\n" +
-                   $"SĐT       : {Phone}\n" +
-                   $"Địa chỉ   : {Address}\n" +
-                   $"Quê quán  : {Hometown}\n" +
-                   $"Email     : {Email}\n" +
-                   $"Ảnh       : {(Picture != null ? "Có" : "Chưa có")}";
+                   $"Lớp       : {TenLop ?? "Chưa xếp lớp"}\n" +
+                   $"Ngành     : {TenNganh ?? "Chưa phân ngành"}\n" +
+                   // Dùng toán tử điều kiện kiểm tra ngày sinh để tránh hiển thị ngày mặc định bẩn dữ liệu
+                   $"Ngày sinh : {(DateOfBirth.HasValue ? DateOfBirth.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")}\n" +
+                   $"Giới tính : {Gender ?? "Chưa cập nhật"}\n" +
+                   $"SĐT       : {Phone ?? "Chưa cập nhật"}\n" +
+                   $"Địa chỉ   : {Address ?? "Chưa cập nhật"}\n" +
+                   $"Quê quán  : {Hometown ?? "Chưa cập nhật"}\n" +
+                   $"Email     : {Email ?? "Chưa cập nhật"}";
         }
     }
 }

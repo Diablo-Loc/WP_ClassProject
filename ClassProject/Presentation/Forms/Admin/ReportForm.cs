@@ -1,41 +1,46 @@
-﻿using ClassProject.DataAccess.Db; // Đảm bảo gọi đúng Namespace chứa class kết nối My_DB của bạn
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using iTextSharp.text.pdf;
-using OfficeOpenXml;
+﻿using ClassProject.Services;
+using ClassProject.DataAccess.Repositories;
 using System;
 using System.Data;
-using Microsoft.Data.SqlClient; // Sử dụng thư viện kết nối SQL Server hiện đại cho .NET
 using System.Drawing;
-using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using ClosedXML.Excel;
-
-// Đặt Alias rút gọn cho OpenXml Wordprocessing để tuyệt đối không bị xung đột với iTextSharp và WinForms
-using WpWord = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace ClassProject.Presentation.Forms.Admin
 {
     public partial class ReportForm : Form
     {
-        private readonly My_DB _db = new My_DB();
-        private readonly string _connString;
+        private readonly IReportRepository _reportRepo;
+        private DataTable _currentReportTable;
+        private bool _isLoading = false;
 
-        public ReportForm()
+        // CHUẨN THỰC TẾ: Nên truyền Repository qua Constructor (Dependency Injection)
+        // Nếu trường học chưa áp dụng DI Container, có thể giữ overload mặc định nhưng khuyến khích dùng cách này
+        public ReportForm(IReportRepository reportRepo)
         {
             InitializeComponent();
-            // Lấy chuỗi kết nối trực tiếp từ đối tượng kết nối DB của bạn
-            _connString = _db.GetConnection().ConnectionString;
+            _reportRepo = reportRepo ?? throw new ArgumentNullException(nameof(reportRepo));
         }
 
-        private void ReportForm_Load(object sender, EventArgs e)
+        public ReportForm() : this(new ReportRepository()) // Constructor dự phòng cho designer
         {
-            StyleGrid();
-            LoadComboboxData();
-            LoadReportData(); // Mặc định nạp toàn bộ danh sách điểm lên bảng để xem trước
         }
 
-        // ⭐ LÀM ĐẸP GRID THEO STYLE SLATE CAO CẤP + BẬT LỀ TRÁI CHO STT
+        private async void ReportForm_Load(object sender, EventArgs e)
+        {
+            // Bảo vệ sự kiện vẽ STT, tránh việc đăng ký lặp khi Form load lại
+            dgvReport.RowPostPaint -= dgvReport_RowPostPaint;
+            dgvReport.RowPostPaint += dgvReport_RowPostPaint;
+
+            StyleGrid();
+
+            // Nạp dữ liệu bộ lọc trước
+            await LoadComboboxDataAsync();
+
+            // Tự động nạp dữ liệu báo cáo lần đầu
+            await LoadReportDataAsync();
+        }
+
         private void StyleGrid()
         {
             if (dgvReport == null) return;
@@ -43,67 +48,59 @@ namespace ClassProject.Presentation.Forms.Admin
             dgvReport.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvReport.AllowUserToAddRows = false;
             dgvReport.EnableHeadersVisualStyles = false;
+            dgvReport.ReadOnly = true;
             dgvReport.RowTemplate.Height = 35;
             dgvReport.GridColor = Color.FromArgb(241, 245, 249);
             dgvReport.BackgroundColor = Color.White;
             dgvReport.BorderStyle = BorderStyle.None;
 
-            // Header tiêu đề
-            dgvReport.ColumnHeadersHeight = 35;
-            dgvReport.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(15, 23, 42); // Màu Slate tối
+            dgvReport.ColumnHeadersHeight = 38;
+            dgvReport.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(15, 23, 42);
             dgvReport.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            dgvReport.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9.5f, FontStyle.Bold);
+            dgvReport.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            dgvReport.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
-            // Dòng xen kẽ
             dgvReport.RowsDefaultCellStyle.BackColor = Color.White;
             dgvReport.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
 
-            // Hiệu ứng chọn dòng
             dgvReport.DefaultCellStyle.SelectionBackColor = Color.FromArgb(239, 246, 255);
             dgvReport.DefaultCellStyle.SelectionForeColor = Color.FromArgb(37, 99, 235);
 
-            // Bật hàng tiêu đề trái để làm cột số thứ tự tự động
             dgvReport.RowHeadersVisible = true;
             dgvReport.RowHeadersWidth = 45;
             dgvReport.RowHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
         }
 
-        // Tự động vẽ số thứ tự vào lề trái chuẩn xác
         private void dgvReport_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
             string stt = (e.RowIndex + 1).ToString();
-            System.Drawing.Font rFont = new System.Drawing.Font("Segoe UI", 9.5f, FontStyle.Bold);
-            Brush rBrush = new SolidBrush(Color.FromArgb(100, 116, 139));
-
-            float x = e.RowBounds.Location.X + (dgvReport.RowHeadersWidth - e.Graphics.MeasureString(stt, rFont).Width) / 2;
-            float y = e.RowBounds.Location.Y + (e.RowBounds.Height - rFont.Height) / 2;
-
-            e.Graphics.DrawString(stt, rFont, rBrush, x, y);
+            using (Font rFont = new Font("Segoe UI", 9.5f, FontStyle.Bold))
+            using (Brush rBrush = new SolidBrush(Color.FromArgb(100, 116, 139)))
+            {
+                float x = e.RowBounds.Location.X + (dgvReport.RowHeadersWidth - e.Graphics.MeasureString(stt, rFont).Width) / 2;
+                float y = e.RowBounds.Location.Y + (e.RowBounds.Height - rFont.Height) / 2;
+                e.Graphics.DrawString(stt, rFont, rBrush, x, y);
+            }
         }
 
-        // NẠP DỮ LIỆU VÀO COMBOBOX BỘ LỌC TỪ DATABASE CỦA BẠN
-        private void LoadComboboxData()
+        private async Task LoadComboboxDataAsync()
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(_connString))
-                {
-                    conn.Open();
+                cbMonHoc.SelectedIndexChanged -= CbMonHoc_SelectedIndexChanged;
 
-                    // Nạp ComboBox Môn học (Từ bảng Course: MaMH, TenMH)
-                    SqlDataAdapter daCourse = new SqlDataAdapter("SELECT MaMH, TenMH FROM Course", conn);
-                    DataTable dtCourse = new DataTable();
-                    daCourse.Fill(dtCourse);
+                DataTable dtCourse = await _reportRepo.GetCoursesAsync();
 
-                    DataRow rowCourse = dtCourse.NewRow();
-                    rowCourse["MaMH"] = DBNull.Value;
-                    rowCourse["TenMH"] = "-- Tất cả môn học --";
-                    dtCourse.Rows.InsertAt(rowCourse, 0);
+                DataRow rowCourse = dtCourse.NewRow();
+                rowCourse["MaMH"] = DBNull.Value;
+                rowCourse["TenMH"] = "-- Tất cả môn học --";
+                dtCourse.Rows.InsertAt(rowCourse, 0);
 
-                    cbMonHoc.DataSource = dtCourse;
-                    cbMonHoc.DisplayMember = "TenMH";
-                    cbMonHoc.ValueMember = "MaMH";
-                }
+                cbMonHoc.DataSource = dtCourse;
+                cbMonHoc.DisplayMember = "TenMH";
+                cbMonHoc.ValueMember = "MaMH";
+
+                cbMonHoc.SelectedIndexChanged += CbMonHoc_SelectedIndexChanged;
             }
             catch (Exception ex)
             {
@@ -111,311 +108,159 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        // TẢI DỮ LIỆU BÁO CÁO ĐIỂM SỐ TỪ BA BẢNG: Score, Students, Course
-        private void LoadReportData()
+        private async Task LoadReportDataAsync()
         {
+            if (_isLoading) return;
+
             try
             {
-                using (SqlConnection conn = new SqlConnection(_connString))
+                _isLoading = true;
+                btnXemBaoCao.Enabled = false;
+                this.Cursor = Cursors.WaitCursor; // UX: Đổi con trỏ chuột sang trạng thái chờ
+
+                // CHUẨN HÓA: Lấy SelectedValue an toàn, ngắn gọn hơn code cũ
+                string selectedMaMH = cbMonHoc.SelectedValue is string mamh ? mamh : null;
+                if (string.IsNullOrWhiteSpace(selectedMaMH)) selectedMaMH = null;
+
+                _currentReportTable = await _reportRepo.GetScoreReportDataAsync(selectedMaMH);
+
+                // Clone cấu trúc và đổi tên cột hiển thị thân thiện với người dùng
+                DataTable displayTable = _currentReportTable.Copy();
+
+                string[] sourceCols = { "MSSV", "HoTen", "MaMH", "TenMH", "DiemQT", "DiemCK", "DiemTK" };
+                string[] destCols = { "MSSV", "Họ và Tên", "Mã Môn", "Tên Môn Học", "Điểm QT", "Điểm CK", "Điểm TK" };
+
+                for (int i = 0; i < sourceCols.Length; i++)
                 {
-                    // Truy vấn liên kết bảng theo đúng cấu trúc dữ liệu của bạn
-                    string query = @"SELECT s.MSSV, (s.FirstName + ' ' + s.LastName) AS HoTen, 
-                                            c.MaMH, c.TenMH, sc.DiemQT, sc.DiemCK, sc.DiemTK
-                                     FROM Score sc
-                                     INNER JOIN Students s ON sc.MSSV = s.MSSV
-                                     INNER JOIN Course c ON sc.MaMH = c.MaMH
-                                     WHERE (1=1)";
-
-                    SqlCommand cmd = new SqlCommand("", conn);
-
-                    // Thêm điều kiện lọc nếu người dùng chọn môn học cụ thể
-                    if (cbMonHoc.SelectedValue != null && cbMonHoc.SelectedValue != DBNull.Value)
-                    {
-                        query += " AND sc.MaMH = @MaMH";
-                        cmd.Parameters.AddWithValue("@MaMH", cbMonHoc.SelectedValue.ToString());
-                    }
-
-                    cmd.CommandText = query;
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-
-                    dgvReport.DataSource = dt;
-
-                    // Định dạng tên cột Tiếng Việt hiển thị trên GridView
-                    if (dgvReport.Columns.Count > 0)
-                    {
-                        if (dgvReport.Columns.Contains("MSSV")) dgvReport.Columns["MSSV"].HeaderText = "MSSV";
-                        if (dgvReport.Columns.Contains("HoTen")) dgvReport.Columns["HoTen"].HeaderText = "Họ và Tên";
-                        if (dgvReport.Columns.Contains("MaMH")) dgvReport.Columns["MaMH"].HeaderText = "Mã Môn";
-                        if (dgvReport.Columns.Contains("TenMH")) dgvReport.Columns["TenMH"].HeaderText = "Tên Môn Học";
-                        if (dgvReport.Columns.Contains("DiemQT")) dgvReport.Columns["DiemQT"].HeaderText = "Điểm QT";
-                        if (dgvReport.Columns.Contains("DiemCK")) dgvReport.Columns["DiemCK"].HeaderText = "Điểm CK";
-                        if (dgvReport.Columns.Contains("DiemTK")) dgvReport.Columns["DiemTK"].HeaderText = "Điểm TK";
-
-                        dgvReport.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                    }
+                    if (displayTable.Columns.Contains(sourceCols[i]))
+                        displayTable.Columns[sourceCols[i]].ColumnName = destCols[i];
                 }
+
+                dgvReport.DataSource = displayTable;
+                dgvReport.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải bảng báo cáo: {ex.Message}", "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void btnXemBaoCao_Click(object sender, EventArgs e)
-        {
-            LoadReportData();
-        }
-
-        // ==========================================
-        // ⭐ LOGIC XUẤT EXCEL (SỬ DỤNG EPPLUS)
-        // ==========================================
-        private void btnExportExcel_Click(object sender, EventArgs e)
-        {
-            if (dgvReport.Rows.Count == 0)
+            finally
             {
-                MessageBox.Show("Không có dữ liệu trên bảng để xuất!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                _isLoading = false;
+                btnXemBaoCao.Enabled = true;
+                this.Cursor = Cursors.Default; // Trả con trỏ chuột về mặc định
             }
+        }
 
-            SaveFileDialog sfd = new SaveFileDialog
-            {
-                Filter = "Excel Workbook (*.xlsx)|*.xlsx",
-                FileName = "BaoCao_DiemSo_" + DateTime.Now.ToString("yyyyMMdd")
-            };
+        private async void btnXemBaoCao_Click(object sender, EventArgs e)
+        {
+            await LoadReportDataAsync();
+        }
 
-            if (sfd.ShowDialog() == DialogResult.OK)
+        private async void CbMonHoc_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await LoadReportDataAsync();
+        }
+
+        // =========================================================================
+        // XỬ LÝ XUẤT FILE BẤT ĐỒNG BỘ (ASYNC) - GIÚP KHÔNG BỊ TREO GIAO DIỆN KHI FILE NẶNG
+        // =========================================================================
+
+        private async void btnExportExcel_Click(object sender, EventArgs e)
+        {
+            if (!ValidateDataBeforeExport()) return;
+
+            using (SaveFileDialog sfd = new SaveFileDialog { Filter = "Excel Workbook (*.xlsx)|*.xlsx", FileName = $"BaoCao_DiemSo_{DateTime.Now:yyyyMMdd}" })
             {
-                try
+                if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    // Sử dụng XLWorkbook của ClosedXML (Giống hệt thư viện bạn đang dùng để Import)
-                    using (XLWorkbook workbook = new XLWorkbook())
+                    try
                     {
-                        var worksheet = workbook.Worksheets.Add("Báo cáo điểm số");
+                        this.Cursor = Cursors.WaitCursor;
 
-                        // 1. Tiêu đề báo cáo lớn nằm ở hàng 1
-                        worksheet.Cell(1, 1).Value = "BÁO CÁO DANH SÁCH ĐIỂM SỐ SINH VIÊN";
-                        int totalColumns = dgvReport.Columns.Count + 1; // Cộng thêm 1 cột STT
-                        worksheet.Range(1, 1, 1, totalColumns).Merge(); // Trộn các ô tiêu đề
-                        worksheet.Cell(1, 1).Style.Font.Bold = true;
-                        worksheet.Cell(1, 1).Style.Font.FontSize = 16;
-                        worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        // Đẩy tác vụ ghi file xuống luồng ngầm (Background Thread) bằng Task.Run
+                        await Task.Run(() => ExportService.ToExcel(_currentReportTable, sfd.FileName, "Báo cáo danh sách điểm số sinh viên"));
 
-                        // 2. Tạo tiêu đề cột tại hàng 3 (Thêm cột STT đầu tiên)
-                        worksheet.Cell(3, 1).Value = "STT";
-                        for (int i = 0; i < dgvReport.Columns.Count; i++)
-                        {
-                            worksheet.Cell(3, i + 2).Value = dgvReport.Columns[i].HeaderText;
-                        }
-
-                        // Đổ màu nền Slate tối + chữ trắng cho thanh tiêu đề (Đồng bộ giao diện)
-                        var headerRange = worksheet.Range(3, 1, 3, totalColumns);
-                        headerRange.Style.Font.Bold = true;
-                        headerRange.Style.Font.FontColor = XLColor.White;
-                        headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#0F172A"); // Màu Slate tối
-                        headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                        // 3. Đổ dữ liệu từ lưới DataGridView vào các ô Excel từ hàng 4
-                        for (int r = 0; r < dgvReport.Rows.Count; r++)
-                        {
-                            int currentRow = r + 4;
-                            worksheet.Cell(currentRow, 1).Value = r + 1; // Ghi Số thứ tự (STT)
-
-                            for (int c = 0; c < dgvReport.Columns.Count; c++)
-                            {
-                                string cellValue = dgvReport.Rows[r].Cells[c].Value?.ToString() ?? "";
-                                worksheet.Cell(currentRow, c + 2).Value = cellValue;
-                            }
-                        }
-
-                        // Tự động căn chỉnh độ rộng các cột cho vừa vặn chữ, không bị che khuất
-                        worksheet.Columns().AdjustToContents();
-
-                        // Lưu file Excel xuống ổ đĩa
-                        workbook.SaveAs(sfd.FileName);
+                        MessageBox.Show("Xuất file Excel báo cáo thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
-
-                    MessageBox.Show("Xuất file Excel báo cáo thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Lỗi khi xuất Excel bằng ClosedXML: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi hệ thống khi xuất Excel: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        this.Cursor = Cursors.Default;
+                    }
                 }
             }
         }
 
-        // ==========================================
-        // ⭐ LOGIC XUẤT PDF (SỬ DỤNG ITEXTSHARP VÀ ĐÃ FIX XUNG ĐỘT)
-        // ==========================================
-        private void btnExportPdf_Click(object sender, EventArgs e)
+        private async void btnExportPdf_Click(object sender, EventArgs e)
         {
-            if (dgvReport.Rows.Count == 0)
-            {
-                MessageBox.Show("Không có dữ liệu trên bảng để xuất!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (!ValidateDataBeforeExport()) return;
 
-            SaveFileDialog sfd = new SaveFileDialog
+            using (SaveFileDialog sfd = new SaveFileDialog { Filter = "PDF (*.pdf)|*.pdf", FileName = $"BaoCao_DiemSo_{DateTime.Now:yyyyMMdd}" })
             {
-                Filter = "PDF (*.pdf)|*.pdf",
-                FileName = "BaoCao_DiemSo_" + DateTime.Now.ToString("yyyyMMdd")
-            };
-
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                try
+                if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    // Cấu hình Font chữ hệ thống (Arial) để hiển thị đầy đủ dấu Tiếng Việt
-                    string sysFontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "Arial.ttf");
-                    BaseFont bf = BaseFont.CreateFont(sysFontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-                    iTextSharp.text.Font fontTitle = new iTextSharp.text.Font(bf, 16, iTextSharp.text.Font.BOLD);
-                    iTextSharp.text.Font fontBody = new iTextSharp.text.Font(bf, 10, iTextSharp.text.Font.NORMAL);
-                    iTextSharp.text.Font fontHeader = new iTextSharp.text.Font(bf, 10, iTextSharp.text.Font.BOLD, iTextSharp.text.BaseColor.WHITE);
-
-                    // Sử dụng định danh tường minh iTextSharp.text để tránh xung đột với WinForms/OpenXML
-                    iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4.Rotate(), 10f, 10f, 10f, 0f);
-
-                    using (FileStream stream = new FileStream(sfd.FileName, FileMode.Create))
+                    try
                     {
-                        PdfWriter.GetInstance(pdfDoc, stream);
-                        pdfDoc.Open();
+                        this.Cursor = Cursors.WaitCursor;
 
-                        // Tiêu đề văn bản PDF
-                        iTextSharp.text.Paragraph title = new iTextSharp.text.Paragraph("BÁO CÁO DANH SÁCH ĐIỂM SỐ SINH VIÊN\n\n", fontTitle)
-                        {
-                            Alignment = iTextSharp.text.Element.ALIGN_CENTER
-                        };
-                        pdfDoc.Add(title);
+                        // Chạy ngầm tránh block UI Thread
+                        await Task.Run(() => ExportService.ToPdf(_currentReportTable, sfd.FileName, "Báo cáo danh sách điểm số sinh viên"));
 
-                        // Tạo bảng PDF (+1 cột STT)
-                        PdfPTable pdfTable = new PdfPTable(dgvReport.Columns.Count + 1)
-                        {
-                            WidthPercentage = 100
-                        };
-
-                        // Khởi tạo các ô Tiêu đề cột
-                        pdfTable.AddCell(new PdfPCell(new iTextSharp.text.Phrase("STT", fontHeader)) { BackgroundColor = new iTextSharp.text.BaseColor(15, 23, 42) });
-                        for (int i = 0; i < dgvReport.Columns.Count; i++)
-                        {
-                            PdfPCell cell = new PdfPCell(new iTextSharp.text.Phrase(dgvReport.Columns[i].HeaderText, fontHeader))
-                            {
-                                BackgroundColor = new iTextSharp.text.BaseColor(15, 23, 42)
-                            };
-                            pdfTable.AddCell(cell);
-                        }
-
-                        // Duyệt chèn dữ liệu
-                        for (int r = 0; r < dgvReport.Rows.Count; r++)
-                        {
-                            pdfTable.AddCell(new iTextSharp.text.Phrase((r + 1).ToString(), fontBody));
-                            for (int c = 0; c < dgvReport.Columns.Count; c++)
-                            {
-                                pdfTable.AddCell(new iTextSharp.text.Phrase(dgvReport.Rows[r].Cells[c].Value?.ToString(), fontBody));
-                            }
-                        }
-
-                        pdfDoc.Add(pdfTable);
-                        pdfDoc.Close();
+                        MessageBox.Show("Xuất file PDF báo cáo thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
-                    MessageBox.Show("Xuất file PDF báo cáo thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Lỗi khi xuất PDF: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi hệ thống khi xuất PDF: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        this.Cursor = Cursors.Default;
+                    }
                 }
             }
         }
 
-        // ==========================================
-        // ⭐ LOGIC XUẤT WORD CHUẨN ĐỊNH DẠNG .DOCX (SỬ DỤNG ALIAS WPWORD)
-        // ==========================================
-        private void btnExportWord_Click(object sender, EventArgs e)
+        private async void btnExportWord_Click(object sender, EventArgs e)
         {
-            if (dgvReport.Rows.Count == 0)
-            {
-                MessageBox.Show("Không có dữ liệu trên bảng để xuất!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (!ValidateDataBeforeExport()) return;
 
-            SaveFileDialog sfd = new SaveFileDialog
+            using (SaveFileDialog sfd = new SaveFileDialog { Filter = "Word Document (*.docx)|*.docx", FileName = $"BaoCao_DiemSo_{DateTime.Now:yyyyMMdd}" })
             {
-                Filter = "Word Document (*.docx)|*.docx",
-                FileName = "BaoCao_DiemSo_" + DateTime.Now.ToString("yyyyMMdd")
-            };
-
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                try
+                if (sfd.ShowDialog() == DialogResult.OK)
                 {
-
-                    using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(sfd.FileName, WordprocessingDocumentType.Document))
+                    try
                     {
-                        MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
-                        mainPart.Document = new WpWord.Document();
-                        WpWord.Body body = mainPart.Document.AppendChild(new WpWord.Body());
+                        this.Cursor = Cursors.WaitCursor;
 
-                        // 1. Tiêu đề văn bản Word lớn nằm giữa
-                        WpWord.Paragraph pTitle = body.AppendChild(new WpWord.Paragraph());
-                        WpWord.ParagraphProperties pPr = pTitle.AppendChild(new WpWord.ParagraphProperties());
-                        pPr.AppendChild(new WpWord.Justification() { Val = WpWord.JustificationValues.Center });
+                        // Chạy ngầm tránh block UI Thread
+                        await Task.Run(() => ExportService.ToWord(_currentReportTable, sfd.FileName, "Báo cáo danh sách điểm số sinh viên"));
 
-                        WpWord.Run rTitle = pTitle.AppendChild(new WpWord.Run());
-                        WpWord.RunProperties rPr = rTitle.AppendChild(new WpWord.RunProperties());
-                        rPr.AppendChild(new WpWord.Bold());
-                        rPr.AppendChild(new WpWord.FontSize() { Val = "32" }); // Cỡ chữ 16pt trong OpenXML
-                        rTitle.AppendChild(new WpWord.Text("BÁO CÁO DANH SÁCH ĐIỂM SỐ SINH VIÊN"));
-
-                        body.AppendChild(new WpWord.Paragraph(new WpWord.Run(new WpWord.Break()))); // Tạo khoảng cách cách dòng
-
-                        // 2. Cấu hình bảng dữ liệu và đường viền bao quanh các ô
-                        WpWord.Table table = new WpWord.Table();
-                        WpWord.TableProperties tblProp = new WpWord.TableProperties(
-                            new WpWord.TableBorders(
-                                new WpWord.TopBorder() { Val = WpWord.BorderValues.Single, Size = 4 },
-                                new WpWord.BottomBorder() { Val = WpWord.BorderValues.Single, Size = 4 },
-                                new WpWord.LeftBorder() { Val = WpWord.BorderValues.Single, Size = 4 },
-                                new WpWord.RightBorder() { Val = WpWord.BorderValues.Single, Size = 4 },
-                                new WpWord.InsideHorizontalBorder() { Val = WpWord.BorderValues.Single, Size = 4 },
-                                new WpWord.InsideVerticalBorder() { Val = WpWord.BorderValues.Single, Size = 4 }
-                            )
-                        );
-                        table.AppendChild(tblProp);
-
-                        // 3. Tạo dòng tiêu đề cho bảng Word
-                        WpWord.TableRow headerRow = new WpWord.TableRow();
-                        headerRow.Append(new WpWord.TableCell(new WpWord.Paragraph(new WpWord.Run(new WpWord.RunProperties(new WpWord.Bold()), new WpWord.Text("STT")))));
-                        foreach (DataGridViewColumn col in dgvReport.Columns)
-                        {
-                            headerRow.Append(new WpWord.TableCell(new WpWord.Paragraph(new WpWord.Run(new WpWord.RunProperties(new WpWord.Bold()), new WpWord.Text(col.HeaderText)))));
-                        }
-                        table.Append(headerRow);
-
-                        // 4. Đọc dữ liệu ghi vào từng dòng trong bảng Word
-                        for (int i = 0; i < dgvReport.Rows.Count; i++)
-                        {
-                            WpWord.TableRow dataRow = new WpWord.TableRow();
-                            dataRow.Append(new WpWord.TableCell(new WpWord.Paragraph(new WpWord.Run(new WpWord.Text((i + 1).ToString()))))); // Ghi Số thứ tự
-
-                            for (int j = 0; j < dgvReport.Columns.Count; j++)
-                            {
-                                string cellValue = dgvReport.Rows[i].Cells[j].Value?.ToString() ?? "";
-                                dataRow.Append(new WpWord.TableCell(new WpWord.Paragraph(new WpWord.Run(new WpWord.Text(cellValue)))));
-                            }
-                            table.Append(dataRow);
-                        }
-
-                        body.Append(table);
-                        mainPart.Document.Save();
+                        MessageBox.Show("Xuất file Word báo cáo thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
-
-                    MessageBox.Show("Xuất file Word báo cáo thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Lỗi khi xuất Word: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi hệ thống khi xuất Word: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        this.Cursor = Cursors.Default;
+                    }
                 }
             }
+        }
+
+        // Hàm tiện ích kiểm tra dữ liệu trước khi xuất (Gom nhóm tránh lặp code - DRY Principle)
+        private bool ValidateDataBeforeExport()
+        {
+            if (_currentReportTable == null || _currentReportTable.Rows.Count == 0)
+            {
+                MessageBox.Show("Không có dữ liệu hợp lệ trên lưới để xuất file!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
         }
     }
 }

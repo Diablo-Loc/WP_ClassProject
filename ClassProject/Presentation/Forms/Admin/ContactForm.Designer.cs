@@ -107,7 +107,7 @@
             label1.AutoSize = true;
             label1.Location = new Point(17, 60);
             label1.Name = "label1";
-            label1.Size = new Size(383, 20);
+            label1.Size = new Size(378, 20);
             label1.TabIndex = 54;
             label1.Text = "Quản lý danh sách liên hệ (Đối tác, Hotline, phòng ban,..\r\n";
             // 
@@ -386,6 +386,8 @@
             txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges20;
             txtSearch.Size = new Size(293, 47);
             txtSearch.TabIndex = 55;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            txtSearch.KeyDown += txtSearch_KeyDown;
             // 
             // dgvContacts
             // 
@@ -439,7 +441,6 @@
             dgvContacts.ThemeStyle.RowsStyle.Height = 29;
             dgvContacts.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(231, 229, 255);
             dgvContacts.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(71, 69, 94);
-            
             dgvContacts.RowPostPaint += dgvContacts_RowPostPaint;
             // 
             // lblDSPhanCongGiangDay

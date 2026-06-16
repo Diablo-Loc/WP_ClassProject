@@ -67,13 +67,13 @@
             lblMonHoc = new Label();
             lblThongTinPhanCong = new Label();
             pnlHistory = new Guna.UI2.WinForms.Guna2Panel();
+            label2 = new Label();
             dgvReport = new Guna.UI2.WinForms.Guna2DataGridView();
             guna2Panel1 = new Guna.UI2.WinForms.Guna2Panel();
             pnlBottom = new Guna.UI2.WinForms.Guna2Panel();
             btnExportWord = new Guna.UI2.WinForms.Guna2Button();
             btnExportExcel = new Guna.UI2.WinForms.Guna2Button();
             btnExportPdf = new Guna.UI2.WinForms.Guna2Button();
-            label2 = new Label();
             pnlHeader.SuspendLayout();
             pnlInfoRequest.SuspendLayout();
             pnlHistory.SuspendLayout();
@@ -262,6 +262,18 @@
             pnlHistory.Size = new Size(1069, 372);
             pnlHistory.TabIndex = 60;
             // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.BackColor = Color.Transparent;
+            label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label2.ForeColor = Color.FromArgb(26, 115, 232);
+            label2.Location = new Point(23, 20);
+            label2.Name = "label2";
+            label2.Size = new Size(280, 20);
+            label2.TabIndex = 55;
+            label2.Text = "DANH SÁCH PHÂN CÔNG GIẢNG DẠY";
+            // 
             // dgvReport
             // 
             dgvReport.AllowUserToAddRows = false;
@@ -289,6 +301,7 @@
             dgvReport.GridColor = Color.FromArgb(230, 235, 245);
             dgvReport.Location = new Point(11, 63);
             dgvReport.Name = "dgvReport";
+            dgvReport.ReadOnly = true;
             dgvReport.RowHeadersVisible = false;
             dgvReport.RowHeadersWidth = 51;
             dgvReport.Size = new Size(1046, 296);
@@ -306,7 +319,7 @@
             dgvReport.ThemeStyle.HeaderStyle.ForeColor = Color.White;
             dgvReport.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
             dgvReport.ThemeStyle.HeaderStyle.Height = 4;
-            dgvReport.ThemeStyle.ReadOnly = false;
+            dgvReport.ThemeStyle.ReadOnly = true;
             dgvReport.ThemeStyle.RowsStyle.BackColor = Color.White;
             dgvReport.ThemeStyle.RowsStyle.BorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             dgvReport.ThemeStyle.RowsStyle.Font = new Font("Segoe UI", 9F);
@@ -404,18 +417,6 @@
             btnExportPdf.TabIndex = 55;
             btnExportPdf.Text = "Xuất PDF";
             btnExportPdf.Click += btnExportPdf_Click;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.BackColor = Color.Transparent;
-            label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.ForeColor = Color.FromArgb(26, 115, 232);
-            label2.Location = new Point(23, 20);
-            label2.Name = "label2";
-            label2.Size = new Size(280, 20);
-            label2.TabIndex = 55;
-            label2.Text = "DANH SÁCH PHÂN CÔNG GIẢNG DẠY";
             // 
             // ReportFormHR
             // 

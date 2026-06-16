@@ -1,10 +1,12 @@
 ﻿using ClassProject.DataAccess.Db;
 using ClassProject.DataAccess.Repositories;
+using ClassProject.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
@@ -13,28 +15,29 @@ namespace ClassProject.Presentation.Forms.Students
     public partial class StudentRequestForm : Form
     {
         private readonly RequestRepository _requestRepo;
-        private readonly string _currentMSSV;
 
-        public StudentRequestForm(string loggedInMSSV)
-        {
-            InitializeComponent();
-            _currentMSSV = loggedInMSSV;
-
-            My_DB db = new My_DB();
-            _requestRepo = new RequestRepository(db.GetConnection().ConnectionString);
-        }
-
+        /// <summary>
+        /// Constructor duy nhất không tham số - Triệt tiêu Tight Coupling
+        /// </summary>
         public StudentRequestForm()
         {
             InitializeComponent();
 
             My_DB db = new My_DB();
             _requestRepo = new RequestRepository(db.GetConnection().ConnectionString);
-            
         }
 
         private void StudentRequestForm_Load(object sender, EventArgs e)
         {
+            // BẪY PHÒNG THỦ: Kiểm tra session ngay khi form khởi chạy để tránh lỗi Runtime
+            if (string.IsNullOrEmpty(UserSession.MSSV))
+            {
+                MessageBox.Show("Không thể xác định danh tính sinh viên cho phiên làm việc này!\nHệ thống tự động đóng chức năng.",
+                                "Lỗi Xác Thực Phiên", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.BeginInvoke(new Action(this.Close));
+                return;
+            }
+
             if (cboType != null && cboType.Items.Count == 0)
             {
                 cboType.Items.Add("Phúc khảo điểm");
@@ -63,11 +66,12 @@ namespace ClassProject.Presentation.Forms.Students
             {
                 if (_requestRepo == null) return;
 
-                DataTable dt = _requestRepo.GetRequestsByStudent(_currentMSSV);
+                // Bốc trực tiếp MSSV an toàn từ UserSession toàn cục
+                DataTable dt = _requestRepo.GetRequestsByStudent(UserSession.MSSV);
                 dgvMyRequests.DataSource = dt;
                 FormatGridColumns();
 
-                // Cập nhật tổng số dòng lên Label (nếu bạn có đặt lblTotal ở góc trái dưới)
+                // Cập nhật tổng số dòng lên Label
                 if (lblTotal != null)
                 {
                     lblTotal.Text = $"Tổng số yêu cầu: {dt.Rows.Count}";
@@ -75,7 +79,7 @@ namespace ClassProject.Presentation.Forms.Students
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi tải lịch sử yêu cầu: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi tải lịch sử yêu cầu: {ex.Message}", "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -104,7 +108,6 @@ namespace ClassProject.Presentation.Forms.Students
         {
             try
             {
-                // Giả sử ô tìm kiếm của bạn đặt tên là txtSearchRequests hoặc txtSearch
                 string keyword = txtSearchRequests.Text.Trim();
 
                 // Nếu để trống ô tìm kiếm thì tự động load lại toàn bộ danh sách
@@ -114,7 +117,8 @@ namespace ClassProject.Presentation.Forms.Students
                     return;
                 }
 
-                DataTable result = _requestRepo.SearchRequests(_currentMSSV, keyword);
+                // Sử dụng trực tiếp UserSession.MSSV tại đây thay vì biến nội bộ
+                DataTable result = _requestRepo.SearchRequests(UserSession.MSSV, keyword);
                 dgvMyRequests.DataSource = result;
                 FormatGridColumns();
 
@@ -142,7 +146,8 @@ namespace ClassProject.Presentation.Forms.Students
 
             string fullContent = $"[{requestType}] - {textContent}";
 
-            if (_requestRepo.AddRequest(_currentMSSV, fullContent))
+            // Gửi yêu cầu với Passport UserSession.MSSV
+            if (_requestRepo.AddRequest(UserSession.MSSV, fullContent))
             {
                 MessageBox.Show("Yêu cầu của bạn đã được gửi lên hệ thống thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ResetForm();
@@ -157,7 +162,7 @@ namespace ClassProject.Presentation.Forms.Students
         private void btnReset_Click(object sender, EventArgs e)
         {
             ResetForm();
-            LoadMyRequests(); // Tiện tay load lại lưới sạch sẽ khi bấm làm mới
+            LoadMyRequests(); // Load lại lưới sạch sẽ khi bấm làm mới
         }
 
         private void ResetForm()
