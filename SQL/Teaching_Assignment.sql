@@ -39,3 +39,26 @@ BEGIN
     ORDER BY ta.ID DESC;             -- Đẩy các bản ghi phân công mới nhất lên trên đầu bảng
 END;
 GO
+
+CREATE OR ALTER PROC proc_GetTeachingAssignments_Report
+    @HRID INT = NULL,       
+    @MaMH CHAR(10) = NULL     
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        ta.ID,                       
+        ta.HRID,                     
+        u.Username AS HRName,        
+        ta.MaMH,                     
+        c.TenMH                      
+    FROM dbo.TeachingAssignment ta
+    INNER JOIN dbo.Users u ON ta.HRID = u.Id
+    INNER JOIN dbo.Course c ON ta.MaMH = c.MaMH
+    WHERE 
+        (@HRID IS NULL OR ta.HRID = @HRID)
+        AND (@MaMH IS NULL OR ta.MaMH = @MaMH)
+    ORDER BY ta.ID DESC;             
+END;
+GO

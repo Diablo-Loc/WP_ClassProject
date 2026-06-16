@@ -285,6 +285,7 @@ namespace ClassProject.Presentation.Forms.Main
                 // CASE 1: STUDENT PORTAL (POSITION = 1) - CỔNG THÔNG TIN SINH VIÊN
                 // =========================================================
                 case 1:
+                    flowMenu.Controls.Add(CreateMenuButton("Hồ sơ cá nhân", Profile_Click));
                     flowMenu.Controls.Add(CreateMenuButton("Yêu cầu", Request_Click));               // Gửi đơn hỗ trợ, phúc khảo điểm
                     break;
 
@@ -351,7 +352,26 @@ namespace ClassProject.Presentation.Forms.Main
         }
         private void Statistic_Click(object sender, EventArgs e) => OpenChildForm(new StatisticsForm());
         private void Report_Click(object sender, EventArgs e) => OpenChildForm(new ReportFormHR());
+        //2.Student: Hồ sơ cá nhân, yêu cầu (gửi đơn hỗ trợ, phúc khảo điểm)
+        private void Profile_Click(object sender, EventArgs e)
+        {
+            // 1. Lấy chuỗi kết nối trực tiếp từ đối tượng db toàn cục của f_main
+            string connectionString = db.GetConnection().ConnectionString;
 
+            // 2. Kiểm tra an toàn xem hệ thống đã lấy được MSSV của sinh viên này chưa
+            if (string.IsNullOrEmpty(UserSession.MSSV))
+            {
+                MessageBox.Show("Không tìm thấy thông tin Mã số sinh viên (MSSV) cho tài khoản này!",
+                                "Thông báo lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 3. Ép kiểu chuỗi MSSV từ UserSession sang số nguyên int để khớp với Constructor của ProfileForm
+            int loggedInMssv = Convert.ToInt32(UserSession.MSSV);
+
+            // 4. Khởi tạo ProfileForm với 2 tham số và đẩy thẳng vào vùng hiển thị pnlContainer
+            OpenChildForm(new ProfileForm(connectionString, loggedInMssv));
+        }
         //3.hr
         private void ScoreSv_Click(object sender, EventArgs e) => OpenChildForm(new StudentScoreForm());
 
