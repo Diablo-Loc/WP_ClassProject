@@ -1,6 +1,6 @@
 ﻿using ClassProject.DataAccess.Db;
 using ClassProject.Models;
-using Microsoft.Data.SqlClient; 
+using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 
@@ -155,7 +155,6 @@ namespace ClassProject.DataAccess.Repositories
 
         public bool IsDuplicateCheck(string msgv, string phone, string email, int? excludeId = null)
         {
-            // Kiểm tra trùng Mã số, hoặc trùng SĐT (nếu gõ), hoặc trùng Email (nếu gõ)
             string query = @"SELECT COUNT(1) FROM dbo.Teachers 
                             WHERE (MSGV = @MSGV 
                                    OR (@Phone <> '' AND Phone = @Phone) 
@@ -190,9 +189,9 @@ namespace ClassProject.DataAccess.Repositories
                 return false;
             }
         }
+
         public Teacher GetTeacherByUserId(int userId)
         {
-            // Truy vấn chuẩn xác theo các cột hiện có trong schema của bạn
             string query = "SELECT Id, UserId, MSGV, FirstName, LastName, Phone, Email, AcademicRank FROM dbo.Teachers WHERE UserId = @UserId";
             try
             {
@@ -228,6 +227,7 @@ namespace ClassProject.DataAccess.Repositories
             }
             return null;
         }
+
         public bool UpdateTeacherProfile(Teacher teacher)
         {
             string query = @"UPDATE dbo.Teachers 
@@ -257,33 +257,139 @@ namespace ClassProject.DataAccess.Repositories
                 return false;
             }
         }
-        public bool InsertTeacherProfile(Teacher teacher)
+
+        public bool InsertTeacherWithAccount(string msgv, string firstName, string lastName, DateTime? dateOfBirth, string gender, string phone, string email, string academicRank, string username, string rawPassword, out string errorMessage)
         {
+            errorMessage = string.Empty;
+
+            // Mã hóa mật khẩu mặc định bằng BCrypt tương thích hệ thống kiểm tra mật khẩu
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(rawPassword);
+
             using (SqlConnection conn = _db.GetConnection())
             {
-                const string query = @"
-            INSERT INTO dbo.Teachers (UserId, MSGV, FirstName, LastName, Email, Status, Created_At)
-            VALUES (@UserId, @MSGV, @FirstName, @LastName, @Email, @Status, GETDATE())";
+                if (conn.State == ConnectionState.Closed) conn.Open();
 
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    cmd.Parameters.AddWithValue("@UserId", teacher.UserId);
-                    cmd.Parameters.AddWithValue("@MSGV", teacher.MSGV);
-                    cmd.Parameters.AddWithValue("@FirstName", teacher.FirstName);
-                    cmd.Parameters.AddWithValue("@LastName", teacher.LastName);
-                    cmd.Parameters.AddWithValue("@Email", teacher.Email);
-                    cmd.Parameters.AddWithValue("@Status", teacher.Status);
-
                     try
                     {
-                        conn.Open();
-                        return cmd.ExecuteNonQuery() > 0;
+                        // Đã sửa lại cấu trúc cột: PasswordHash -> Password, Role -> RoleId
+                        string sqlUser = @"INSERT INTO LoginDB.dbo.Users (Username, Password, Email, RoleId, Status) 
+                                           OUTPUT INSERTED.Id 
+                                           VALUES (@Username, @Password, @Email, 2, 1);";
+
+                        int newUserId;
+                        using (SqlCommand cmdUser = new SqlCommand(sqlUser, conn, trans))
+                        {
+                            cmdUser.Parameters.AddWithValue("@Username", username.Trim());
+                            cmdUser.Parameters.AddWithValue("@Password", passwordHash);
+                            cmdUser.Parameters.AddWithValue("@Email", (object)email?.Trim() ?? DBNull.Value);
+
+                            newUserId = Convert.ToInt32(cmdUser.ExecuteScalar());
+                        }
+
+                        // Bước 2: Thêm thông tin giảng viên vào dbo.Teachers kết nối với UserId vừa sinh ra
+                        string sqlTeacher = @"INSERT INTO dbo.Teachers (UserId, MSGV, FirstName, LastName, DateOfBirth, Gender, Phone, Email, AcademicRank, Status, Created_At)
+                                              VALUES (@UserId, @MSGV, @FirstName, @LastName, @DateOfBirth, @Gender, @Phone, @Email, @AcademicRank, 1, GETDATE())";
+
+                        using (SqlCommand cmdTeacher = new SqlCommand(sqlTeacher, conn, trans))
+                        {
+                            cmdTeacher.Parameters.AddWithValue("@UserId", newUserId);
+                            cmdTeacher.Parameters.AddWithValue("@MSGV", msgv.Trim());
+                            cmdTeacher.Parameters.AddWithValue("@FirstName", firstName.Trim());
+                            cmdTeacher.Parameters.AddWithValue("@LastName", lastName.Trim());
+                            cmdTeacher.Parameters.AddWithValue("@DateOfBirth", (object)dateOfBirth ?? DBNull.Value);
+                            cmdTeacher.Parameters.AddWithValue("@Gender", (object)gender ?? DBNull.Value);
+                            cmdTeacher.Parameters.AddWithValue("@Phone", (object)phone ?? DBNull.Value);
+                            cmdTeacher.Parameters.AddWithValue("@Email", (object)email ?? DBNull.Value);
+                            cmdTeacher.Parameters.AddWithValue("@AcademicRank", (object)academicRank ?? DBNull.Value);
+
+                            cmdTeacher.ExecuteNonQuery();
+                        }
+
+                        trans.Commit();
+                        return true;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        trans.Rollback();
+                        errorMessage = ex.Message;
                         return false;
                     }
                 }
+            }
+        }
+
+        public DataRow GetAccountInfoByTeacherId(int teacherId)
+        {
+            string query = @"SELECT t.MSGV, u.Username, t.Email, 
+                             (t.FirstName + ' ' + t.LastName) AS FullName
+                             FROM dbo.Teachers t
+                             INNER JOIN LoginDB.dbo.Users u ON t.UserId = u.Id
+                             WHERE t.Id = @TeacherId";
+            try
+            {
+                using (SqlConnection conn = _db.GetConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@TeacherId", teacherId);
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            da.Fill(dt);
+                            if (dt.Rows.Count > 0)
+                            {
+                                return dt.Rows[0];
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi GetAccountInfoByTeacherId: " + ex.Message);
+            }
+            return null;
+        }
+        public bool ResetPassword(int teacherId, string newPasswordHash, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            // Câu lệnh SQL: Tìm UserId dựa vào TeacherId, sau đó cập nhật Password bên bảng Users
+            string query = @"UPDATE u
+                             SET u.Password = @NewPasswordHash
+                             FROM LoginDB.dbo.Users u
+                             INNER JOIN dbo.Teachers t ON t.UserId = u.Id
+                             WHERE t.Id = @TeacherId";
+            try
+            {
+                using (SqlConnection conn = _db.GetConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@NewPasswordHash", newPasswordHash);
+                        cmd.Parameters.AddWithValue("@TeacherId", teacherId);
+
+                        conn.Open();
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            errorMessage = "Không tìm thấy tài khoản hệ thống liên kết với Giảng viên này.";
+                            return false;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
             }
         }
     }

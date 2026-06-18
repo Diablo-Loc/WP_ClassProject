@@ -116,6 +116,24 @@ CREATE TABLE dbo.Teachers
 );
 GO
 
+CREATE TABLE dbo.Staffs
+(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NULL,                                 -- Liên kết tài khoản đăng nhập
+    MSNV NVARCHAR(30) NOT NULL UNIQUE,               -- Mã số nhân viên (Mã Giáo vụ)
+    FirstName NVARCHAR(100) NOT NULL,
+    LastName NVARCHAR(100) NOT NULL,
+    Phone NVARCHAR(15) NULL,
+    Email NVARCHAR(100) NULL CONSTRAINT UQ_Staffs_Email UNIQUE,
+    Department NVARCHAR(100) DEFAULT N'Phòng Giáo vụ',
+    Status INT DEFAULT 1,                            -- 1: Đang làm việc, 0: Đã nghỉ việc
+    Created_At DATETIME DEFAULT GETDATE(),
+    Updated_At DATETIME NULL,
+
+    CONSTRAINT FK_Staffs_Users FOREIGN KEY (UserId) REFERENCES dbo.Users(Id) ON DELETE SET NULL
+);
+GO
+
 CREATE TABLE dbo.Students
 (
     Id INT PRIMARY KEY IDENTITY(1,1),
@@ -209,6 +227,7 @@ CREATE TABLE dbo.Requests
     CONSTRAINT FK_Requests_Students FOREIGN KEY (MSSV) REFERENCES dbo.Students(MSSV) ON DELETE CASCADE
 );
 GO
+
 
 -- ============================================================================
 -- 4. HIỆU NĂNG TRUY VẤN (INDEXES) & TRÌNH XEM (VIEWS)

@@ -3,6 +3,7 @@ using ClassProject.Models;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -14,24 +15,28 @@ namespace ClassProject.Presentation.Forms.Admin
         private bool _isEditMode = false;
         private int _selectedTeacherId = -1;
 
+        // Định nghĩa cấu trúc Email Doanh nghiệp dành riêng cho giảng viên
+        private const string TEACHER_EMAIL_SUBDOMAIN = "@teacher.";
+        private const string REQUIRED_EMAIL_SUFFIX = ".edu.vn";
+
         public ManageTeacherForm()
         {
             InitializeComponent();
             _teacherRepo = new TeacherRepository();
 
-            // Gán sự kiện chặn ký tự chữ cho ô số điện thoại
             if (txtPhone != null) txtPhone.KeyPress += TxtPhone_KeyPress;
+
+            // Đăng ký sự kiện tự động tạo Email/Username khi Admin nhập chữ vào ô Họ & Tên
+            txtLastName.TextChanged += AutoGenerateEmail_TextChanged;
+            txtFirstName.TextChanged += AutoGenerateEmail_TextChanged;
         }
 
         private void ManageTeacherForm_Load(object sender, EventArgs e)
         {
-            // ĐỒNG BỘ RBAC: Sử dụng Helper IsAdmin từ lõi UserSession để kiểm tra quyền truy cập thay vì check cứng số
             if (!UserSession.IsLoggedIn || !UserSession.IsAdmin)
             {
-                MessageBox.Show("Quyền truy cập bị từ chối! Chỉ tài khoản Quản trị viên (Administrator) mới được quyền can thiệp danh sách giảng viên.",
+                MessageBox.Show("Quyền truy cập bị từ chối! Chỉ tài khoản Quản trị viên mới được quyền truy cập.",
                                 "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-
-                // Đóng form an toàn tránh xung đột UI Thread
                 this.BeginInvoke(new MethodInvoker(this.Close));
                 return;
             }
@@ -44,64 +49,58 @@ namespace ClassProject.Presentation.Forms.Admin
         private void StyleGrid()
         {
             if (dgvTeachers == null) return;
-
             dgvTeachers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvTeachers.AllowUserToAddRows = false;
-            dgvTeachers.MultiSelect = false; // Chống xung đột ID khi chọn nhiều dòng
+            dgvTeachers.MultiSelect = false;
             dgvTeachers.RowTemplate.Height = 35;
             dgvTeachers.BackgroundColor = Color.White;
             dgvTeachers.BorderStyle = BorderStyle.None;
-
-            // Đồng bộ phong cách Dark Slate thanh lịch cho tiêu đề bảng
             dgvTeachers.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(15, 23, 42);
             dgvTeachers.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             dgvTeachers.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             dgvTeachers.RowHeadersVisible = false;
+
+            if (!dgvTeachers.Columns.Contains("btnViewAccount"))
+            {
+                DataGridViewButtonColumn btnColumn = new DataGridViewButtonColumn();
+                btnColumn.Name = "btnViewAccount";
+                btnColumn.HeaderText = "Tài khoản";
+                btnColumn.Text = "👁️ Xem";
+                btnColumn.UseColumnTextForButtonValue = true;
+                btnColumn.Width = 80;
+                btnColumn.FlatStyle = FlatStyle.Flat;
+                dgvTeachers.Columns.Add(btnColumn);
+            }
         }
 
         private void FormatGridColumns()
         {
             if (dgvTeachers.Columns.Count == 0) return;
-
-            // Ẩn các cột định danh kỹ thuật không cần thiết đối với người dùng
             if (dgvTeachers.Columns.Contains("Id")) dgvTeachers.Columns["Id"].Visible = false;
             if (dgvTeachers.Columns.Contains("UserId")) dgvTeachers.Columns["UserId"].Visible = false;
             if (dgvTeachers.Columns.Contains("Status")) dgvTeachers.Columns["Status"].Visible = false;
             if (dgvTeachers.Columns.Contains("FirstName")) dgvTeachers.Columns["FirstName"].Visible = false;
             if (dgvTeachers.Columns.Contains("LastName")) dgvTeachers.Columns["LastName"].Visible = false;
 
-            // Cấu hình nhãn tiếng Việt trực quan cho các cột
-            if (dgvTeachers.Columns.Contains("MSGV")) dgvTeachers.Columns["MSGV"].HeaderText = "Mã số GV";
-            if (dgvTeachers.Columns.Contains("FullName")) dgvTeachers.Columns["FullName"].HeaderText = "Họ và Tên";
-            if (dgvTeachers.Columns.Contains("Gender")) dgvTeachers.Columns["Gender"].HeaderText = "Giới tính";
-            if (dgvTeachers.Columns.Contains("DateOfBirth")) dgvTeachers.Columns["DateOfBirth"].HeaderText = "Ngày sinh";
-            if (dgvTeachers.Columns.Contains("Phone")) dgvTeachers.Columns["Phone"].HeaderText = "Số điện thoại";
-            if (dgvTeachers.Columns.Contains("Email")) dgvTeachers.Columns["Email"].HeaderText = "Địa chỉ Email";
-            if (dgvTeachers.Columns.Contains("AcademicRank")) dgvTeachers.Columns["AcademicRank"].HeaderText = "Học vị";
-            if (dgvTeachers.Columns.Contains("StatusText")) dgvTeachers.Columns["StatusText"].HeaderText = "Trạng thái công tác";
-
             dgvTeachers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            if (dgvTeachers.Columns.Contains("btnViewAccount"))
+            {
+                dgvTeachers.Columns["btnViewAccount"].DisplayIndex = dgvTeachers.Columns.Count - 1;
+            }
         }
 
         private void LoadTeacherGrid()
         {
             try
             {
-                // Tạm hủy sự kiện click để tránh hiện tượng nhảy dữ liệu ngược khi đang bind datasource
                 dgvTeachers.CellClick -= dgvTeachers_CellClick;
-
                 DataTable dt = _teacherRepo.GetAllTeachers();
                 dgvTeachers.DataSource = dt;
                 FormatGridColumns();
-
-                if (lblTotalTeachers != null)
-                {
-                    lblTotalTeachers.Text = $"Tổng số giảng viên: {dt?.Rows.Count ?? 0}";
-                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi nạp danh sách hệ thống: {ex.Message}", "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi nạp danh sách: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -109,77 +108,57 @@ namespace ClassProject.Presentation.Forms.Admin
             }
         }
 
-        private void dgvTeachers_CellClick(object sender, DataGridViewCellEventArgs e)
+        #region 💡 TỰ ĐỘNG SINH THÔNG TIN DOANH NGHIỆP DÀNH CHO GIẢNG VIÊN
+        private void AutoGenerateEmail_TextChanged(object sender, EventArgs e)
         {
-            // Kiểm tra hàng được chọn hợp lệ theo Checklist chống bug
-            if (e.RowIndex < 0 || dgvTeachers.CurrentRow == null) return;
-
-            DataGridViewRow row = dgvTeachers.Rows[e.RowIndex];
-
-            // Đọc dữ liệu an toàn tránh lỗi NullReferenceException
-            if (row.Cells["Id"].Value != null && row.Cells["Id"].Value != DBNull.Value)
+            if (!_isEditMode)
             {
-                _selectedTeacherId = Convert.ToInt32(row.Cells["Id"].Value);
-
-                txtTeacherCode.Text = row.Cells["MSGV"].Value?.ToString() ?? string.Empty;
-                txtFirstName.Text = row.Cells["FirstName"].Value?.ToString() ?? string.Empty;
-                txtLastName.Text = row.Cells["LastName"].Value?.ToString() ?? string.Empty;
-                cboGender.SelectedItem = row.Cells["Gender"].Value?.ToString() ?? "Nam";
-                txtPhone.Text = row.Cells["Phone"].Value?.ToString() ?? string.Empty;
-                txtEmail.Text = row.Cells["Email"].Value?.ToString() ?? string.Empty;
-                cboRank.SelectedItem = row.Cells["AcademicRank"].Value?.ToString() ?? "Thạc sĩ";
-
-                // Kiểm tra và chuyển đổi định dạng ngày sinh an toàn
-                string dateVal = row.Cells["DateOfBirth"].Value?.ToString() ?? "";
-                if (DateTime.TryParse(dateVal, out DateTime birthDate))
+                string fullNameStr = $"{txtLastName.Text.Trim()} {txtFirstName.Text.Trim()}";
+                if (string.IsNullOrWhiteSpace(fullNameStr))
                 {
-                    dtpBirthDate.Value = birthDate;
-                }
-                else
-                {
-                    dtpBirthDate.Value = new DateTime(1990, 1, 1); // Giá trị mặc định phòng thủ
+                    txtEmail.Clear();
+                    return;
                 }
 
-                int status = Convert.ToInt32(row.Cells["Status"].Value ?? 1);
-                chkActive.Checked = (status == 1);
+                // Loại bỏ dấu tiếng Việt, viết thường liền nhau (Ví dụ: tranvanb)
+                string unsignedName = RemoveSignForVietnamese(fullNameStr).Replace(" ", "").ToLower();
 
-                txtTeacherCode.Enabled = false; // Nghiêm cấm thay đổi Mã định danh khi sửa
-                SwitchMode(editMode: true);
+                // Định dạng đầu ra gợi ý: tranvanb@teacher.school.edu.vn
+                txtEmail.Text = unsignedName + TEACHER_EMAIL_SUBDOMAIN + "school" + REQUIRED_EMAIL_SUFFIX;
             }
         }
 
-        private void SwitchMode(bool editMode)
+        private string GenerateUsernameFromEmail(string email)
         {
-            _isEditMode = editMode;
-            if (_isEditMode)
-            {
-                btnSave.Text = "💾 Cập nhật";
-                btnSave.FillColor = Color.FromArgb(245, 158, 11); // Màu cam hổ phách
-                if (chkActive != null) chkActive.Visible = true;
-            }
-            else
-            {
-                btnSave.Text = "(+) Thêm Giảng Viên";
-                btnSave.FillColor = Color.FromArgb(16, 124, 65); // Xanh lục thương mại
-                if (chkActive != null) chkActive.Visible = false;
-                txtTeacherCode.Enabled = true;
-            }
+            string localPart = email.Split('@')[0];
+            return $"teacher_{localPart.ToLower().Trim()}"; // Định dạng: teacher_tranvanb
         }
 
-        private void ResetFormToInsertMode()
+        private string GenerateRandomPassword(int length = 8)
         {
-            txtTeacherCode.Clear();
-            txtFirstName.Clear();
-            txtLastName.Clear();
-            txtPhone.Clear();
-            txtEmail.Clear();
-            if (cboGender.Items.Count > 0) cboGender.SelectedIndex = 0;
-            if (cboRank.Items.Count > 0) cboRank.SelectedIndex = 0;
-            dtpBirthDate.Value = new DateTime(1990, 1, 1);
-            _selectedTeacherId = -1;
-            SwitchMode(editMode: false);
-            txtTeacherCode.Focus();
+            const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@#";
+            StringBuilder res = new StringBuilder();
+            Random rnd = new Random();
+            while (0 < length--)
+            {
+                res.Append(validChars[rnd.Next(validChars.Length)]);
+            }
+            return res.ToString();
         }
+
+        private string RemoveSignForVietnamese(string str)
+        {
+            if (string.IsNullOrEmpty(str)) return "";
+            string[] arr1 = new string[] { "á", "à", "ả", "ã", "ạ", "â", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ă", "ắ", "ằ", "ẳ", "ẵ", "ặ", "đ", "é", "è", "ẻ", "ẽ", "ẹ", "ê", "ế", "ề", "ể", "ễ", "ệ", "í", "ì", "ỉ", "ĩ", "ị", "ó", "ò", "ỏ", "õ", "ọ", "ô", "ố", "ồ", "ổ", "ỗ", "ộ", "ơ", "ớ", "ờ", "ở", "ỡ", "ợ", "ú", "ù", "ủ", "ũ", "ụ", "ư", "ứ", "ừ", "ử", "ữ", "ự", "ý", "ỳ", "ỷ", "ỹ", "ỵ" };
+            string[] arr2 = new string[] { "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "d", "e", "e", "e", "e", "e", "e", "e", "e", "e", "e", "e", "i", "i", "i", "i", "i", "o", "o", "o", "o", "o", "o", "o", "o", "o", "o", "o", "o", "o", "o", "o", "o", "o", "u", "u", "u", "u", "u", "u", "u", "u", "u", "u", "u", "y", "y", "y", "y", "y" };
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                str = str.Replace(arr1[i], arr2[i]);
+                str = str.Replace(arr1[i].ToUpper(), arr2[i].ToUpper());
+            }
+            return str;
+        }
+        #endregion
 
         private void btnSave_Click(object sender, EventArgs e)
         {
@@ -192,114 +171,199 @@ namespace ClassProject.Presentation.Forms.Admin
             string rank = cboRank.SelectedItem?.ToString() ?? "Thạc sĩ";
             DateTime birth = dtpBirthDate.Value;
 
-            // 1. Kiểm tra nghiệp vụ dữ liệu trống
-            if (string.IsNullOrWhiteSpace(msgv) || string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+            if (string.IsNullOrWhiteSpace(msgv) || string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(email))
             {
-                MessageBox.Show("Mã giảng viên, Họ và Tên đệm không được phép bỏ trống!", "Cảnh báo nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Các trường thông tin thiết yếu không được để trống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 2. Kiểm tra biểu thức chính quy (Regex Formats)
-            if (!string.IsNullOrEmpty(phone) && !Regex.IsMatch(phone, @"^(03|05|07|08|09)[0-9]{8}$"))
+            // Kiểm tra định dạng Email giảng viên
+            if (!email.Contains(TEACHER_EMAIL_SUBDOMAIN, StringComparison.OrdinalIgnoreCase) || !email.EndsWith(REQUIRED_EMAIL_SUFFIX, StringComparison.OrdinalIgnoreCase))
             {
-                MessageBox.Show("Số điện thoại không đúng định dạng di động Việt Nam (Phải có 10 chữ số)!", "Sai định dạng", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Email giảng viên bắt buộc phải chứa '{TEACHER_EMAIL_SUBDOMAIN}' và đuôi '{REQUIRED_EMAIL_SUFFIX}'!", "Sai định dạng", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (!string.IsNullOrEmpty(email) && !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-            {
-                MessageBox.Show("Địa chỉ Email không tuân thủ định dạng cấu trúc chung!", "Sai định dạng", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // 3. Kiểm tra tính toàn vẹn (Chống trùng lập hồ sơ trên database)
             int? excludeId = _isEditMode ? (int?)_selectedTeacherId : null;
             if (_teacherRepo.IsDuplicateCheck(msgv, phone, email, excludeId))
             {
-                MessageBox.Show("Mã số giảng viên, Số điện thoại hoặc Email này đã tồn tại trên một hồ sơ công tác khác!", "Xung đột dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Mã số giảng viên hoặc Email này đã tồn tại trên hệ thống!", "Trùng dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 4. Thực thi lưu trữ qua Repository
             if (_isEditMode)
             {
                 int status = chkActive.Checked ? 1 : 0;
                 if (_teacherRepo.UpdateTeacher(_selectedTeacherId, firstName, lastName, birth, gender, phone, email, rank, status))
                 {
-                    MessageBox.Show("Cập nhật thông tin giảng viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Cập nhật thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ResetFormToInsertMode();
                     LoadTeacherGrid();
                 }
             }
             else
             {
-                // Tạo hồ sơ giảng viên mới
-                int? linkedUserId = null;
+                // ✨ SINH TÀI KHOẢN VÀ MẬT KHẨU TỰ ĐỘNG THEO FORM MỚI
+                string username = GenerateUsernameFromEmail(email);
+                string rawPassword = GenerateRandomPassword(8); // Sinh chuỗi mật khẩu 8 ký tự ngẫu nhiên bảo mật cao
 
-                if (_teacherRepo.InsertTeacher(linkedUserId, msgv, firstName, lastName, birth, gender, phone, email, rank))
+                if (_teacherRepo.InsertTeacherWithAccount(msgv, firstName, lastName, birth, gender, phone, email, rank, username, rawPassword, out string dbError))
                 {
-                    MessageBox.Show("Thêm mới hồ sơ giảng viên vào hệ thống thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    string msgSuccess = $"🎉 THÊM GIẢNG VIÊN VÀ CẤP TÀI KHOẢN THÀNH CÔNG!\n\n" +
+                                        $"• Username: {username}\n" +
+                                        $"• Mật khẩu tạm: {rawPassword}\n\n" +
+                                        $"Hãy lưu lại thông tin này để cấp phát cho giảng viên!";
+                    MessageBox.Show(msgSuccess, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ResetFormToInsertMode();
                     LoadTeacherGrid();
                 }
                 else
                 {
-                    MessageBox.Show("Xử lý thêm mới thất bại, vui lòng kiểm tra kết nối SQL Server!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Lỗi hệ thống: {dbError}", "Thất bại", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
+        // ✨ BỔ SUNG SỰ KIỆN: XỬ LÝ KHI NHẤN NÚT XÓA GIẢNG VIÊN
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (_selectedTeacherId == -1 || dgvTeachers.CurrentRow == null)
+            if (_selectedTeacherId == -1)
             {
-                MessageBox.Show("Vui lòng click chọn một giảng viên cụ thể từ danh sách trước!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn một giảng viên từ danh sách để xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            string targetName = $"{txtFirstName.Text} {txtLastName.Text}".Trim();
-            DialogResult dr = MessageBox.Show($"Bạn có chắc chắn muốn xóa vĩnh viễn giảng viên [{targetName}] khỏi hệ thống?\nHành động này không thể hoàn tác!", "Xác nhận hành động xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-
-            if (dr == DialogResult.Yes)
+            var confirmResult = MessageBox.Show("Bạn có chắc chắn muốn xóa giảng viên này không?\nHành động này không thể hoàn tác!",
+                                                 "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (confirmResult == DialogResult.Yes)
             {
                 if (_teacherRepo.DeleteTeacher(_selectedTeacherId))
                 {
-                    MessageBox.Show("Đã xóa hồ sơ giảng viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Xóa hồ sơ giảng viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ResetFormToInsertMode();
                     LoadTeacherGrid();
+                }
+                else
+                {
+                    MessageBox.Show("Không thể xóa giảng viên này. Có thể hồ sơ đang được liên kết dữ liệu ở bảng khác!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
-        {
-            string keyword = txtSearch.Text.Trim();
-            if (string.IsNullOrEmpty(keyword))
-            {
-                LoadTeacherGrid();
-            }
-            else
-            {
-                DataTable dt = _teacherRepo.SearchTeachers(keyword);
-                dgvTeachers.DataSource = dt;
-                FormatGridColumns();
-            }
-        }
-
+        // ✨ BỔ SUNG SỰ KIỆN: LÀM TRỐNG FORM (HỦY CHẾ ĐỘ SỬA)
         private void btnClear_Click(object sender, EventArgs e)
         {
             ResetFormToInsertMode();
-            if (txtSearch != null) txtSearch.Clear();
-            LoadTeacherGrid();
+        }
+
+        // ✨ BỔ SUNG SỰ KIỆN: TÌM KIẾM THEO TỪ KHÓA REAL-TIME
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string keyword = txtSearch.Text.Trim();
+                if (string.IsNullOrEmpty(keyword))
+                {
+                    LoadTeacherGrid();
+                }
+                else
+                {
+                    dgvTeachers.CellClick -= dgvTeachers_CellClick;
+                    DataTable dt = _teacherRepo.SearchTeachers(keyword);
+                    dgvTeachers.DataSource = dt;
+                    FormatGridColumns();
+                    dgvTeachers.CellClick += dgvTeachers_CellClick;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi tìm kiếm: " + ex.Message);
+            }
+        }
+
+        private void dgvTeachers_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || dgvTeachers.CurrentRow == null) return;
+            DataGridViewRow row = dgvTeachers.Rows[e.RowIndex];
+
+            if (dgvTeachers.Columns[e.ColumnIndex].Name == "btnViewAccount")
+            {
+                if (row.Cells["Id"].Value != null && row.Cells["Id"].Value != DBNull.Value)
+                {
+                    int teacherId = Convert.ToInt32(row.Cells["Id"].Value);
+                    DataRow accInfo = _teacherRepo.GetAccountInfoByTeacherId(teacherId);
+                    if (accInfo != null)
+                    {
+                        var diag = new AccountSecurityInfoDialog(teacherId, accInfo["MSGV"].ToString(), accInfo["Username"].ToString(), accInfo["Email"].ToString(), accInfo["FullName"].ToString(), 2);
+                        diag.ShowDialog();
+                    }
+                }
+                return;
+            }
+
+            // Gán ngược dữ liệu lên TextBox để phục vụ sửa đổi
+            txtLastName.TextChanged -= AutoGenerateEmail_TextChanged;
+            txtFirstName.TextChanged -= AutoGenerateEmail_TextChanged;
+
+            _selectedTeacherId = Convert.ToInt32(row.Cells["Id"].Value);
+            txtTeacherCode.Text = row.Cells["MSGV"].Value?.ToString();
+            txtFirstName.Text = row.Cells["FirstName"].Value?.ToString();
+            txtLastName.Text = row.Cells["LastName"].Value?.ToString();
+            txtEmail.Text = row.Cells["Email"].Value?.ToString();
+            txtPhone.Text = row.Cells["Phone"].Value?.ToString();
+
+            if (row.Cells["Gender"].Value != null) cboGender.SelectedItem = row.Cells["Gender"].Value.ToString();
+            if (row.Cells["AcademicRank"].Value != null) cboRank.SelectedItem = row.Cells["AcademicRank"].Value.ToString();
+            if (row.Cells["DateOfBirth"].Value != DBNull.Value && row.Cells["DateOfBirth"].Value != null)
+                dtpBirthDate.Value = Convert.ToDateTime(row.Cells["DateOfBirth"].Value);
+
+            txtTeacherCode.Enabled = false;
+            txtEmail.ReadOnly = true; // Khóa không cho sửa Email ở mode cập nhật để bảo toàn định dạng Auth
+            SwitchMode(editMode: true);
+
+            if (row.Cells["Status"].Value != DBNull.Value && row.Cells["Status"].Value != null)
+            {
+                if (chkActive != null) chkActive.Checked = Convert.ToInt32(row.Cells["Status"].Value) == 1;
+            }
+
+            txtLastName.TextChanged += AutoGenerateEmail_TextChanged;
+            txtFirstName.TextChanged += AutoGenerateEmail_TextChanged;
+        }
+
+        private void SwitchMode(bool editMode)
+        {
+            _isEditMode = editMode;
+            if (_isEditMode)
+            {
+                btnSave.Text = "💾 Cập nhật";
+                if (chkActive != null) chkActive.Visible = true;
+            }
+            else
+            {
+                btnSave.Text = "(+) Thêm Giảng Viên";
+                if (chkActive != null) chkActive.Visible = false;
+                txtTeacherCode.Enabled = true;
+                txtEmail.ReadOnly = false;
+            }
+        }
+
+        private void ResetFormToInsertMode()
+        {
+            txtTeacherCode.Clear();
+            txtFirstName.Clear();
+            txtLastName.Clear();
+            txtPhone.Clear();
+            txtEmail.Clear();
+            _selectedTeacherId = -1;
+            if (cboGender.Items.Count > 0) cboGender.SelectedIndex = 0;
+            if (cboRank.Items.Count > 0) cboRank.SelectedIndex = 0;
+            dtpBirthDate.Value = DateTime.Now.AddYears(-25); // Giá trị mặc định hợp lý cho giảng viên
+            SwitchMode(editMode: false);
         }
 
         private void TxtPhone_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Chỉ cho phép phím số và phím xóa Backspace
-            if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)8)
-            {
-                e.Handled = true;
-            }
+            if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)8) e.Handled = true;
         }
     }
 }

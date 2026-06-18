@@ -11,8 +11,7 @@ namespace ClassProject.Models
         private static int _userId = -1;
         private static string _mssv = string.Empty;
         private static string _username = string.Empty;
-
-        // BỔ SUNG 2 TRƯỜNG BACKING-FIELD MỚI
+        private static string _fullName = string.Empty;
         private static string _email = string.Empty;
         private static string _teacherId = string.Empty;
 
@@ -22,7 +21,7 @@ namespace ClassProject.Models
         public static int UserId => _userId;
         public static string MSSV => _mssv;
         public static string Username => _username;
-
+        public static string FullName => _fullName;
         // BỔ SUNG PROPERTIES ĐỂ BÊN NGOÀI ĐỌC ĐƯỢC
         public static string Email => _email;
         public static string TeacherId => _teacherId;
@@ -59,7 +58,7 @@ namespace ClassProject.Models
 
         /// Khởi tạo một phiên làm việc mới sau khi xác thực thành công.
         /// CẬP NHẬT: Thêm tham số email và teacherId vào hàm khởi tạo
-        public static void Initialize(int userId, string username, int roleId, string email = "", string mssv = "", string teacherId = "")
+        public static void Initialize(int userId, string username, int roleId, string email = "", string fullName = "", string mssv = "", string teacherId = "")
         {
             if (userId <= 0)
                 throw new ArgumentException("Id người dùng không hợp lệ để khởi tạo phiên.");
@@ -67,9 +66,10 @@ namespace ClassProject.Models
             _userId = userId;
             _username = username?.Trim() ?? string.Empty;
             _roleId = roleId;
-            _email = email?.Trim() ?? string.Empty; // Nhận email
+            _email = email?.Trim() ?? string.Empty;
+            _fullName = fullName?.Trim() ?? string.Empty;
             _mssv = mssv?.Trim() ?? string.Empty;
-            _teacherId = teacherId?.Trim() ?? string.Empty; // Nhận mã giảng viên (MSGV)
+            _teacherId = teacherId?.Trim() ?? string.Empty;
         }
 
         /// Cập nhật riêng biệt MSSV sau khi Form Main đồng bộ từ Database.
@@ -97,8 +97,9 @@ namespace ClassProject.Models
             _userId = -1;
             _mssv = string.Empty;
             _username = string.Empty;
-            _email = string.Empty;     // Xóa email khi Logout
-            _teacherId = string.Empty; // Xóa mã giảng viên khi Logout
+            _email = string.Empty;
+            _fullName = string.Empty;  
+            _teacherId = string.Empty;
         }
 
         #endregion

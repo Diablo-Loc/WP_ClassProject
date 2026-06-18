@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ClassProject.Models;
+using System;
 using System.Data;
 
 namespace ClassProject.DataAccess.Repositories
@@ -13,7 +14,6 @@ namespace ClassProject.DataAccess.Repositories
 
         // Thêm mới giảng viên (Liên kết với một tài khoản User có sẵn)
         bool InsertTeacher(int? userId, string msgv, string firstName, string lastName, DateTime? dateOfBirth, string gender, string phone, string email, string academicRank);
-
         // Cập nhật thông tin và trạng thái công tác
         bool UpdateTeacher(int id, string firstName, string lastName, DateTime? dateOfBirth, string gender, string phone, string email, string academicRank, int status);
 
@@ -22,5 +22,12 @@ namespace ClassProject.DataAccess.Repositories
 
         // Hàm kiểm tra trùng lập Mã số, Số điện thoại hoặc Email trước khi lưu
         bool IsDuplicateCheck(string msgv, string phone, string email, int? excludeId = null);
+
+
+        bool InsertTeacherWithAccount(string msgv, string firstName, string lastName, DateTime? dateOfBirth, string gender, string phone, string email, string academicRank, string username, string rawPassword, out string errorMessage);
+
+        // Lấy thông tin tài khoản liên kết (Username, Email, FullName) để hiển thị lên hộp thoại bảo mật tài khoản
+        DataRow GetAccountInfoByTeacherId(int teacherId);
+        bool ResetPassword(int teacherId, string newPasswordHash, out string errorMessage);
     }
 }

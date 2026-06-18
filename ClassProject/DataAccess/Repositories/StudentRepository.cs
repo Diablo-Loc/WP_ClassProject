@@ -8,7 +8,6 @@ namespace ClassProject.DataAccess.Repositories
 {
     public class StudentRepository
     {
-        private readonly string _connString;
         private readonly My_DB _db = new My_DB();
 
         public StudentRepository()
@@ -36,6 +35,47 @@ namespace ClassProject.DataAccess.Repositories
                 }
             }
             return table;
+        }
+
+        public bool AddStudent(Student student)
+        {
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                try
+                {
+                    conn.Open();
+
+                    // Chỉ Insert vào bảng Students.
+                    string sqlStudent = @"INSERT INTO Students 
+                                       (UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Picture)
+                                   VALUES 
+                                       (@UserId, @MSSV, @FirstName, @LastName, @DateOfBirth, @Gender, @Phone, @Address, @Hometown, @Email, @Picture)";
+
+                    using (SqlCommand cmd = new SqlCommand(sqlStudent, conn))
+                    {
+                        // CHÚ Ý CHỖ NÀY: Xử lý giá trị null ép về DBNull.Value cho SQL hiểu
+                        cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = (object)student.UserId ?? DBNull.Value });
+                        cmd.Parameters.Add(new SqlParameter("@MSSV", SqlDbType.NVarChar) { Value = student.Mssv.ToString() });
+                        cmd.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = student.FirstName });
+                        cmd.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = student.LastName });
+                        cmd.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.DateTime) { Value = student.DateOfBirth });
+                        cmd.Parameters.Add(new SqlParameter("@Gender", SqlDbType.NVarChar) { Value = student.Gender });
+                        cmd.Parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar) { Value = student.Phone });
+                        cmd.Parameters.Add(new SqlParameter("@Address", SqlDbType.NVarChar) { Value = student.Address ?? (object)DBNull.Value });
+                        cmd.Parameters.Add(new SqlParameter("@Hometown", SqlDbType.NVarChar) { Value = student.Hometown ?? (object)DBNull.Value });
+                        cmd.Parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar) { Value = student.Email });
+                        cmd.Parameters.Add(new SqlParameter("@Picture", SqlDbType.VarBinary) { Value = student.Picture ?? (object)DBNull.Value });
+
+                        cmd.ExecuteNonQuery();
+                    }
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi khi thêm sinh viên: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+            }
         }
 
         public Student GetStudentByMssv(string mssv)
@@ -87,44 +127,67 @@ namespace ClassProject.DataAccess.Repositories
             return null;
         }
 
-        public bool AddStudent(Student student)
+        public bool AddStudentWithAccount(Student student, string username, string hashedPassword, int roleId)
         {
             using (SqlConnection conn = _db.GetConnection())
             {
-                string sqlStudent = @"INSERT INTO dbo.Students 
-                                       (UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Picture, MaLop, MaNganh)
-                                     VALUES 
-                                       (@UserId, @MSSV, @FirstName, @LastName, @DateOfBirth, @Gender, @Phone, @Address, @Hometown, @Email, @Picture, @MaLop, @MaNganh);";
+                if (conn.State == ConnectionState.Closed) conn.Open();
 
-                using (SqlCommand cmd = new SqlCommand(sqlStudent, conn))
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = (object)student.UserId ?? DBNull.Value });
-                    cmd.Parameters.Add(new SqlParameter("@MSSV", SqlDbType.NVarChar, 30) { Value = student.Mssv?.Trim() });
-                    cmd.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar, 100) { Value = student.FirstName?.Trim() });
-                    cmd.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar, 100) { Value = student.LastName?.Trim() });
-                    cmd.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.DateTime) { Value = (object)student.DateOfBirth ?? DBNull.Value });
-                    cmd.Parameters.Add(new SqlParameter("@Gender", SqlDbType.NVarChar, 10) { Value = student.Gender?.Trim() ?? (object)DBNull.Value });
-                    cmd.Parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 15) { Value = student.Phone?.Trim() ?? (object)DBNull.Value });
-                    cmd.Parameters.Add(new SqlParameter("@Address", SqlDbType.NVarChar, 200) { Value = student.Address?.Trim() ?? (object)DBNull.Value });
-                    cmd.Parameters.Add(new SqlParameter("@Hometown", SqlDbType.NVarChar, 100) { Value = student.Hometown?.Trim() ?? (object)DBNull.Value });
-                    cmd.Parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 100) { Value = student.Email?.Trim() ?? (object)DBNull.Value });
-                    cmd.Parameters.Add(new SqlParameter("@Picture", SqlDbType.VarBinary) { Value = student.Picture ?? (object)DBNull.Value });
-                    cmd.Parameters.Add(new SqlParameter("@MaLop", SqlDbType.VarChar, 20) { Value = student.MaLop?.Trim() ?? (object)DBNull.Value });
-                    cmd.Parameters.Add(new SqlParameter("@MaNganh", SqlDbType.Char, 10) { Value = student.MaNganh?.Trim() ?? (object)DBNull.Value });
-
                     try
                     {
-                        conn.Open();
-                        return cmd.ExecuteNonQuery() > 0;
+                        string sqlUser = @"INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid, Status, Created_At)
+                                           VALUES (@Username, @Email, @Password, @RoleId, 1, 1, GETDATE());
+                                           SELECT SCOPE_IDENTITY();";
+
+                        int newUserId = 0;
+                        using (SqlCommand cmdUser = new SqlCommand(sqlUser, conn, trans))
+                        {
+                            cmdUser.Parameters.Add(new SqlParameter("@Username", SqlDbType.NVarChar, 50) { Value = username.Trim() });
+                            cmdUser.Parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 100) { Value = student.Email.Trim() });
+                            cmdUser.Parameters.Add(new SqlParameter("@Password", SqlDbType.NVarChar, 255) { Value = hashedPassword });
+                            cmdUser.Parameters.Add(new SqlParameter("@RoleId", SqlDbType.Int) { Value = roleId });
+
+                            newUserId = Convert.ToInt32(cmdUser.ExecuteScalar());
+                        }
+
+                        string sqlStudent = @"INSERT INTO dbo.Students 
+                                               (UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Picture, MaLop, MaNganh, Created_At)
+                                             VALUES 
+                                               (@UserId, @MSSV, @FirstName, @LastName, @DateOfBirth, @Gender, @Phone, @Address, @Hometown, @Email, @Picture, @MaLop, @MaNganh, GETDATE());";
+
+                        using (SqlCommand cmdStudent = new SqlCommand(sqlStudent, conn, trans))
+                        {
+                            cmdStudent.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = newUserId });
+                            cmdStudent.Parameters.Add(new SqlParameter("@MSSV", SqlDbType.NVarChar, 30) { Value = student.Mssv.Trim() });
+                            cmdStudent.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar, 100) { Value = student.FirstName.Trim() });
+                            cmdStudent.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar, 100) { Value = student.LastName.Trim() });
+                            cmdStudent.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.DateTime) { Value = (object)student.DateOfBirth ?? DBNull.Value });
+                            cmdStudent.Parameters.Add(new SqlParameter("@Gender", SqlDbType.NVarChar, 10) { Value = string.IsNullOrEmpty(student.Gender) ? DBNull.Value : (object)student.Gender.Trim() });
+                            cmdStudent.Parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 15) { Value = string.IsNullOrEmpty(student.Phone) ? DBNull.Value : (object)student.Phone.Trim() });
+                            cmdStudent.Parameters.Add(new SqlParameter("@Address", SqlDbType.NVarChar, 200) { Value = string.IsNullOrEmpty(student.Address) ? DBNull.Value : (object)student.Address.Trim() });
+                            cmdStudent.Parameters.Add(new SqlParameter("@Hometown", SqlDbType.NVarChar, 100) { Value = string.IsNullOrEmpty(student.Hometown) ? DBNull.Value : (object)student.Hometown.Trim() });
+                            cmdStudent.Parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 100) { Value = student.Email.Trim() });
+                            cmdStudent.Parameters.Add(new SqlParameter("@Picture", SqlDbType.VarBinary) { Value = student.Picture ?? (object)DBNull.Value });
+                            cmdStudent.Parameters.Add(new SqlParameter("@MaLop", SqlDbType.VarChar, 20) { Value = string.IsNullOrEmpty(student.MaLop) ? DBNull.Value : (object)student.MaLop.Trim() });
+                            cmdStudent.Parameters.Add(new SqlParameter("@MaNganh", SqlDbType.Char, 10) { Value = string.IsNullOrEmpty(student.MaNganh) ? DBNull.Value : (object)student.MaNganh.Trim() });
+
+                            cmdStudent.ExecuteNonQuery();
+                        }
+
+                        trans.Commit();
+                        return true;
                     }
                     catch (SqlException ex)
                     {
+                        trans.Rollback();
                         if (ex.Number == 2627 || ex.Number == 2601)
                         {
+                            if (ex.Message.Contains("Username"))
+                                throw new InvalidOperationException("Tên tài khoản (Username) tự động sinh ra đã trùng lặp!");
                             if (ex.Message.Contains("Email") || ex.Message.Contains("UQ_Students_Email"))
-                            {
-                                throw new InvalidOperationException("Địa chỉ Email này đã tồn tại trong hệ thống sinh viên!");
-                            }
+                                throw new InvalidOperationException("Địa chỉ Email hệ thống này đã tồn tại!");
                             throw new InvalidOperationException("Mã số sinh viên (MSSV) này đã được sử dụng!");
                         }
                         throw;
@@ -137,38 +200,57 @@ namespace ClassProject.DataAccess.Repositories
         {
             using (SqlConnection conn = _db.GetConnection())
             {
-                string sql = @"UPDATE dbo.Students 
-                               SET FirstName=@fn, LastName=@ln, DateOfBirth=@db, Gender=@gr, 
-                                   Phone=@ph, Address=@ad, Hometown=@ht, Email=@em, 
-                                   Picture = ISNULL(@pc, Picture),
-                                   MaLop=@ml, MaNganh=@mn
-                               WHERE MSSV = @mssv";
+                if (conn.State == ConnectionState.Closed) conn.Open();
 
-                using (SqlCommand command = new SqlCommand(sql, conn))
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    command.Parameters.Add(new SqlParameter("@mssv", SqlDbType.NVarChar, 30) { Value = student.Mssv?.Trim() });
-                    command.Parameters.Add(new SqlParameter("@fn", SqlDbType.NVarChar, 100) { Value = student.FirstName?.Trim() });
-                    command.Parameters.Add(new SqlParameter("@ln", SqlDbType.NVarChar, 100) { Value = student.LastName?.Trim() });
-                    command.Parameters.Add(new SqlParameter("@db", SqlDbType.DateTime) { Value = (object)student.DateOfBirth ?? DBNull.Value });
-                    command.Parameters.Add(new SqlParameter("@gr", SqlDbType.NVarChar, 10) { Value = student.Gender?.Trim() ?? (object)DBNull.Value });
-                    command.Parameters.Add(new SqlParameter("@ph", SqlDbType.NVarChar, 15) { Value = student.Phone?.Trim() ?? (object)DBNull.Value });
-                    command.Parameters.Add(new SqlParameter("@ad", SqlDbType.NVarChar, 200) { Value = student.Address?.Trim() ?? (object)DBNull.Value });
-                    command.Parameters.Add(new SqlParameter("@ht", SqlDbType.NVarChar, 100) { Value = student.Hometown?.Trim() ?? (object)DBNull.Value });
-                    command.Parameters.Add(new SqlParameter("@em", SqlDbType.NVarChar, 100) { Value = student.Email?.Trim() ?? (object)DBNull.Value });
-                    command.Parameters.Add(new SqlParameter("@pc", SqlDbType.VarBinary) { Value = student.Picture ?? (object)DBNull.Value });
-                    command.Parameters.Add(new SqlParameter("@ml", SqlDbType.VarChar, 20) { Value = student.MaLop?.Trim() ?? (object)DBNull.Value });
-                    command.Parameters.Add(new SqlParameter("@mn", SqlDbType.Char, 10) { Value = student.MaNganh?.Trim() ?? (object)DBNull.Value });
-
                     try
                     {
-                        conn.Open();
-                        return command.ExecuteNonQuery() > 0;
+                        string sql = @"UPDATE dbo.Students 
+                                       SET FirstName=@fn, LastName=@ln, DateOfBirth=@db, Gender=@gr, 
+                                           Phone=@ph, Address=@ad, Hometown=@ht, Email=@em, 
+                                           Picture = ISNULL(@pc, Picture),
+                                           MaLop=@ml, MaNganh=@mn, Updated_At=GETDATE()
+                                       WHERE MSSV = @mssv";
+
+                        using (SqlCommand command = new SqlCommand(sql, conn, trans))
+                        {
+                            command.Parameters.Add(new SqlParameter("@mssv", SqlDbType.NVarChar, 30) { Value = student.Mssv?.Trim() });
+                            command.Parameters.Add(new SqlParameter("@fn", SqlDbType.NVarChar, 100) { Value = student.FirstName?.Trim() });
+                            command.Parameters.Add(new SqlParameter("@ln", SqlDbType.NVarChar, 100) { Value = student.LastName?.Trim() });
+                            command.Parameters.Add(new SqlParameter("@db", SqlDbType.DateTime) { Value = (object)student.DateOfBirth ?? DBNull.Value });
+                            command.Parameters.Add(new SqlParameter("@gr", SqlDbType.NVarChar, 10) { Value = student.Gender?.Trim() ?? (object)DBNull.Value });
+                            command.Parameters.Add(new SqlParameter("@ph", SqlDbType.NVarChar, 15) { Value = student.Phone?.Trim() ?? (object)DBNull.Value });
+                            command.Parameters.Add(new SqlParameter("@ad", SqlDbType.NVarChar, 200) { Value = student.Address?.Trim() ?? (object)DBNull.Value });
+                            command.Parameters.Add(new SqlParameter("@ht", SqlDbType.NVarChar, 100) { Value = student.Hometown?.Trim() ?? (object)DBNull.Value });
+                            command.Parameters.Add(new SqlParameter("@em", SqlDbType.NVarChar, 100) { Value = student.Email?.Trim() ?? (object)DBNull.Value });
+                            command.Parameters.Add(new SqlParameter("@pc", SqlDbType.VarBinary) { Value = student.Picture ?? (object)DBNull.Value });
+                            command.Parameters.Add(new SqlParameter("@ml", SqlDbType.VarChar, 20) { Value = student.MaLop?.Trim() ?? (object)DBNull.Value });
+                            command.Parameters.Add(new SqlParameter("@mn", SqlDbType.Char, 10) { Value = student.MaNganh?.Trim() ?? (object)DBNull.Value });
+
+                            command.ExecuteNonQuery();
+                        }
+
+                        if (student.UserId.HasValue && student.UserId.Value > 0)
+                        {
+                            string sqlUserUpdate = "UPDATE dbo.Users SET Email = @Email, Updated_At = GETDATE() WHERE Id = @UserId";
+                            using (SqlCommand cmdUser = new SqlCommand(sqlUserUpdate, conn, trans))
+                            {
+                                cmdUser.Parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 100) { Value = student.Email.Trim() });
+                                cmdUser.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = student.UserId.Value });
+                                cmdUser.ExecuteNonQuery();
+                            }
+                        }
+
+                        trans.Commit();
+                        return true;
                     }
                     catch (SqlException ex)
                     {
+                        trans.Rollback();
                         if (ex.Number == 2627 || ex.Number == 2601)
                         {
-                            throw new InvalidOperationException("Email cập nhật đã trùng với một sinh viên khác trong hệ thống!");
+                            throw new InvalidOperationException("Email cập nhật đã trùng với một tài khoản/sinh viên khác trong hệ thống!");
                         }
                         throw;
                     }
@@ -180,12 +262,47 @@ namespace ClassProject.DataAccess.Repositories
         {
             using (SqlConnection conn = _db.GetConnection())
             {
-                string query = "DELETE FROM dbo.Students WHERE MSSV = @id";
-                using (SqlCommand command = new SqlCommand(query, conn))
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                // Đưa toàn bộ tiến trình đọc logic và xóa vào chung khối Transaction an toàn
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    command.Parameters.Add(new SqlParameter("@id", SqlDbType.NVarChar, 30) { Value = mssv });
-                    conn.Open();
-                    return command.ExecuteNonQuery() > 0;
+                    try
+                    {
+                        int? userId = null;
+                        string findUserQuery = "SELECT UserId FROM dbo.Students WHERE MSSV = @mssv";
+                        using (SqlCommand cmdFind = new SqlCommand(findUserQuery, conn, trans))
+                        {
+                            cmdFind.Parameters.Add(new SqlParameter("@mssv", SqlDbType.NVarChar, 30) { Value = mssv });
+                            var res = cmdFind.ExecuteScalar();
+                            if (res != null && res != DBNull.Value) userId = Convert.ToInt32(res);
+                        }
+
+                        string query = "DELETE FROM dbo.Students WHERE MSSV = @id";
+                        using (SqlCommand command = new SqlCommand(query, conn, trans))
+                        {
+                            command.Parameters.Add(new SqlParameter("@id", SqlDbType.NVarChar, 30) { Value = mssv });
+                            command.ExecuteNonQuery();
+                        }
+
+                        if (userId.HasValue)
+                        {
+                            string deleteUser = "DELETE FROM dbo.Users WHERE Id = @UserId";
+                            using (SqlCommand cmdUser = new SqlCommand(deleteUser, conn, trans))
+                            {
+                                cmdUser.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = userId.Value });
+                                cmdUser.ExecuteNonQuery();
+                            }
+                        }
+
+                        trans.Commit();
+                        return true;
+                    }
+                    catch
+                    {
+                        trans.Rollback();
+                        throw;
+                    }
                 }
             }
         }
@@ -212,7 +329,6 @@ namespace ClassProject.DataAccess.Repositories
             DataTable dt = new DataTable();
             using (SqlConnection conn = _db.GetConnection())
             {
-                // Giữ nguyên logic so khớp không dấu thông minh của bạn
                 string query = @"SELECT s.UserId, s.MSSV, s.FirstName, s.LastName, s.DateOfBirth, 
                                         s.Gender, s.Phone, s.Address, s.Hometown, s.Email, s.Picture,
                                         s.MaLop, s.MaNganh,
@@ -277,8 +393,6 @@ namespace ClassProject.DataAccess.Repositories
                 using (SqlCommand checkCmd = new SqlCommand(checkSql, conn))
                 {
                     checkCmd.Parameters.Add(new SqlParameter("@Mssv", SqlDbType.NVarChar, 30) { Value = mssv.Trim() });
-
-                    // ĐỒNG BỘ: Sửa thành VarChar(30) cho khớp chính xác với bảng DKMH vật lý trong SQL
                     checkCmd.Parameters.Add(new SqlParameter("@MaLopHP", SqlDbType.VarChar, 30) { Value = maLopHP.Trim() });
 
                     if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
@@ -293,82 +407,146 @@ namespace ClassProject.DataAccess.Repositories
                 using (SqlCommand insertCmd = new SqlCommand(insertSql, conn))
                 {
                     insertCmd.Parameters.Add(new SqlParameter("@Mssv", SqlDbType.NVarChar, 30) { Value = mssv.Trim() });
-
                     insertCmd.Parameters.Add(new SqlParameter("@MaLopHP", SqlDbType.VarChar, 30) { Value = maLopHP.Trim() });
 
                     return insertCmd.ExecuteNonQuery() > 0;
                 }
             }
         }
+
         public bool ImportStudentWithAccount(string username, string hashedPassword, Student student)
         {
-            // Lấy chuỗi kết nối từ cấu trúc cơ sở dữ liệu hiện tại của dự án của bạn
-            // Giả định _db.GetConnection() trả về đối tượng SqlConnection
-            using (SqlConnection conn = (SqlConnection)_db.GetConnection())
+            try
             {
-                if (conn.State == System.Data.ConnectionState.Closed) conn.Open();
+                return AddStudentWithAccount(student, username, hashedPassword, 1);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi khi thực thi ImportTransaction: " + ex.Message);
+                return false;
+            }
+        }
+        public bool CreateAccountForStudent(string mssv, string username, string hashedPassword)
+        {
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                if (conn.State == ConnectionState.Closed) conn.Open();
 
-                // Khởi tạo Transaction bảo vệ tính toàn vẹn dữ liệu
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
                     try
                     {
-                        // BƯỚC 1: Chèn tài khoản mới vào bảng Users với RoleId = 1 (Sinh viên)
-                        // Sử dụng SELECT SCOPE_IDENTITY() để lấy ra ID tự tăng vừa tạo ngay lập tức
-                        string userQuery = @"
-                    INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid, Status, Created_At)
-                    VALUES (@Username, @Email, @Password, 1, 1, 1, GETDATE());
-                    SELECT SCOPE_IDENTITY();";
+                        // 1. Lấy email hiện tại của sinh viên để đưa sang bảng Users
+                        string email = "";
+                        string sqlGetEmail = "SELECT Email FROM dbo.Students WHERE MSSV = @mssv";
+                        using (SqlCommand cmdGet = new SqlCommand(sqlGetEmail, conn, trans))
+                        {
+                            cmdGet.Parameters.Add(new SqlParameter("@mssv", SqlDbType.NVarChar, 30) { Value = mssv.Trim() });
+                            var res = cmdGet.ExecuteScalar();
+                            if (res != null && res != DBNull.Value) email = res.ToString().Trim();
+                        }
+
+                        // 2. Tạo tài khoản trong bảng Users (Role mặc định cho Sinh viên là 1)
+                        string sqlUser = @"INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid, Status, Created_At)
+                                   VALUES (@Username, @Email, @Password, 1, 1, 1, GETDATE());
+                                   SELECT SCOPE_IDENTITY();";
 
                         int newUserId = 0;
-                        using (SqlCommand cmdUser = new SqlCommand(userQuery, conn, trans))
+                        using (SqlCommand cmdUser = new SqlCommand(sqlUser, conn, trans))
                         {
-                            cmdUser.Parameters.AddWithValue("@Username", username);
-                            cmdUser.Parameters.AddWithValue("@Email", student.Email);
-                            cmdUser.Parameters.AddWithValue("@Password", hashedPassword);
+                            cmdUser.Parameters.Add(new SqlParameter("@Username", SqlDbType.NVarChar, 50) { Value = username.Trim() });
+                            cmdUser.Parameters.Add(new SqlParameter("@Email", SqlDbType.NVarChar, 100) { Value = email });
+                            cmdUser.Parameters.Add(new SqlParameter("@Password", SqlDbType.NVarChar, 255) { Value = hashedPassword });
 
                             newUserId = Convert.ToInt32(cmdUser.ExecuteScalar());
                         }
 
-                        // BƯỚC 2: Chèn thông tin vào bảng Students với UserId vừa lấy được từ bảng Users
-                        string studentQuery = @"
-                    INSERT INTO dbo.Students (UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Hometown, Email, Created_At)
-                    VALUES (@UserId, @MSSV, @FirstName, @LastName, @DateOfBirth, @Gender, @Phone, @Address, @Hometown, @Email, GETDATE());";
-
-                        using (SqlCommand cmdStudent = new SqlCommand(studentQuery, conn, trans))
+                        // 3. Cập nhật ngược lại UserId vừa sinh ra vào bảng Students
+                        string sqlUpdateStudent = "UPDATE dbo.Students SET UserId = @UserId, Updated_At = GETDATE() WHERE MSSV = @mssv";
+                        using (SqlCommand cmdUpdate = new SqlCommand(sqlUpdateStudent, conn, trans))
                         {
-                            cmdStudent.Parameters.AddWithValue("@UserId", newUserId);
-                            cmdStudent.Parameters.AddWithValue("@MSSV", student.Mssv);
-                            cmdStudent.Parameters.AddWithValue("@FirstName", student.FirstName);
-                            cmdStudent.Parameters.AddWithValue("@LastName", student.LastName);
+                            cmdUpdate.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = newUserId });
+                            cmdUpdate.Parameters.Add(new SqlParameter("@mssv", SqlDbType.NVarChar, 30) { Value = mssv.Trim() });
 
-                            // Xử lý kiểm tra dữ liệu ngày tháng rỗng an toàn
-                            if (student.DateOfBirth.HasValue)
-                                cmdStudent.Parameters.AddWithValue("@DateOfBirth", student.DateOfBirth.Value);
-                            else
-                                cmdStudent.Parameters.AddWithValue("@DateOfBirth", DBNull.Value);
-
-                            cmdStudent.Parameters.AddWithValue("@Gender", string.IsNullOrEmpty(student.Gender) ? DBNull.Value : (object)student.Gender);
-                            cmdStudent.Parameters.AddWithValue("@Phone", string.IsNullOrEmpty(student.Phone) ? DBNull.Value : (object)student.Phone);
-                            cmdStudent.Parameters.AddWithValue("@Address", string.IsNullOrEmpty(student.Address) ? DBNull.Value : (object)student.Address);
-                            cmdStudent.Parameters.AddWithValue("@Hometown", string.IsNullOrEmpty(student.Hometown) ? DBNull.Value : (object)student.Hometown);
-                            cmdStudent.Parameters.AddWithValue("@Email", student.Email);
-
-                            cmdStudent.ExecuteNonQuery();
+                            cmdUpdate.ExecuteNonQuery();
                         }
 
-                        // BƯỚC 3: Nếu cả 2 bước chạy không lỗi, xác nhận lưu dữ liệu vĩnh viễn vào SQL Server
                         trans.Commit();
                         return true;
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        // Có lỗi phát sinh (Trùng Email hệ thống, sai kiểu dữ liệu...), hủy bỏ toàn bộ thao tác của dòng này
                         trans.Rollback();
-                        System.Diagnostics.Debug.WriteLine("Lỗi khi thực thi ImportTransaction: " + ex.Message);
                         return false;
                     }
                 }
+            }
+        }
+        public DataRow GetAccountInfoById(int userId)
+        {
+            try
+            {
+                using (SqlConnection conn = _db.GetConnection())
+                {
+                    // Truy vấn trực tiếp lấy thông tin bảo mật tương tự như Stored Procedure bên Staff
+                    string query = @"SELECT s.UserId, s.MSSV, u.Username, s.Email, 
+                                            (s.LastName + ' ' + s.FirstName) AS FullName
+                                     FROM dbo.Students s
+                                     INNER JOIN dbo.Users u ON s.UserId = u.Id
+                                     WHERE s.UserId = @UserId";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = userId });
+
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            da.Fill(dt);
+
+                            if (dt.Rows.Count > 0)
+                            {
+                                return dt.Rows[0];
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi GetAccountInfoById (Student): " + ex.Message);
+            }
+            return null;
+        }
+
+        // Thực hiện reset và cập nhật mật khẩu đã băm vào bảng Users cho Sinh viên
+        public bool ResetPassword(int userId, string newPasswordHash, out string errorMsg)
+        {
+            errorMsg = "";
+            try
+            {
+                using (SqlConnection conn = _db.GetConnection())
+                {
+                    // Vì mật khẩu nằm ở bảng Users nên ta update bảng Users dựa theo UserId
+                    string query = @"UPDATE dbo.Users 
+                                     SET Password = @NewPasswordHash, Updated_At = GETDATE() 
+                                     WHERE Id = @UserId";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.Int) { Value = userId });
+                        cmd.Parameters.Add(new SqlParameter("@NewPasswordHash", SqlDbType.NVarChar, 255) { Value = newPasswordHash });
+
+                        conn.Open();
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMsg = ex.Message;
+                return false;
             }
         }
     }

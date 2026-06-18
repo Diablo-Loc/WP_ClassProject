@@ -54,6 +54,7 @@ namespace ClassProject
 
             // BỔ SUNG: Biến hứng Email từ DB phục vụ UserSession
             string email = string.Empty;
+            string fullName = string.Empty;
 
             using (SqlConnection conn = _db.GetConnection())
             {
@@ -62,12 +63,25 @@ namespace ClassProject
                     conn.Open();
 
                     // CẬP NHẬT: Thêm cột Email vào SELECT query
-                    string query = @"SELECT Id, Password, RoleId, Email,
-                                            ISNULL(Valid, 0) AS Valid, 
-                                            ISNULL(Status, 0) AS Status, 
-                                            ISNULL(FailedAttempts, 0) AS FailedAttempts, 
-                                            LockoutEnd 
-                                     FROM Users WHERE Username = @user";
+                    string query = @"
+                        SELECT 
+                            u.Id, u.Password, u.RoleId, u.Email,
+                            ISNULL(u.Valid, 0) AS Valid, 
+                            ISNULL(u.Status, 0) AS Status, 
+                            ISNULL(u.FailedAttempts, 0) AS FailedAttempts, 
+                            u.LockoutEnd,
+                            -- Ghép Họ + Tên dựa theo RoleId thực tế trong DB của bạn
+                            CASE 
+                                WHEN u.RoleId = 1 THEN ISNULL(s.LastName + ' ' + s.FirstName, '')
+                                WHEN u.RoleId = 2 THEN ISNULL(t.LastName + ' ' + t.FirstName, '')
+                                WHEN u.RoleId = 3 THEN ISNULL(st.LastName + ' ' + st.FirstName, '')
+                                ELSE N'Hệ thống Administrator'
+                            END AS FullName
+                        FROM Users u
+                        LEFT JOIN Students s ON u.Id = s.UserId
+                        LEFT JOIN Teachers t ON u.Id = t.UserId
+                        LEFT JOIN Staffs st ON u.Id = st.UserId
+                        WHERE u.Username = @user";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
@@ -83,9 +97,8 @@ namespace ClassProject
                                 valid = Convert.ToInt32(reader["Valid"]);
                                 status = Convert.ToInt32(reader["Status"]);
                                 failedAttempts = Convert.ToInt32(reader["FailedAttempts"]);
-
-                                // BỔ SUNG: Đọc dữ liệu Email một cách an toàn
                                 email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : string.Empty;
+                                fullName = reader["FullName"] != DBNull.Value ? reader["FullName"].ToString() : string.Empty;
 
                                 if (reader["LockoutEnd"] != DBNull.Value)
                                 {
@@ -153,7 +166,7 @@ namespace ClassProject
 
                         // CẬP NHẬT CHUẨN GLOBAL: Khởi tạo Identity Passport có kèm Email
                         // Do mới đăng nhập nên ta để trống mssv và teacherId để form Main đồng bộ sau
-                        UserSession.Initialize(userId, username, roleId, email, "", "");
+                        UserSession.Initialize(userId, username, roleId, email, fullName, "", "");
 
                         // Xử lý Remember Me (DPAPI Bảo mật)
                         if (chkRememberMe.Checked)
