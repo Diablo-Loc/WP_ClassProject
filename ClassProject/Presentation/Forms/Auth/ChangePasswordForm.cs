@@ -59,9 +59,12 @@ namespace ClassProject.Presentation.Forms.Main
                 MessageBox.Show("Mật khẩu mới không được trùng với mật khẩu hiện tại!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (newPass.Length < 6 || !Regex.IsMatch(newPass, @"[a-zA-Z]") || !Regex.IsMatch(newPass, @"[0-9]"))
+            string passwordPattern = @"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
+            if (!Regex.IsMatch(newPass, passwordPattern))
             {
-                MessageBox.Show("Mật khẩu mới phải từ 6 ký tự trở lên, bao gồm cả chữ cái và chữ số để đảm bảo an toàn!", "Mật khẩu yếu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Mật khẩu mới không đủ độ an toàn!\n" +
+                                "Yêu cầu: Tối thiểu 8 ký tự, chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt.",
+                                "Mật khẩu yếu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 

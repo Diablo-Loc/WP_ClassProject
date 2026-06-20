@@ -1,13 +1,18 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using BCrypt.Net;
+using ClassProject.DataAccess.Db;
+using ClassProject.Presentation.Forms.Auth;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using BCrypt.Net;
-using ClassProject.DataAccess.Db;
 
 namespace ClassProject.Presentation.Forms
 {
@@ -20,7 +25,7 @@ namespace ClassProject.Presentation.Forms
             InitializeComponent();
         }
 
-        private void btnRegister_Click(object sender, EventArgs e)
+        private async void btnRegister_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
             string email = txtEmail.Text.Trim();
@@ -56,7 +61,43 @@ namespace ClassProject.Presentation.Forms
                 MessageBox.Show("Mật khẩu xác nhận không khớp!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+            // CHỐT CHẶN KIỂM TRA ĐỘ MẠNH MẬT KHẨU BẰNG REGEX
+            // ^(?=.*[A-Z]) : Ít nhất 1 chữ cái viết hoa
+            // (?=.*\d)     : Ít nhất 1 chữ số
+            // (?=.*[\W_])  : Ít nhất 1 ký tự đặc biệt (như @, #, $, !, %,...)
+            // .{8,}        : Tổng chiều dài tối thiểu từ 8 ký tự trở lên
+            string passwordPattern = @"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
+            if (!Regex.IsMatch(password, passwordPattern))
+            {
+                MessageBox.Show("Mật khẩu không đủ độ an toàn!\n" +
+                                "Yêu cầu: Tối thiểu 8 ký tự, chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt.",
+                                "Mật khẩu yếu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
+            try
+            {
+                // Chuyển con trỏ chuột thành hình vòng xoay tải để người dùng biết hệ thống đang xử lý
+                Cursor.Current = Cursors.WaitCursor;
+
+                // Gọi API bất đồng bộ (Có từ khóa await)
+                bool isDisposable = await IsDisposableEmail(email);
+
+                // Trả con trỏ chuột về bình thường
+                Cursor.Current = Cursors.Default;
+
+                if (isDisposable)
+                {
+                    MessageBox.Show("Hệ thống phát hiện đây là Email tạm thời (Disposable Email) dùng để spam!\n" +
+                                    "Vui lòng sử dụng các dịch vụ Email chính thức (Gmail, Outlook, Mail Trường,...) để đăng ký tài khoản.",
+                                    "Từ chối đăng ký", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return; // Chặn đứng luồng không cho chạy xuống lưu DB
+                }
+            }
+            catch
+            {
+                Cursor.Current = Cursors.Default;
+            }
             // 2. Xử lý nghiệp vụ tương tác Cơ sở dữ liệu thông qua Transaction
             try
             {
@@ -210,6 +251,68 @@ namespace ClassProject.Presentation.Forms
         private void lblBacktoLogin_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        // Hàm gọi API kiểm tra xem Email có phải là email rác/tạm thời hay không
+        private async Task<bool> IsDisposableEmail(string email)
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    // Thiết lập Timeout 4 giây để nếu mạng quá yếu thì tự ngắt, không bắt User đợi lâu
+                    client.Timeout = TimeSpan.FromSeconds(4);
+
+                    // API endpoint miễn phí từ Kickbox (không cần tạo tài khoản, không cần API Key)
+                    string url = $"https://open.kickbox.com/v1/disposable/{Uri.EscapeDataString(email)}";
+
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string jsonResult = await response.Content.ReadAsStringAsync();
+
+                        // Phân tích kết quả JSON trả về. Định dạng API: {"disposable": true} hoặc {"disposable": false}
+                        using (JsonDocument doc = JsonDocument.Parse(jsonResult))
+                        {
+                            if (doc.RootElement.TryGetProperty("disposable", out JsonElement disposableProp))
+                            {
+                                return disposableProp.GetBoolean();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Nếu có lỗi mạng hoặc sập API, ghi log debug và trả về false (cho qua) để không chặn người dùng thật
+                System.Diagnostics.Debug.WriteLine($"[API Error - Disposable Check Fail]: {ex.Message}");
+            }
+            return false;
+        }
+
+        private void btnOpenScanner_Click(object sender, EventArgs e)
+        {
+            // Khởi tạo Form quét riêng biệt dưới dạng một Hộp thoại (Dialog)
+            using (CardScannerForm scannerForm = new CardScannerForm())
+            {
+                // Hiển thị Form quét lên và chờ người dùng xử lý xong
+                if (scannerForm.ShowDialog() == DialogResult.OK)
+                {
+                    // Nếu người dùng bấm "Xác nhận và Điền" ở Form kia, lấy kết quả đổ vào txtUsername
+                    string mssvResult = scannerForm.DetectedMSSV;
+
+                    if (!string.IsNullOrEmpty(mssvResult))
+                    {
+                        txtUsername.Text = mssvResult;
+
+                        // Tiện tay chuyển luôn Combobox chức vụ sang "Student" cho họ vì họ vừa quét thẻ SV
+                        if (cboPosition.Items.Contains("Student"))
+                        {
+                            cboPosition.SelectedItem = "Student";
+                        }
+                    }
+                }
+            }
         }
     }
 }

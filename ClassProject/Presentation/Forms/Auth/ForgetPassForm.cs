@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Configuration;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
+using System.Text.RegularExpressions;
 using MimeKit;
 using MailKit.Net.Smtp;
 using BCrypt.Net;
@@ -166,11 +168,14 @@ namespace ClassProject.Presentation.Forms
                 return;
             }
 
-            // Triển khai chính sách độ dài mật khẩu (Password Policy)
-            if (newPassword.Length < 6)
+            // THAY THẾ KIỂM TRA ĐỘ DÀI CŨ THÀNH REGEX ĐỘ MẠNH MẬT KHẨU ĐỒNG BỘ 
+            // Yêu cầu: Tối thiểu 8 ký tự, 1 chữ hoa, 1 số, 1 ký tự đặc biệt
+            string passwordPattern = @"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
+            if (!Regex.IsMatch(newPassword, passwordPattern))
             {
-                MessageBox.Show("Mật khẩu mới phải có độ dài tối thiểu từ 6 ký tự trở lên để đảm bảo an toàn!",
-                    "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Mật khẩu mới không đủ độ an toàn!\n" +
+                                "Yêu cầu: Tối thiểu 8 ký tự, chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt.",
+                                "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -297,12 +302,16 @@ namespace ClassProject.Presentation.Forms
         {
             try
             {
-                // LỖI 2: Đồ án chấp nhận để chuỗi bảo mật ở đây, thực tế khuyến khích cấu hình qua App.config / Web.config
-                string senderEmail = "tranthienan6298.2017@gmail.com";
-                string senderPassword = "kmxdsjowtxbfwuhl";
+                // Đọc dữ liệu bảo mật từ file App.config thay vì hardcode
+                string senderEmail = ConfigurationManager.AppSettings["SenderEmail"];
+                string senderPassword = ConfigurationManager.AppSettings["AppPassword"];
 
+                // Kiểm tra an toàn xem file cấu hình có bị thiếu thông tin không
                 if (string.IsNullOrEmpty(senderEmail) || string.IsNullOrEmpty(senderPassword))
+                {
+                    System.Diagnostics.Debug.WriteLine("[Error] Thiếu cấu hình SenderEmail hoặc AppPassword trong App.config!");
                     return false;
+                }
 
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress("ClassProject Systems", senderEmail));

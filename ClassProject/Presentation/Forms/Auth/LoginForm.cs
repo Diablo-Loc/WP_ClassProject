@@ -1,19 +1,22 @@
 using BCrypt.Net;
+using ClassProject.Business.Services;
+using ClassProject.DataAccess.Db;
+using ClassProject.DataAccess.Entities;
 using ClassProject.Presentation.Forms;
+using ClassProject.Presentation.Forms.Auth;
 using ClassProject.Presentation.Forms.Main;
 using Microsoft.Data.SqlClient;
 using System;
-using System.Windows.Forms;
 using System.Security.Cryptography;
 using System.Text;
-using ClassProject.DataAccess.Db;
-using ClassProject.DataAccess.Entities;
+using System.Windows.Forms;
 
 namespace ClassProject
 {
     public partial class LoginForm : Form
     {
         private readonly My_DB _db = new My_DB();
+        private readonly SecurityMonitoringService _securityService = new SecurityMonitoringService();
 
         public LoginForm(string registeredUser = "")
         {
@@ -111,6 +114,7 @@ namespace ClassProject
                     // BƯỚC 1: KIỂM TRA SỰ TỒN TẠI CỦA TÀI KHOẢN
                     if (!userExists || status == -1) // status = -1 là xóa mềm
                     {
+                        _securityService.ProcessSecurityAudit(username, isSuccess: false, method: "PASSWORD", userEmail: "", failureReason: "Tai khoan khong ton tai");
                         MessageBox.Show("Sai tài khoản hoặc mật khẩu!", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         txtPassword.Clear();
                         txtUsername.Focus();
@@ -124,7 +128,8 @@ namespace ClassProject
                         string timeString = waitTime.Minutes > 0
                             ? $"{waitTime.Minutes} phút {waitTime.Seconds} giây"
                             : $"{waitTime.Seconds} giây";
-
+                        // KIỂM TOÁN NGẦM: Cố tình đăng nhập khi đang trong trạng thái bị khóa cứng
+                        _securityService.ProcessSecurityAudit(username, isSuccess: false, method: "PASSWORD", userEmail: email, failureReason: "Co tinh truy cap khi dang lockout");
                         MessageBox.Show($"Tài khoản đang bị khóa do nhập sai quá 5 lần.\nVui lòng thử lại sau {timeString}.",
                                         "Cảnh báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                         txtPassword.Clear();
@@ -172,6 +177,8 @@ namespace ClassProject
 
                         // CẬP NHẬT CHUẨN GLOBAL: Khởi tạo Identity Passport có kèm Email
                         // Do mới đăng nhập nên ta để trống mssv và teacherId để form Main đồng bộ sau
+                        // KIỂM TOÁN NGẦM: Đăng nhập thành công, AI quét quy tắc "Giờ lạ"
+                        _securityService.ProcessSecurityAudit(username, isSuccess: true, method: "PASSWORD", userEmail: email);
                         UserSession.Initialize(userId, username, roleId, email, fullName, "", "");
 
                         // Xử lý Remember Me (DPAPI Bảo mật)
@@ -197,7 +204,7 @@ namespace ClassProject
                         // THẤT BẠI: Tăng số lần gõ sai mật khẩu
                         failedAttempts++;
                         DateTime? newLockout = null;
-
+                        string auditReason = "Sai mat khau lan " + failedAttempts;
                         if (failedAttempts >= 5)
                         {
                             newLockout = DateTime.Now.AddMinutes(15);
@@ -209,7 +216,8 @@ namespace ClassProject
                         }
 
                         UpdateLoginStatus(conn, username, failedAttempts, newLockout);
-
+                        // KIỂM TOÁN NGẦM: Đăng nhập thất bại, AI quét quy tắc "Sai liên tiếp trong 5 phút"
+                        _securityService.ProcessSecurityAudit(username, isSuccess: false, method: "PASSWORD", userEmail: email, failureReason: auditReason);
                         txtPassword.Clear();
                         txtPassword.Focus();
                         return;
@@ -332,6 +340,39 @@ namespace ClassProject
             f.FormClosed += (s, args) => this.Show();
             f.Show();
             this.Hide();
+        }
+
+        private void btnOpenFaceID_Click(object sender, EventArgs e)
+        {
+            // 1. Kiểm tra xem người dùng đã gõ tên tài khoản vào ô nhập liệu chưa
+            // (Bạn hãy đổi 'txtUsername' thành đúng tên ô TextBox nhập tài khoản trên giao diện của bạn nhé)
+            string usernameInput = txtUsername.Text.Trim();
+
+            if (string.IsNullOrEmpty(usernameInput))
+            {
+                MessageBox.Show("Vui lòng nhập Tên tài khoản trước khi mở xác thực Face ID!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtUsername.Focus();
+                return;
+            }
+
+            // 2.Truyền tài khoản và tham số 'false' (chế độ đăng nhập) vào Form
+            using (FaceLoginForm faceForm = new FaceLoginForm(usernameInput, false))
+            {
+                this.Hide(); // Ẩn login cũ đi cho đẹp mắt
+                var result = faceForm.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    // Nếu bên Form Quét mặt báo về OK -> Nghĩa là đã nạp UserSession xong -> Tiến hành mở thẳng f_main luôn!
+                    using (f_main mainForm = new f_main())
+                    {
+                        mainForm.ShowDialog();
+                    }
+                }
+
+                // Sau khi thoát f_main hoặc bấm nút hủy quét mặt -> Hiện lại màn hình Login ban đầu
+                this.Show();
+            }
         }
     }
 }

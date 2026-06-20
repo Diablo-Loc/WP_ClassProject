@@ -45,6 +45,7 @@
             lblPassword = new Label();
             lblEmail = new Label();
             lblUsername = new Label();
+            btnOpenScanner = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             pnlCreateAccount.SuspendLayout();
             SuspendLayout();
@@ -134,6 +135,7 @@
             // pnlCreateAccount
             // 
             pnlCreateAccount.BorderStyle = BorderStyle.FixedSingle;
+            pnlCreateAccount.Controls.Add(btnOpenScanner);
             pnlCreateAccount.Controls.Add(txtPosition);
             pnlCreateAccount.Controls.Add(chkAgree);
             pnlCreateAccount.Controls.Add(cboPosition);
@@ -220,6 +222,16 @@
             lblUsername.TabIndex = 12;
             lblUsername.Text = "Username";
             // 
+            // btnOpenScanner
+            // 
+            btnOpenScanner.Location = new Point(234, 447);
+            btnOpenScanner.Name = "btnOpenScanner";
+            btnOpenScanner.Size = new Size(95, 29);
+            btnOpenScanner.TabIndex = 22;
+            btnOpenScanner.Text = "📷 Quét thẻ SV để điền nhanh";
+            btnOpenScanner.UseVisualStyleBackColor = true;
+            btnOpenScanner.Click += btnOpenScanner_Click;
+            // 
             // RegisterForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -256,5 +268,6 @@
         private Label lblBacktoLogin;
         private ComboBox cboPosition;
         private Label txtPosition;
+        private Button btnOpenScanner;
     }
 }

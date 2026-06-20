@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Forms;
 
 namespace ClassProject.DataAccess.Entities
 {
@@ -15,6 +16,11 @@ namespace ClassProject.DataAccess.Entities
         private static string _email = string.Empty;
         private static string _teacherId = string.Empty;
 
+        //THÀNH PHẦN AI AUTOLOGOUT: HỆ THỐNG GIÁM SÁT TIMEOUT
+        private static System.Windows.Forms.Timer _sessionTimer;
+        private static DateTime _lastActivityTime;
+        private static readonly TimeSpan SessionTimeout = TimeSpan.FromMinutes(30); // Ngưỡng 30 phút
+
         #region Properties (Thread-safe hoặc đơn giản hóa cho WinForms)
 
         public static int RoleId => _roleId;
@@ -22,7 +28,6 @@ namespace ClassProject.DataAccess.Entities
         public static string MSSV => _mssv;
         public static string Username => _username;
         public static string FullName => _fullName;
-        // BỔ SUNG PROPERTIES ĐỂ BÊN NGOÀI ĐỌC ĐƯỢC
         public static string Email => _email;
         public static string TeacherId => _teacherId;
 
@@ -35,7 +40,6 @@ namespace ClassProject.DataAccess.Entities
         public static bool IsStudent => _roleId == 1;
         public static bool IsStaff => _roleId == 3;
 
-        // SỬA TẠI ĐÂY: RoleId == 2 đại diện cho Giảng viên (Teacher)
         public static bool IsTeacher => _roleId == 2;
 
         public static string RoleName
@@ -45,7 +49,7 @@ namespace ClassProject.DataAccess.Entities
                 if (IsAdmin) return "Administrator";
                 if (IsStudent) return "Student";
                 if (IsStaff) return "Giáo vụ / Phòng đào tạo";
-                if (IsTeacher) return "Giảng viên"; // Hiển thị chuẩn hóa trên f_main
+                if (IsTeacher) return "Giảng viên";
                 return "Guest";
             }
         }
@@ -57,7 +61,6 @@ namespace ClassProject.DataAccess.Entities
         #region Các Thao Tác Nghiệp Vụ Cốt Lõi (Core Operations)
 
         /// Khởi tạo một phiên làm việc mới sau khi xác thực thành công.
-        /// CẬP NHẬT: Thêm tham số email và teacherId vào hàm khởi tạo
         public static void Initialize(int userId, string username, int roleId, string email = "", string fullName = "", string mssv = "", string teacherId = "")
         {
             if (userId <= 0)
@@ -70,6 +73,55 @@ namespace ClassProject.DataAccess.Entities
             _fullName = fullName?.Trim() ?? string.Empty;
             _mssv = mssv?.Trim() ?? string.Empty;
             _teacherId = teacherId?.Trim() ?? string.Empty;
+            _lastActivityTime = DateTime.Now;
+            StartSessionMonitoring();
+        }
+
+        /// BÀI BÁO TƯƠNG TÁC: Gọi hàm này từ form chính khi người dùng click chuột/gõ phím
+        public static void RefreshActivity()
+        {
+            if (IsLoggedIn)
+            {
+                _lastActivityTime = DateTime.Now;
+            }
+        }
+
+        // Khởi tạo và chạy Timer ngầm theo dõi 30 phút
+        private static void StartSessionMonitoring()
+        {
+            if (_sessionTimer == null)
+            {
+                _sessionTimer = new System.Windows.Forms.Timer();
+                _sessionTimer.Interval = 10000; // Cứ 10 giây quét một lần (tối ưu CPU)
+                _sessionTimer.Tick += SessionTimer_Tick;
+            }
+            _sessionTimer.Start();
+        }
+
+        // Xử lý sự kiện khi hết hạn 30 phút không tương tác
+        private static void SessionTimer_Tick(object sender, EventArgs e)
+        {
+            if (!IsLoggedIn) return;
+
+            if (DateTime.Now - _lastActivityTime >= SessionTimeout)
+            {
+                StopSessionMonitoring();
+                Clear(); // Xóa sạch dữ liệu
+
+                MessageBox.Show("Phiên làm việc đã hết hạn do 30 phút bạn không tương tác.\nHệ thống sẽ tự động đăng xuất để bảo mật thông tin!",
+                                "Thông báo bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                // Khởi động lại toàn bộ ứng dụng, đẩy người dùng về màn hình Login ban đầu
+                Application.Restart();
+            }
+        }
+
+        private static void StopSessionMonitoring()
+        {
+            if (_sessionTimer != null)
+            {
+                _sessionTimer.Stop();
+            }
         }
 
         /// Cập nhật riêng biệt MSSV sau khi Form Main đồng bộ từ Database.
@@ -100,6 +152,7 @@ namespace ClassProject.DataAccess.Entities
             _email = string.Empty;
             _fullName = string.Empty;  
             _teacherId = string.Empty;
+            StopSessionMonitoring();
         }
 
         #endregion

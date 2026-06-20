@@ -41,6 +41,7 @@ namespace ClassProject
             lblForgetPassword = new Label();
             lblRegister = new Label();
             chkRememberMe = new CheckBox();
+            btnOpenFaceID = new Button();
             ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
             SuspendLayout();
             // 
@@ -115,7 +116,7 @@ namespace ClassProject
             // btnLogin
             // 
             btnLogin.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnLogin.Location = new Point(275, 345);
+            btnLogin.Location = new Point(214, 345);
             btnLogin.Name = "btnLogin";
             btnLogin.Size = new Size(112, 45);
             btnLogin.TabIndex = 7;
@@ -163,6 +164,17 @@ namespace ClassProject
             chkRememberMe.Text = "Remember me";
             chkRememberMe.UseVisualStyleBackColor = false;
             // 
+            // btnOpenFaceID
+            // 
+            btnOpenFaceID.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnOpenFaceID.Location = new Point(399, 345);
+            btnOpenFaceID.Name = "btnOpenFaceID";
+            btnOpenFaceID.Size = new Size(112, 45);
+            btnOpenFaceID.TabIndex = 14;
+            btnOpenFaceID.Text = "Face ID";
+            btnOpenFaceID.UseVisualStyleBackColor = true;
+            btnOpenFaceID.Click += btnOpenFaceID_Click;
+            // 
             // LoginForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -170,6 +182,7 @@ namespace ClassProject
             BackColor = Color.DimGray;
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             ClientSize = new Size(641, 436);
+            Controls.Add(btnOpenFaceID);
             Controls.Add(chkRememberMe);
             Controls.Add(lblRegister);
             Controls.Add(lblForgetPassword);
@@ -202,5 +215,6 @@ namespace ClassProject
         private Label lblForgetPassword;
         private Label lblRegister;
         private CheckBox chkRememberMe;
+        private Button btnOpenFaceID;
     }
 }
