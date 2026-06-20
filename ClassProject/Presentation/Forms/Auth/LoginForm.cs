@@ -1,6 +1,4 @@
 using BCrypt.Net;
-using ClassProject.DataAccess.Db;
-using ClassProject.Models;
 using ClassProject.Presentation.Forms;
 using ClassProject.Presentation.Forms.Main;
 using Microsoft.Data.SqlClient;
@@ -8,6 +6,8 @@ using System;
 using System.Windows.Forms;
 using System.Security.Cryptography;
 using System.Text;
+using ClassProject.DataAccess.Db;
+using ClassProject.DataAccess.Entities;
 
 namespace ClassProject
 {
@@ -135,28 +135,34 @@ namespace ClassProject
                     // BƯỚC 3: XÁC THỰC MẬT KHẨU BĂM (BCRYPT)
                     if (BCrypt.Net.BCrypt.Verify(password, hashedPassword))
                     {
-                        // ĐẶC CÁCH BẢO MẬT: Nếu là Admin (roleId == 0), bỏ qua mọi bước check duyệt hệ thống
+                        // ĐẶC CÁCH BẢO MẬT: Nếu là Admin tối cao (RoleId == 0), bỏ qua mọi bước duyệt để cứu hộ hệ thống
                         if (roleId != 0)
                         {
-                            // Kiểm tra trạng thái Phê duyệt tài khoản (Valid)
+                            // 1. CHỐT CHẶN PHÊ DUYỆT (Valid) - SQL gốc mặc định là 0
                             if (valid == 0)
                             {
-                                MessageBox.Show("Tài khoản của bạn đang chờ duyệt, chưa được Admin phê duyệt vào hệ thống!",
-                                                "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                MessageBox.Show("Tài khoản của bạn đang chờ phê duyệt. Chỉ tài khoản được Ban quản trị kích hoạt mới có thể đăng nhập hoặc dùng tính năng Quên mật khẩu!",
+                                                "Tài khoản chưa kích hoạt", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                                 return;
                             }
                             if (valid == 2)
                             {
-                                MessageBox.Show("Yêu cầu đăng ký tài khoản này đã bị Admin TỪ CHỐI phê duyệt!",
+                                MessageBox.Show("Đăng ký tài khoản này đã bị Ban quản trị TỪ CHỐI phê duyệt vĩnh viễn!",
                                                 "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                                 return;
                             }
 
-                            // Kiểm tra trạng thái Khóa tài khoản điều hành (Status)
+                            // 2. CHỐT CHẶN ĐIỀU HÀNH (Status) - Đồng bộ logic với ForgetPassForm
                             if (status == 1)
                             {
-                                MessageBox.Show("Tài khoản của bạn đã bị Admin KHÓA TRUY CẬP hệ thống.\nVui lòng liên hệ phòng quản lý để được hỗ trợ!",
-                                                "Tài khoản bị khóa", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                MessageBox.Show("Tài khoản của bạn hiện đang bị TẠM KHÓA để bảo trì hoặc kiểm tra.\nVui lòng thử lại sau!",
+                                                "Tài khoản tạm khóa", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                return;
+                            }
+                            if (status == 2)
+                            {
+                                MessageBox.Show("Tài khoản của bạn đã bị Admin KHÓA TRUY CẬP vĩnh viễn do vi phạm chính sách!\nVui lòng liên hệ phòng quản lý để được hỗ trợ.",
+                                                "Tài khoản bị khóa vĩnh viễn", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                                 return;
                             }
                         }

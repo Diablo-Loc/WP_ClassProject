@@ -1,5 +1,5 @@
-﻿using ClassProject.DataAccess.Repositories;
-using ClassProject.Models;
+﻿using ClassProject.DataAccess.Entities;
+using ClassProject.DataAccess.Repositories.Implementations;
 using System;
 using System.Drawing;
 using System.IO;

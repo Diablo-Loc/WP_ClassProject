@@ -64,15 +64,6 @@ CREATE TABLE dbo.Course (
 );
 GO
 
-CREATE TABLE dbo.Contact
-(
-    ContactID INT IDENTITY(1,1) PRIMARY KEY,
-    Name NVARCHAR(100) NOT NULL,              
-    Phone VARCHAR(20) NULL,                    
-    Email VARCHAR(100) NULL                    
-);
-GO
-
 -- ============================================================================
 -- 2. PHÂN HỆ TÀI KHOẢN VÀ HỒ SƠ VẬT LÝ
 -- ============================================================================
@@ -94,6 +85,34 @@ CREATE TABLE dbo.Users
     CONSTRAINT FK_Users_Roles FOREIGN KEY (RoleId) REFERENCES dbo.Roles(Id)
 );
 GO
+
+CREATE TABLE dbo.Groups (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL,
+    UserID INT NOT NULL,
+    CONSTRAINT FK_Groups_Users FOREIGN KEY (UserID) REFERENCES dbo.Users(Id) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE dbo.Contact (
+    ContactID INT IDENTITY(1,1) PRIMARY KEY, 
+    Name NVARCHAR(100) NOT NULL,             
+    Fname NVARCHAR(50) NOT NULL,             
+    Lname NVARCHAR(50) NULL,              
+    Dob DATETIME NULL,
+    Gender NVARCHAR(10) NULL,
+    Group_ID INT NULL,
+    Phone NVARCHAR(15) NULL,
+    Address NVARCHAR(200) NULL,
+    Email NVARCHAR(100) NULL,
+    Pic IMAGE NULL,
+    UserID INT NOT NULL,
+    CONSTRAINT FK_Contact_Groups FOREIGN KEY (Group_ID) REFERENCES dbo.Groups(ID) ON DELETE SET NULL,
+    -- Đổi thành NO ACTION ở đây để SQL Server không báo lỗi trùng lặp đường dẫn xóa
+    CONSTRAINT FK_Contact_Users FOREIGN KEY (UserID) REFERENCES dbo.Users(Id) ON DELETE NO ACTION
+);
+GO
+
 
 CREATE TABLE dbo.Teachers
 (
@@ -158,6 +177,7 @@ CREATE TABLE dbo.Students
     CONSTRAINT FK_Students_Major FOREIGN KEY (MaNganh) REFERENCES dbo.Major(MaNganh) ON DELETE SET NULL
 );
 GO
+
 
 -- ============================================================================
 -- 3. PHÂN HỆ QUẢN LÝ ĐÀO TẠO THEO TÍN CHỈ (LỚP HỌC PHẦN)
@@ -234,20 +254,16 @@ GO
 -- ============================================================================
 
 CREATE INDEX IX_Students_UserId ON dbo.Students(UserId);     
-CREATE INDEX IX_Users_Username ON dbo.Users(Username);       
+CREATE INDEX IX_Users_Username ON dbo.Users(Username);        
 CREATE INDEX IX_Score_MSSV ON dbo.Score(MSSV);               
 CREATE INDEX IX_Requests_MSSV ON dbo.Requests(MSSV);         
 CREATE INDEX IX_DKMH_MaLopHP ON dbo.DKMH(MaLopHP);   
-CREATE UNIQUE NONCLUSTERED INDEX UX_Contact_Phone 
-ON dbo.Contact(Phone) WHERE Phone IS NOT NULL;
-CREATE UNIQUE NONCLUSTERED INDEX UX_Contact_Email 
-ON dbo.Contact(Email) WHERE Email IS NOT NULL;
+CREATE NONCLUSTERED INDEX IX_Contact_User_Group ON dbo.Contact(UserID, Group_ID) INCLUDE (Name, Phone, Email);
+CREATE NONCLUSTERED INDEX IX_Groups_User ON dbo.Groups(UserID) INCLUDE (Name);
 CREATE NONCLUSTERED INDEX IX_Teachers_UserId ON dbo.Teachers(UserId);
 CREATE NONCLUSTERED INDEX IX_Teachers_MSGV ON dbo.Teachers(MSGV);
 CREATE UNIQUE NONCLUSTERED INDEX UX_Teachers_Phone 
 ON dbo.Teachers(Phone) WHERE Phone IS NOT NULL;
-
--- Tối ưu hóa tìm kiếm theo tên Ngành Học
 CREATE NONCLUSTERED INDEX IX_Major_TenNganh ON dbo.Major(TenNganh);
 GO
 

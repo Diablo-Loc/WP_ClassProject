@@ -68,50 +68,35 @@
             guna2Panel3.SuspendLayout();
             SuspendLayout();
             // 
-            // btnSendRequest
-            // 
-            btnSendRequest.Location = new Point(830, 310);
-            btnSendRequest.Name = "btnSendRequest";
-            btnSendRequest.Size = new Size(96, 38);
-            btnSendRequest.TabIndex = 1;
-            btnSendRequest.Text = "Gửi yêu cầu";
-            btnSendRequest.UseVisualStyleBackColor = true;
-            btnSendRequest.Click += btnSendRequest_Click;
-            // 
-            // dgvMyRequests
-            // 
-            dgvMyRequests.BackgroundColor = SystemColors.ButtonFace;
-            dgvMyRequests.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvMyRequests.Location = new Point(24, 106);
-            dgvMyRequests.Name = "dgvMyRequests";
-            dgvMyRequests.RowHeadersWidth = 51;
-            dgvMyRequests.Size = new Size(1049, 163);
-            dgvMyRequests.TabIndex = 2;
-            // 
             // lblTitle
             // 
             lblTitle.AutoSize = true;
-            lblTitle.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblTitle.ForeColor = Color.FromArgb(20, 40, 80);
-            lblTitle.Location = new Point(59, 21);
+            lblTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblTitle.Location = new Point(20, 15);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(330, 41);
+            lblTitle.Size = new Size(247, 30);
             lblTitle.TabIndex = 3;
             lblTitle.Text = "GỬI YÊU CẦU HỖ TRỢ";
             // 
             // lblSub
             // 
             lblSub.AutoSize = true;
-            lblSub.Location = new Point(64, 71);
+            lblSub.Font = new Font("Segoe UI", 9F);
+            lblSub.ForeColor = Color.FromArgb(100, 116, 139);
+            lblSub.Location = new Point(22, 48);
             lblSub.Name = "lblSub";
-            lblSub.Size = new Size(280, 20);
+            lblSub.Size = new Size(231, 15);
             lblSub.TabIndex = 4;
             lblSub.Text = "Sinh viên gửi yêu cầu đến phòng đào tạo";
             // 
-            // guna2Panel1
+            // guna2Panel1 (Card khối trên: Thông tin nhập liệu)
             // 
-            guna2Panel1.BackColor = Color.White;
-            guna2Panel1.BorderRadius = 12;
+            guna2Panel1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            guna2Panel1.BackColor = Color.Transparent;
+            guna2Panel1.BorderColor = Color.FromArgb(226, 232, 240);
+            guna2Panel1.BorderRadius = 4;
+            guna2Panel1.BorderThickness = 1;
             guna2Panel1.Controls.Add(btnClear);
             guna2Panel1.Controls.Add(txtRequestContent);
             guna2Panel1.Controls.Add(guna2Panel2);
@@ -121,110 +106,144 @@
             guna2Panel1.Controls.Add(lblLoaiYeuCau);
             guna2Panel1.Controls.Add(lblNoiDungYeuCau);
             guna2Panel1.CustomizableEdges = customizableEdges7;
-            guna2Panel1.Location = new Point(12, 111);
+            guna2Panel1.FillColor = Color.White;
+            guna2Panel1.Location = new Point(20, 80);
             guna2Panel1.Name = "guna2Panel1";
             guna2Panel1.ShadowDecoration.CustomizableEdges = customizableEdges8;
-            guna2Panel1.Size = new Size(1092, 361);
+            guna2Panel1.Size = new Size(1098, 340);
             guna2Panel1.TabIndex = 32;
-            // 
-            // btnClear
-            // 
-            btnClear.Location = new Point(945, 310);
-            btnClear.Name = "btnClear";
-            btnClear.Size = new Size(96, 38);
-            btnClear.TabIndex = 51;
-            btnClear.Text = "Làm mới";
-            btnClear.UseVisualStyleBackColor = true;
-            btnClear.Click += btnReset_Click;
-            // 
-            // txtRequestContent
-            // 
-            txtRequestContent.BorderRadius = 6;
-            txtRequestContent.CustomizableEdges = customizableEdges1;
-            txtRequestContent.DefaultText = "";
-            txtRequestContent.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
-            txtRequestContent.DisabledState.FillColor = Color.FromArgb(226, 226, 226);
-            txtRequestContent.DisabledState.ForeColor = Color.FromArgb(138, 138, 138);
-            txtRequestContent.DisabledState.PlaceholderForeColor = Color.FromArgb(138, 138, 138);
-            txtRequestContent.FocusedState.BorderColor = Color.FromArgb(94, 148, 255);
-            txtRequestContent.Font = new Font("Segoe UI", 9F);
-            txtRequestContent.HoverState.BorderColor = Color.FromArgb(94, 148, 255);
-            txtRequestContent.Location = new Point(165, 186);
-            txtRequestContent.Margin = new Padding(3, 4, 3, 4);
-            txtRequestContent.Multiline = true;
-            txtRequestContent.Name = "txtRequestContent";
-            txtRequestContent.PlaceholderText = "Nhập nội dung yêu cầu của bạn tại đây...";
-            txtRequestContent.ScrollBars = ScrollBars.Vertical;
-            txtRequestContent.SelectedText = "";
-            txtRequestContent.ShadowDecoration.CustomizableEdges = customizableEdges2;
-            txtRequestContent.Size = new Size(885, 106);
-            txtRequestContent.TabIndex = 50;
-            // 
-            // guna2Panel2
-            // 
-            guna2Panel2.CustomizableEdges = customizableEdges3;
-            guna2Panel2.Location = new Point(165, 155);
-            guna2Panel2.Name = "guna2Panel2";
-            guna2Panel2.ShadowDecoration.CustomizableEdges = customizableEdges4;
-            guna2Panel2.Size = new Size(885, 34);
-            guna2Panel2.TabIndex = 49;
-            // 
-            // cboType
-            // 
-            cboType.BackColor = Color.Transparent;
-            cboType.BorderRadius = 6;
-            cboType.CustomizableEdges = customizableEdges5;
-            cboType.DrawMode = DrawMode.OwnerDrawFixed;
-            cboType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboType.FocusedColor = Color.FromArgb(94, 148, 255);
-            cboType.FocusedState.BorderColor = Color.FromArgb(94, 148, 255);
-            cboType.Font = new Font("Segoe UI", 10F);
-            cboType.ForeColor = Color.FromArgb(68, 88, 112);
-            cboType.ItemHeight = 30;
-            cboType.Location = new Point(170, 62);
-            cboType.Name = "cboType";
-            cboType.ShadowDecoration.CustomizableEdges = customizableEdges6;
-            cboType.Size = new Size(244, 36);
-            cboType.TabIndex = 48;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.BackColor = Color.Transparent;
-            label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.ForeColor = Color.FromArgb(0, 192, 192);
-            label1.Location = new Point(14, 13);
+            label1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            label1.ForeColor = Color.FromArgb(13, 110, 253);
+            label1.Location = new Point(16, 14);
             label1.Name = "label1";
-            label1.Size = new Size(160, 20);
+            label1.Size = new Size(141, 17);
             label1.TabIndex = 47;
             label1.Text = "THÔNG TIN YÊU CẦU";
             // 
             // lblLoaiYeuCau
             // 
             lblLoaiYeuCau.AutoSize = true;
-            lblLoaiYeuCau.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblLoaiYeuCau.ForeColor = Color.Black;
-            lblLoaiYeuCau.Location = new Point(24, 68);
+            lblLoaiYeuCau.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            lblLoaiYeuCau.ForeColor = Color.FromArgb(71, 85, 105);
+            lblLoaiYeuCau.Location = new Point(16, 50);
             lblLoaiYeuCau.Name = "lblLoaiYeuCau";
-            lblLoaiYeuCau.Size = new Size(99, 20);
+            lblLoaiYeuCau.Size = new Size(76, 15);
             lblLoaiYeuCau.TabIndex = 11;
             lblLoaiYeuCau.Text = "Loại yêu cầu:";
+            // 
+            // cboType
+            // 
+            cboType.BackColor = Color.Transparent;
+            cboType.BorderColor = Color.FromArgb(203, 213, 225);
+            cboType.BorderRadius = 4;
+            cboType.CustomizableEdges = customizableEdges5;
+            cboType.DrawMode = DrawMode.OwnerDrawFixed;
+            cboType.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboType.FocusedColor = Color.FromArgb(22, 101, 192);
+            cboType.FocusedState.BorderColor = Color.FromArgb(22, 101, 192);
+            cboType.Font = new Font("Segoe UI", 9F);
+            cboType.ForeColor = Color.FromArgb(15, 23, 42);
+            cboType.ItemHeight = 26;
+            cboType.Location = new Point(16, 70);
+            cboType.Name = "cboType";
+            cboType.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            cboType.Size = new Size(300, 32);
+            cboType.TabIndex = 48;
             // 
             // lblNoiDungYeuCau
             // 
             lblNoiDungYeuCau.AutoSize = true;
-            lblNoiDungYeuCau.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblNoiDungYeuCau.ForeColor = Color.Black;
-            lblNoiDungYeuCau.Location = new Point(24, 155);
+            lblNoiDungYeuCau.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            lblNoiDungYeuCau.ForeColor = Color.FromArgb(71, 85, 105);
+            lblNoiDungYeuCau.Location = new Point(16, 118);
             lblNoiDungYeuCau.Name = "lblNoiDungYeuCau";
-            lblNoiDungYeuCau.Size = new Size(135, 20);
+            lblNoiDungYeuCau.Size = new Size(103, 15);
             lblNoiDungYeuCau.TabIndex = 12;
             lblNoiDungYeuCau.Text = "Nội dung yêu cầu:";
             // 
-            // guna2Panel3
+            // guna2Panel2 (Thanh công cụ phụ phía trên Textbox nếu cần)
             // 
-            guna2Panel3.BackColor = Color.White;
-            guna2Panel3.BorderRadius = 12;
+            guna2Panel2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            guna2Panel2.CustomizableEdges = customizableEdges3;
+            guna2Panel2.Location = new Point(16, 138);
+            guna2Panel2.Name = "guna2Panel2";
+            guna2Panel2.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            guna2Panel2.Size = new Size(1066, 1);
+            guna2Panel2.TabIndex = 49;
+            guna2Panel2.Visible = false;
+            // 
+            // txtRequestContent
+            // 
+            txtRequestContent.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtRequestContent.BorderColor = Color.FromArgb(203, 213, 225);
+            txtRequestContent.BorderRadius = 4;
+            txtRequestContent.CustomizableEdges = customizableEdges1;
+            txtRequestContent.DefaultText = "";
+            txtRequestContent.DisabledState.BorderColor = Color.FromArgb(226, 232, 240);
+            txtRequestContent.DisabledState.FillColor = Color.FromArgb(248, 250, 252);
+            txtRequestContent.DisabledState.ForeColor = Color.FromArgb(148, 163, 184);
+            txtRequestContent.DisabledState.PlaceholderForeColor = Color.FromArgb(148, 163, 184);
+            txtRequestContent.FocusedState.BorderColor = Color.FromArgb(22, 101, 192);
+            txtRequestContent.Font = new Font("Segoe UI", 9F);
+            txtRequestContent.ForeColor = Color.FromArgb(15, 23, 42);
+            txtRequestContent.HoverState.BorderColor = Color.FromArgb(148, 163, 184);
+            txtRequestContent.Location = new Point(16, 142);
+            txtRequestContent.Multiline = true;
+            txtRequestContent.Name = "txtRequestContent";
+            txtRequestContent.PlaceholderForeColor = Color.FromArgb(148, 163, 184);
+            txtRequestContent.PlaceholderText = "Nhập nội dung yêu cầu của bạn tại đây...";
+            txtRequestContent.ScrollBars = ScrollBars.Vertical;
+            txtRequestContent.SelectedText = "";
+            txtRequestContent.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            txtRequestContent.Size = new Size(1066, 135);
+            txtRequestContent.TabIndex = 50;
+            // 
+            // btnSendRequest
+            // 
+            btnSendRequest.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnSendRequest.BackColor = Color.FromArgb(22, 101, 192);
+            btnSendRequest.Cursor = Cursors.Hand;
+            btnSendRequest.FlatAppearance.BorderSize = 0;
+            btnSendRequest.FlatStyle = FlatStyle.Flat;
+            btnSendRequest.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            btnSendRequest.ForeColor = Color.White;
+            btnSendRequest.Location = new Point(838, 290);
+            btnSendRequest.Name = "btnSendRequest";
+            btnSendRequest.Size = new Size(116, 34);
+            btnSendRequest.TabIndex = 1;
+            btnSendRequest.Text = "Gửi yêu cầu";
+            btnSendRequest.UseVisualStyleBackColor = false;
+            btnSendRequest.Click += btnSendRequest_Click;
+            // 
+            // btnClear
+            // 
+            btnClear.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnClear.BackColor = Color.White;
+            btnClear.Cursor = Cursors.Hand;
+            btnClear.FlatStyle = FlatStyle.Flat;
+            btnClear.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+            btnClear.FlatAppearance.BorderSize = 1;
+            btnClear.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            btnClear.ForeColor = Color.FromArgb(71, 85, 105);
+            btnClear.Location = new Point(966, 290);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(116, 34);
+            btnClear.TabIndex = 51;
+            btnClear.Text = "Làm mới";
+            btnClear.UseVisualStyleBackColor = false;
+            btnClear.Click += btnReset_Click;
+            // 
+            // guna2Panel3 (Card khối dưới: Lịch sử yêu cầu)
+            // 
+            guna2Panel3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            guna2Panel3.BackColor = Color.Transparent;
+            guna2Panel3.BorderColor = Color.FromArgb(226, 232, 240);
+            guna2Panel3.BorderRadius = 4;
+            guna2Panel3.BorderThickness = 1;
             guna2Panel3.Controls.Add(lblTotal);
             guna2Panel3.Controls.Add(label3);
             guna2Panel3.Controls.Add(btnSearch);
@@ -233,121 +252,125 @@
             guna2Panel3.Controls.Add(dgvMyRequests);
             guna2Panel3.Controls.Add(guna2Button1);
             guna2Panel3.CustomizableEdges = customizableEdges15;
-            guna2Panel3.Location = new Point(12, 489);
+            guna2Panel3.FillColor = Color.White;
+            guna2Panel3.Location = new Point(20, 435);
             guna2Panel3.Name = "guna2Panel3";
             guna2Panel3.ShadowDecoration.CustomizableEdges = customizableEdges16;
-            guna2Panel3.Size = new Size(1092, 303);
+            guna2Panel3.Size = new Size(1098, 345);
             guna2Panel3.TabIndex = 52;
             // 
-            // lblTotal
+            // label2
             // 
-            lblTotal.AutoSize = true;
-            lblTotal.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblTotal.ForeColor = Color.Black;
-            lblTotal.Location = new Point(24, 275);
-            lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(65, 20);
-            lblTotal.TabIndex = 53;
-            lblTotal.Text = "Tổng: ...";
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            label2.ForeColor = Color.FromArgb(13, 110, 253);
+            label2.Location = new Point(16, 14);
+            label2.Name = "label2";
+            label2.Size = new Size(119, 17);
+            label2.TabIndex = 47;
+            label2.Text = "LỊCH SỬ YÊU CẦU";
             // 
             // label3
             // 
+            label3.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label3.AutoSize = true;
-            label3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.ForeColor = Color.Black;
-            label3.Location = new Point(14, 62);
+            label3.Font = new Font("Segoe UI Semibold", 9F);
+            label3.ForeColor = Color.FromArgb(100, 116, 139);
+            label3.Location = new Point(660, 15);
             label3.Name = "label3";
-            label3.Size = new Size(78, 20);
+            label3.Size = new Size(58, 15);
             label3.TabIndex = 52;
             label3.Text = "Tìm kiếm:";
             // 
+            // txtSearchRequests
+            // 
+            txtSearchRequests.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            txtSearchRequests.BorderColor = Color.FromArgb(203, 213, 225);
+            txtSearchRequests.BorderRadius = 4;
+            txtSearchRequests.CustomizableEdges = customizableEdges11;
+            txtSearchRequests.DefaultText = "";
+            txtSearchRequests.DisabledState.BorderColor = Color.FromArgb(226, 232, 240);
+            txtSearchRequests.DisabledState.FillColor = Color.FromArgb(248, 250, 252);
+            txtSearchRequests.DisabledState.ForeColor = Color.FromArgb(148, 163, 184);
+            txtSearchRequests.DisabledState.PlaceholderForeColor = Color.FromArgb(148, 163, 184);
+            txtSearchRequests.FocusedState.BorderColor = Color.FromArgb(22, 101, 192);
+            txtSearchRequests.Font = new Font("Segoe UI", 9F);
+            txtSearchRequests.ForeColor = Color.FromArgb(15, 23, 42);
+            txtSearchRequests.HoverState.BorderColor = Color.FromArgb(148, 163, 184);
+            txtSearchRequests.Location = new Point(724, 8);
+            txtSearchRequests.Margin = new Padding(3, 4, 3, 4);
+            txtSearchRequests.Name = "txtSearchRequests";
+            txtSearchRequests.PlaceholderForeColor = Color.FromArgb(148, 163, 184);
+            txtSearchRequests.PlaceholderText = "Tìm kiếm yêu cầu...";
+            txtSearchRequests.SelectedText = "";
+            txtSearchRequests.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            txtSearchRequests.Size = new Size(260, 32);
+            txtSearchRequests.TabIndex = 50;
+            // 
             // btnSearch
             // 
-            btnSearch.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            btnSearch.BorderRadius = 8;
+            btnSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnSearch.BorderRadius = 4;
             btnSearch.CustomizableEdges = customizableEdges9;
             btnSearch.DisabledState.BorderColor = Color.DarkGray;
             btnSearch.DisabledState.CustomBorderColor = Color.DarkGray;
             btnSearch.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
             btnSearch.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
-            btnSearch.FillColor = Color.FromArgb(40, 167, 69);
-            btnSearch.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnSearch.FillColor = Color.FromArgb(25, 135, 84);
+            btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnSearch.ForeColor = Color.White;
-            btnSearch.Location = new Point(427, 47);
-            btnSearch.Margin = new Padding(20, 20, 30, 20);
+            btnSearch.Location = new Point(992, 8);
             btnSearch.Name = "btnSearch";
             btnSearch.ShadowDecoration.CustomizableEdges = customizableEdges10;
-            btnSearch.Size = new Size(73, 50);
+            btnSearch.Size = new Size(90, 32);
             btnSearch.TabIndex = 49;
             btnSearch.Text = "Tìm";
             btnSearch.Click += btnSearch_Click;
             // 
-            // txtSearchRequests
+            // dgvMyRequests (Lưới dữ liệu co dãn linh hoạt)
             // 
-            txtSearchRequests.BorderRadius = 8;
-            txtSearchRequests.CustomizableEdges = customizableEdges11;
-            txtSearchRequests.DefaultText = "";
-            txtSearchRequests.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
-            txtSearchRequests.DisabledState.FillColor = Color.FromArgb(226, 226, 226);
-            txtSearchRequests.DisabledState.ForeColor = Color.FromArgb(138, 138, 138);
-            txtSearchRequests.DisabledState.PlaceholderForeColor = Color.FromArgb(138, 138, 138);
-            txtSearchRequests.FocusedState.BorderColor = Color.FromArgb(94, 148, 255);
-            txtSearchRequests.Font = new Font("Segoe UI", 9F);
-            txtSearchRequests.HoverState.BorderColor = Color.FromArgb(94, 148, 255);
-            txtSearchRequests.Location = new Point(111, 47);
-            txtSearchRequests.Margin = new Padding(3, 4, 3, 4);
-            txtSearchRequests.Name = "txtSearchRequests";
-            txtSearchRequests.PlaceholderForeColor = Color.FromArgb(170, 180, 190);
-            txtSearchRequests.PlaceholderText = "Tìm kiếm yêu cầu,. ...";
-            txtSearchRequests.SelectedText = "";
-            txtSearchRequests.ShadowDecoration.CustomizableEdges = customizableEdges12;
-            txtSearchRequests.Size = new Size(282, 46);
-            txtSearchRequests.TabIndex = 50;
+            dgvMyRequests.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvMyRequests.BackgroundColor = Color.White;
+            dgvMyRequests.BorderStyle = BorderStyle.None;
+            dgvMyRequests.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvMyRequests.Location = new Point(16, 52);
+            dgvMyRequests.Name = "dgvMyRequests";
+            dgvMyRequests.RowHeadersWidth = 51;
+            dgvMyRequests.Size = new Size(1066, 245);
+            dgvMyRequests.TabIndex = 2;
             // 
-            // label2
+            // lblTotal
             // 
-            label2.AutoSize = true;
-            label2.BackColor = Color.Transparent;
-            label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.ForeColor = Color.FromArgb(0, 192, 192);
-            label2.Location = new Point(14, 13);
-            label2.Name = "label2";
-            label2.Size = new Size(133, 20);
-            label2.TabIndex = 47;
-            label2.Text = "LỊCH SỬ YÊU CẦU";
+            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblTotal.AutoSize = true;
+            lblTotal.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            lblTotal.ForeColor = Color.FromArgb(71, 85, 105);
+            lblTotal.Location = new Point(16, 312);
+            lblTotal.Name = "lblTotal";
+            lblTotal.Size = new Size(51, 15);
+            lblTotal.TabIndex = 53;
+            lblTotal.Text = "Tổng: ...";
             // 
-            // guna2Button1
+            // guna2Button1 (Biến thừa được giữ lại ẩn đi để tránh lỗi biên dịch)
             // 
-            guna2Button1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-            guna2Button1.BorderColor = SystemColors.ScrollBar;
-            guna2Button1.BorderRadius = 8;
-            guna2Button1.BorderThickness = 1;
             guna2Button1.CustomizableEdges = customizableEdges13;
-            guna2Button1.DisabledState.BorderColor = Color.DarkGray;
-            guna2Button1.DisabledState.CustomBorderColor = Color.DarkGray;
-            guna2Button1.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
-            guna2Button1.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
-            guna2Button1.FillColor = Color.White;
-            guna2Button1.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            guna2Button1.ForeColor = SystemColors.WindowFrame;
-            guna2Button1.Location = new Point(2437, 224);
-            guna2Button1.Margin = new Padding(30, 20, 20, 20);
+            guna2Button1.Location = new Point(0, 0);
             guna2Button1.Name = "guna2Button1";
             guna2Button1.ShadowDecoration.CustomizableEdges = customizableEdges14;
-            guna2Button1.Size = new Size(164, 503);
+            guna2Button1.Size = new Size(0, 0);
             guna2Button1.TabIndex = 46;
-            guna2Button1.Text = "🔄 Làm mới";
+            guna2Button1.Visible = false;
             // 
             // StudentRequestForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(241, 245, 249);
             ClientSize = new Size(1138, 800);
             Controls.Add(guna2Panel3);
             Controls.Add(guna2Panel1);
             Controls.Add(lblSub);
             Controls.Add(lblTitle);
-            ForeColor = Color.DarkGray;
             Name = "StudentRequestForm";
             Text = "StudentRequestForm";
             Load += StudentRequestForm_Load;

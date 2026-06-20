@@ -40,3 +40,16 @@ BEGIN
     END
 END;
 GO
+
+-- Tạo Trigger dọn dẹp danh bạ tự động khi User bị xóa (Giải pháp chuẩn Enterprise)
+CREATE TRIGGER dbo.trg_DeleteUser_CleanContacts
+ON dbo.Users
+FOR DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Xóa tất cả các liên hệ thuộc về User vừa bị xóa
+    DELETE FROM dbo.Contact 
+    WHERE UserID IN (SELECT Id FROM deleted);
+END;
+GO
