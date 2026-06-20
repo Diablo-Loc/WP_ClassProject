@@ -11,6 +11,7 @@ using System.Data;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using ClassProject.Presentation.Forms.Auth;
 
 namespace ClassProject.Presentation.Forms.Main
 {
@@ -69,6 +70,7 @@ namespace ClassProject.Presentation.Forms.Main
 
             CheckNewNotificationStatus();
             timerClock.Start();
+            UserSession.RefreshActivity();
         }
 
         private void HideFlowMenuScrollbar()
@@ -153,50 +155,6 @@ namespace ClassProject.Presentation.Forms.Main
             }
         }
 
-        private Bitmap CreateAvatarFromUsername(string username)
-        {
-            // Lấy kích thước thực tế từ control thay vì cố định số 42
-            int size = picAvatar != null ? picAvatar.Width : 42;
-            Bitmap bmp = new Bitmap(size, size);
-
-            using (Graphics g = Graphics.FromImage(bmp))
-            {
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                g.Clear(Color.Transparent);
-
-                string shortName = !string.IsNullOrEmpty(username) ? username.Substring(0, 1).ToUpper() : "U";
-
-                int ascii = (int)shortName[0];
-                Color[] corporateColors = {
-            Color.FromArgb(37, 99, 235),  // Royal Blue
-            Color.FromArgb(13, 148, 136), // Teal
-            Color.FromArgb(124, 58, 237), // Purple
-            Color.FromArgb(225, 29, 72)   // Rose
-        };
-                Color backColor = corporateColors[ascii % corporateColors.Length];
-
-                using (SolidBrush bgBrush = new SolidBrush(backColor))
-                {
-                    // Trừ đi 1 pixel để vòng tròn chống răng cưa mượt hơn và không bị lẹm viền
-                    g.FillEllipse(bgBrush, 0, 0, size - 1, size - 1);
-                }
-
-                // Tự động căn chỉnh font size dựa theo kích thước avatar thực tế
-                float fontSize = size * 0.28f;
-                using (Font font = new Font("Segoe UI", fontSize, FontStyle.Bold))
-                using (SolidBrush textBrush = new SolidBrush(Color.White))
-                {
-                    StringFormat sf = new StringFormat
-                    {
-                        Alignment = StringAlignment.Center,
-                        LineAlignment = StringAlignment.Center
-                    };
-                    g.DrawString(shortName, font, textBrush, new RectangleF(0, 0, size, size), sf);
-                }
-            }
-            return bmp;
-        }
-
         private Bitmap CreateAvatarImage(string name)
         {
             // Lấy kích thước thực tế từ control thay vì cố định số 42
@@ -253,28 +211,6 @@ namespace ClassProject.Presentation.Forms.Main
                 default: return Color.FromArgb(225, 29, 72); // Rose
             }
         }
-        private void RenderRoleBadge(string roleName)
-        {
-            // Nếu bạn sử dụng một Guna2Chip hoặc một panel nhỏ bọc ngoài lblRole làm Badge:
-            // Ví dụ đặt tên control bọc ngoài là pnlRoleBadge
-            if (UserSession.IsAdmin)
-            {
-                lblRole.ForeColor = Color.FromArgb(220, 38, 38); // Đỏ quyền lực cho Admin
-            }
-            else if (UserSession.IsStaff)
-            {
-                lblRole.ForeColor = Color.FromArgb(25, 118, 210); // Xanh đậm tin cậy cho Giáo vụ
-            }
-            else if (UserSession.IsTeacher)
-            {
-                lblRole.ForeColor = Color.FromArgb(13, 148, 136); // Màu xanh mộc cho Giảng viên
-            }
-            else
-            {
-                lblRole.ForeColor = Color.FromArgb(71, 85, 105); // Xám đậm trung tính cho Sinh viên
-            }
-        }
-
         private void SyncStudentMssv()
         {
             try
@@ -325,7 +261,8 @@ namespace ClassProject.Presentation.Forms.Main
             child.TopLevel = false;
             child.FormBorderStyle = FormBorderStyle.None;
             child.Dock = DockStyle.Fill;
-
+            child.Activated += (s, e) => UserSession.RefreshActivity();
+            child.Click += (s, e) => UserSession.RefreshActivity();
             pnlContainer.Controls.Clear();
             pnlContainer.Controls.Add(child);
             pnlContainer.Tag = child;
@@ -402,6 +339,7 @@ namespace ClassProject.Presentation.Forms.Main
                 flowMenu.Controls.Add(CreateMenuButton("Thống kê tổng quan", Statistic_Click));
                 flowMenu.Controls.Add(CreateMenuButton("Báo cáo hệ thống", Report_Click));
                 flowMenu.Controls.Add(CreateMenuButton("Quản lý Danh bạ", Contact_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Trung Tâm Giám Sát Kết Nối AI", AIConnectivityMonitoringCenter_Click));
             }
             else if (UserSession.IsStaff)
             {
@@ -504,6 +442,7 @@ namespace ClassProject.Presentation.Forms.Main
         }
         private void Report_Click(object sender, EventArgs e) => OpenChildForm(new ReportFormHR());
         private void Contact_Click(object sender, EventArgs e) => OpenChildForm(new ContactForm());
+        private void AIConnectivityMonitoringCenter_Click(object sender, EventArgs e) => OpenChildForm(new ConnectionMonitorForm());
 
         // --- ĐIỀU HƯỚNG SINH VIÊN & THÔNG TIN CÁ NHÂN ---
         private void Profile_Click(object sender, EventArgs e)
@@ -710,10 +649,10 @@ namespace ClassProject.Presentation.Forms.Main
             ctxSettingMenu.ForeColor = isDarkMode ? Color.White : Color.Black;
             ctxSettingMenu.RenderMode = ToolStripRenderMode.System;
 
+            // 1. Mục Đổi mật khẩu
             ToolStripMenuItem itemChangePassword = new ToolStripMenuItem("🔑 Đổi mật khẩu cá nhân");
             itemChangePassword.Click += (s, ev) => {
                 ChangePasswordForm frmChangePass = new ChangePasswordForm();
-
                 ApplyThemeToChildForm(frmChangePass, isDarkMode);
 
                 if (frmChangePass.ShowDialog() == DialogResult.OK)
@@ -727,27 +666,40 @@ namespace ClassProject.Presentation.Forms.Main
                 }
             };
 
+            // 2. THÊM MỚI: Mục Đăng ký Face ID (Sinh trắc học)
+            ToolStripMenuItem itemRegisterFace = new ToolStripMenuItem("📸 Thiết lập Face ID (Quét mặt)");
+            itemRegisterFace.Click += (s, ev) => {
+                using (FaceLoginForm frmRegisterFace = new FaceLoginForm(UserSession.Username, true))
+                {
+                    ApplyThemeToChildForm(frmRegisterFace, isDarkMode);
+
+                    frmRegisterFace.ShowDialog();
+                }
+            };
+
+            // 3. Mục Dark Mode
             ToolStripMenuItem itemDarkMode = new ToolStripMenuItem("🌙 Chế độ nền tối (Dark Mode)");
             itemDarkMode.CheckOnClick = true;
-            itemDarkMode.Checked = isDarkMode; // Giữ trạng thái tích chọn đúng với hệ thống
+            itemDarkMode.Checked = isDarkMode;
             itemDarkMode.Click += (s, ev) => {
-                // Đảo trạng thái hiện tại
                 isDarkMode = itemDarkMode.Checked;
-
-                // Gọi hàm thay đổi màu cho toàn bộ hệ thống
                 ApplyTheme(isDarkMode);
             };
 
+            // 4. Mục Thông tin phần mềm
             ToolStripMenuItem itemAbout = new ToolStripMenuItem("ℹ️ Thông tin phần mềm");
             itemAbout.Click += (s, ev) => {
                 MessageBox.Show("Hệ thống Quản lý Đào tạo - Phiên bản 1.0.0\n© 2026 ClassProject Team.", "About");
             };
 
+            // --- TIẾN HÀNH NẠP CÁC MỤC VÀO MENU THẢ XUỐNG ---
             ctxSettingMenu.Items.Add(itemChangePassword);
-            ctxSettingMenu.Items.Add(new ToolStripSeparator());
+            ctxSettingMenu.Items.Add(itemRegisterFace); // Đẩy nút Đăng ký Face ID vào đây
+            ctxSettingMenu.Items.Add(new ToolStripSeparator()); // Đường gạch ngang phân cách
             ctxSettingMenu.Items.Add(itemDarkMode);
             ctxSettingMenu.Items.Add(itemAbout);
 
+            // Tính toán vị trí hiển thị menu
             int xOffset = btnSetting.Width - ctxSettingMenu.PreferredSize.Width;
             ctxSettingMenu.Show(btnSetting, new Point(xOffset, btnSetting.Height + 4));
         }
@@ -828,54 +780,91 @@ namespace ClassProject.Presentation.Forms.Main
 
         private void ApplyThemeToChildForm(Form f, bool darkMode)
         {
-            // Bảng màu dành riêng cho Form con
             Color darkBgColor = Color.FromArgb(15, 23, 42);
-            Color lightBgColor = Color.White; // Thường child form đặt trên nền trắng container
+            Color lightBgColor = Color.White;
             Color darkTextMain = Color.FromArgb(241, 245, 249);
             Color lightTextMain = Color.FromArgb(31, 41, 55);
-            Color darkTextSub = Color.FromArgb(148, 163, 184);
-            Color lightTextSub = Color.FromArgb(107, 114, 128);
 
-            // Gán màu nền gốc cho Form con
             f.BackColor = darkMode ? darkBgColor : lightBgColor;
 
-            // Duyệt toàn bộ các Control bên trong Form con để nhuộm màu tương ứng
-            foreach (Control c in f.Controls)
+            // Sử dụng một hàm đệ quy nhỏ để nhuộm màu tất cả các cấp control bên trong
+            NhuomMauControl(f, darkMode, darkBgColor, lightBgColor, darkTextMain, lightTextMain);
+
+            f.Refresh();
+        }
+
+        // Hàm đệ quy duyệt toàn bộ cây Control (kể cả control nằm sâu trong Panel/TabControl)
+        private void NhuomMauControl(Control parent, bool darkMode, Color darkBg, Color lightBg, Color darkText, Color lightText)
+        {
+            foreach (Control c in parent.Controls)
             {
-                // 1. Nhóm các Label, CheckBox, RadioButton, GroupBox thông thường
-                if (c is Label || c is GroupBox || c is CheckBox || c is RadioButton)
+                // 1. Xử lý các nhãn, checkbox, radio cơ bản
+                if (c is Label || c is CheckBox || c is RadioButton || c is GroupBox)
                 {
-                    c.ForeColor = darkMode ? darkTextMain : lightTextMain;
+                    c.ForeColor = darkMode ? darkText : lightText;
                 }
 
-                // 2. Nhóm Panel chứa các control nhỏ bên trong Form con (Đệ quy tầng 1)
-                if (c is Panel pnl)
+                // 2. Xử lý Guna2HtmlLabel hoặc Guna2Label bằng ép kiểu chuỗi
+                if (c.GetType().Name.Contains("Guna2HtmlLabel") || c.GetType().Name.Contains("Guna2Label"))
                 {
-                    pnl.BackColor = darkMode ? darkBgColor : Color.Transparent;
-                    foreach (Control subC in pnl.Controls)
-                    {
-                        if (subC is Label) subC.ForeColor = darkMode ? darkTextMain : lightTextMain;
-                        if (subC is CheckBox || subC is RadioButton) subC.ForeColor = darkMode ? darkTextMain : lightTextMain;
-                    }
+                    c.ForeColor = darkMode ? darkText : lightText;
                 }
 
-                // 3. Nếu Form con sử dụng lưới hiển thị dữ liệu DataGridView / Guna2DataGridView
+                // 3. Xử lý Guna2Panel, Guna2GroupBox (Cần đổi thuộc tính FillColor thay vì BackColor)
+                if (c is Guna.UI2.WinForms.Guna2Panel g2p)
+                {
+                    g2p.FillColor = darkMode ? darkBg : lightBg;
+                }
+                if (c is Guna.UI2.WinForms.Guna2GroupBox g2gb)
+                {
+                    g2gb.FillColor = darkMode ? Color.FromArgb(30, 41, 59) : lightBg; // Hộp nhóm tối hơn chút
+                    g2gb.CustomBorderColor = darkMode ? Color.FromArgb(51, 65, 85) : Color.FromArgb(213, 218, 223);
+                    g2gb.ForeColor = darkMode ? darkText : lightText;
+                }
+
+                // 4. Xử lý các ô nhập liệu Guna2TextBox, Guna2ComboBox
+                if (c is Guna.UI2.WinForms.Guna2TextBox g2txt)
+                {
+                    g2txt.FillColor = darkMode ? Color.FromArgb(30, 41, 59) : Color.White;
+                    g2txt.ForeColor = darkMode ? darkText : lightText;
+                    g2txt.BorderColor = darkMode ? Color.FromArgb(71, 85, 105) : Color.FromArgb(213, 218, 223);
+                }
+                if (c is Guna.UI2.WinForms.Guna2ComboBox g2cb)
+                {
+                    g2cb.FillColor = darkMode ? Color.FromArgb(30, 41, 59) : Color.White;
+                    g2cb.ForeColor = darkMode ? darkText : lightText;
+                    g2cb.BorderColor = darkMode ? Color.FromArgb(71, 85, 105) : Color.FromArgb(213, 218, 223);
+                }
+
+                // 5. Xử lý lưới dữ liệu Guna2DataGridView hoặc DataGridView tiêu chuẩn
                 if (c is DataGridView dgv)
                 {
                     dgv.BackgroundColor = darkMode ? Color.FromArgb(30, 41, 59) : Color.White;
                     dgv.GridColor = darkMode ? Color.FromArgb(51, 65, 85) : Color.FromArgb(226, 232, 240);
                     dgv.DefaultCellStyle.BackColor = darkMode ? Color.FromArgb(30, 41, 59) : Color.White;
-                    dgv.DefaultCellStyle.ForeColor = darkMode ? darkTextMain : lightTextMain;
+                    dgv.DefaultCellStyle.ForeColor = darkMode ? darkText : lightText;
                 }
 
-                // 4. Nếu dùng Guna2HtmlLabel (Nhãn Guna đặc biệt hay dùng trong đồ án)
-                if (c.GetType().Name == "Guna2HtmlLabel")
+                // ĐỆ QUY: Nếu control này chứa các control con khác (như Panel, TabPage, FlowLayoutPanel)
+                if (c.Controls.Count > 0)
                 {
-                    c.ForeColor = darkMode ? darkTextMain : lightTextMain;
+                    NhuomMauControl(c, darkMode, darkBg, lightBg, darkText, lightText);
                 }
             }
+        }
+        // THÀNH PHẦN AI AUTOLOGOUT: ĐÁNH CHẶN TƯƠNG TÁC ĐỂ GIA HẠN PHIÊN
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            // Bất kỳ hành vi nhấn phím nào trên phần mềm cũng tính là đang hoạt động -> Reset bộ đếm 30 phút
+            UserSession.RefreshActivity();
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
 
-            f.Refresh(); // Yêu cầu hệ thống vẽ lại giao diện Form con ngay lập tức
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            // Bất kỳ hành vi di chuột nào trên Form chính cũng tính là đang hoạt động
+            base.OnMouseMove(e);
+            UserSession.RefreshActivity();
         }
     }
 }
