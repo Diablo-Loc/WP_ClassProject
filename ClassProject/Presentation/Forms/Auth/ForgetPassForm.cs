@@ -27,13 +27,14 @@ namespace ClassProject.Presentation.Forms
         {
             string email = txtEmail.Text.Trim();
 
+            // 1. Kiểm tra dữ liệu đầu vào (Input Validation)
             if (string.IsNullOrEmpty(email))
             {
-                MessageBox.Show("Vui lòng nhập địa chỉ Email!", "Cảnh báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập địa chỉ Email!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            // 2. Phòng chống tấn công Spam/DDoS OTP (Rate Limiting)
             if (DateTime.Now < _lastSendOTP.AddSeconds(30))
             {
                 TimeSpan remaining = _lastSendOTP.AddSeconds(30) - DateTime.Now;
@@ -42,38 +43,52 @@ namespace ClassProject.Presentation.Forms
                 return;
             }
 
+            // 3. Đọc dữ liệu trạng thái nâng cao từ Database độc lập
             int validValue = 0;
-            int statusValue = 1;
-            bool isEmailExist = GetEmailStatus(email, out validValue, out statusValue);
+            int statusValue = 0;
+            DateTime? lockoutEnd = null;
 
+            bool isEmailExist = GetEmailSecurityStatus(email, out validValue, out statusValue, out lockoutEnd);
+
+            // 4. CHỐT CHẶN BẢO MẬT DOANH NGHIỆP (Business Security Rules)
             if (!isEmailExist)
             {
-                MessageBox.Show("Email không tồn tại trong hệ thống trường học!", "Cảnh báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                // Chuẩn doanh nghiệp: Không báo "Email không tồn tại" để tránh tấn công dò quét Email (Email Enumeration)
+                MessageBox.Show("Nếu Email tồn tại trong hệ thống và hợp lệ, bạn sẽ nhận được mã OTP trong ít phút.",
+                    "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
+            // QUY TẮC 1: Tài khoản do Admin cấp/duyệt thì Valid phải bằng 1
             if (validValue == 0)
             {
-                MessageBox.Show("Tài khoản liên kết với Email này chưa được phê duyệt bởi Ban quản trị.\nKhông thể thực hiện khôi phục mật khẩu!",
+                MessageBox.Show("Tài khoản liên kết với Email này chưa được phê duyệt hoặc kích hoạt bởi Ban quản trị.\nKhông thể thực hiện khôi phục mật khẩu!",
                     "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return;
             }
 
-            if (statusValue == 2) // Theo đặc tả hệ thống: Status = 2 là tài khoản bị khóa
+            // QUY TẮC 2: Kiểm tra tài khoản bị khóa chủ động bởi Admin (Status = 2)
+            if (statusValue == 2)
             {
-                MessageBox.Show("Tài khoản liên kết với Email này hiện đang bị khóa.\nVui lòng liên hệ Admin để được xử lý!",
-                    "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                MessageBox.Show("Tài khoản này hiện đang bị khóa vĩnh viễn.\nVui lòng liên hệ Phòng Giáo vụ hoặc Admin để được xử lý!",
+                    "Tài khoản bị khóa", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return;
             }
 
-            // ĐẠT: Sinh mã OTP ngẫu nhiên 6 chữ số
+            // QUY TẮC 3: Kiểm tra khóa tự động do nhập sai mật khẩu nhiều lần (Lockout End)
+            if (lockoutEnd.HasValue && lockoutEnd.Value > DateTime.Now)
+            {
+                MessageBox.Show($"Tài khoản đang bị tạm khóa tự động do nhập sai nhiều lần.\nVui lòng thử lại sau: {lockoutEnd.Value.ToString("HH:mm:ss")}",
+                    "Tài khoản bị tạm khóa", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 5. Nếu vượt qua tất cả chốt chặn -> Tiến hành sinh và gửi OTP
             _otp = new Random().Next(100000, 999999).ToString();
             _verifiedEmail = email;
             _otpExpireTime = DateTime.Now.AddMinutes(5);
             _lastSendOTP = DateTime.Now;
 
-            // Tiến hành gửi email thật thông qua SMTP MailKit
             bool isMailSent = SendOTPEmail(email, _otp);
 
             if (isMailSent)
@@ -83,11 +98,51 @@ namespace ClassProject.Presentation.Forms
             }
             else
             {
-                MessageBox.Show($"[CHẾ ĐỘ MOCK - LỖI SMTP HOẶC MẤT MẠNG]\nHệ thống tự động kích hoạt mã xác thực nội bộ.\nMã OTP của bạn là: {_otp}",
+                MessageBox.Show($"[CHẾ ĐỘ DỰ PHÒNG - MOCK]\nMã OTP của bạn là: {_otp}",
                     "Hệ thống xác thực dự phòng", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             SetOTPSectionVisible(true);
+        }
+
+        private bool GetEmailSecurityStatus(string email, out int valid, out int status, out DateTime? lockoutEnd)
+        {
+            valid = 0;
+            status = 0;
+            lockoutEnd = null;
+
+            try
+            {
+                using (SqlConnection conn = db.GetConnection())
+                {
+                    conn.Open();
+                    // Đọc thêm trường LockoutEnd từ cấu trúc SQL gốc của bạn
+                    string query = "SELECT Valid, Status, LockoutEnd FROM dbo.Users WHERE Email = @email";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@email", email);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                valid = Convert.ToInt32(reader["Valid"]);
+                                status = Convert.ToInt32(reader["Status"]);
+
+                                if (reader["LockoutEnd"] != DBNull.Value)
+                                {
+                                    lockoutEnd = Convert.ToDateTime(reader["LockoutEnd"]);
+                                }
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Error - GetEmailSecurityStatus]: {ex.Message}");
+            }
+            return false;
         }
 
         private void btnReset_Click(object sender, EventArgs e)
@@ -138,10 +193,18 @@ namespace ClassProject.Presentation.Forms
             // Thực thi lưu mật khẩu mới xuống Cơ sở dữ liệu
             try
             {
+                // Thực thi lưu mật khẩu mới xuống Cơ sở dữ liệu và làm sạch trạng thái khóa
                 using (SqlConnection conn = db.GetConnection())
                 {
                     conn.Open();
-                    string query = "UPDATE dbo.Users SET Password = @password WHERE Email = @email";
+                    // Khôi phục trạng thái sạch cho tài khoản sau khi đổi mật khẩu thành công
+                    string query = @"UPDATE dbo.Users 
+                     SET Password = @password, 
+                         FailedAttempts = 0, 
+                         LockoutEnd = NULL, 
+                         Updated_At = GETDATE() 
+                     WHERE Email = @email";
+
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@password", BCrypt.Net.BCrypt.HashPassword(newPassword));

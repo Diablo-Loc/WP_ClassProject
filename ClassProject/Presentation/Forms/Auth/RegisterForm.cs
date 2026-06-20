@@ -1,5 +1,4 @@
-﻿using ClassProject.DataAccess.Db;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +7,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using BCrypt.Net;
+using ClassProject.DataAccess.Db;
 
 namespace ClassProject.Presentation.Forms
 {

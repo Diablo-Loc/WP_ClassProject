@@ -38,7 +38,9 @@ BEGIN
         ta.HRID,                     
         (t.FirstName + ' ' + t.LastName) AS HRName,                      
         ta.MaMH,                     
-        c.TenMH                      
+        c.TenMH,
+        -- Bổ sung dòng này để đồng bộ dữ liệu đếm số môn sang C#
+        (SELECT COUNT(*) FROM dbo.TeachingAssignment sub WHERE sub.HRID = ta.HRID) AS TotalAssigned                      
     FROM dbo.TeachingAssignment ta
     INNER JOIN dbo.Users u ON ta.HRID = u.Id
     LEFT JOIN dbo.Teachers t ON u.Id = t.UserId

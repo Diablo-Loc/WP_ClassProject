@@ -1,6 +1,4 @@
 ﻿using ClassProject.DataAccess.Db;
-using ClassProject.DataAccess.Repositories;
-using ClassProject.Models; // Đã tích hợp để sử dụng UserSession
 using Guna.UI2.WinForms;
 using System;
 using System.Data;
@@ -8,6 +6,8 @@ using System.Windows.Forms;
 using System.Threading.Tasks;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
+using ClassProject.DataAccess.Entities;
+using ClassProject.DataAccess.Repositories.Implementations;
 
 namespace ClassProject.Presentation.Forms.Students
 {

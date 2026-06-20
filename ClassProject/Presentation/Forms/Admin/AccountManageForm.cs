@@ -5,8 +5,9 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using ClassProject.Commons.DTOs;
-using ClassProject.Data.Repositories;
+using ClassProject.DataAccess.Repositories.Implementations;
+using ClassProject.DataAccess.DTOs;
+using ClassProject.DataAccess.Repositories.Interfaces;
 
 namespace ClassProject.Presentation.Forms.Admin
 {

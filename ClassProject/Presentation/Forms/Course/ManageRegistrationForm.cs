@@ -3,8 +3,8 @@ using System.Data;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ClassProject.DataAccess.Repositories;
-using ClassProject.Models;
+using ClassProject.DataAccess.Entities;
+using ClassProject.DataAccess.Repositories.Implementations;
 
 namespace ClassProject.Presentation.Forms.Course
 {

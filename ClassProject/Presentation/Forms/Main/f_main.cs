@@ -1,6 +1,6 @@
 ﻿using ClassProject.DataAccess.Db;
-using ClassProject.DataAccess.Repositories;
-using ClassProject.Models;
+using ClassProject.DataAccess.Entities;
+using ClassProject.DataAccess.Repositories.Implementations;
 using ClassProject.Presentation.Forms.Admin;
 using ClassProject.Presentation.Forms.Course;
 using ClassProject.Presentation.Forms.Students;
@@ -412,6 +412,7 @@ namespace ClassProject.Presentation.Forms.Main
                 flowMenu.Controls.Add(CreateMenuButton("Quản lý môn học", Course_Click));
                 flowMenu.Controls.Add(CreateMenuButton("Quản lý lớp học phần", CourseSection_Click));
                 flowMenu.Controls.Add(CreateMenuButton("Quản lý đăng ký học phần", Registration_Click));
+                flowMenu.Controls.Add(CreateMenuButton("Phân công giảng dạy", TeachingAssignment_Click));
                 flowMenu.Controls.Add(CreateMenuButton("Quản lý điểm số", Score_Click));
                 flowMenu.Controls.Add(CreateMenuButton("Xét duyệt yêu cầu SV", Request_Click));
                 flowMenu.Controls.Add(CreateMenuButton("Thống kê đào tạo", Statistic_Click));
@@ -421,9 +422,9 @@ namespace ClassProject.Presentation.Forms.Main
             {
                 // Giảng viên: Tập trung hoàn toàn vào lớp phụ trách và nghiệp vụ giảng dạy
                 flowMenu.Controls.Add(CreateMenuButton("Thông tin cá nhân", Profile_Click));
-                flowMenu.Controls.Add(CreateMenuButton("Lớp học phần của tôi", CourseSection_Click)); // Tái sử dụng form, tự lọc theo mã GV
-                flowMenu.Controls.Add(CreateMenuButton("Sinh viên lớp tôi phụ trách", Student_Click)); // Tái sử dụng form, tự lọc danh sách sinh viên học lớp phần của GV
-                flowMenu.Controls.Add(CreateMenuButton("Nhập & Sửa điểm số", Score_Click));         // Tái sử dụng form, khóa chỉ cho sửa lớp mình dạy
+                flowMenu.Controls.Add(CreateMenuButton("Lớp học phần của tôi", CourseSection1_Click)); // Tái sử dụng form, tự lọc theo mã GV
+                flowMenu.Controls.Add(CreateMenuButton("Sinh viên lớp tôi phụ trách", Student1_Click)); // Tái sử dụng form, tự lọc danh sách sinh viên học lớp phần của GV
+                flowMenu.Controls.Add(CreateMenuButton("Nhập & Sửa điểm số", Score1_Click));         // Tái sử dụng form, khóa chỉ cho sửa lớp mình dạy
             }
             else if (UserSession.IsStudent)
             {
@@ -558,6 +559,7 @@ namespace ClassProject.Presentation.Forms.Main
             OpenChildForm(new StudentRequestForm());
         }
 
+        private void TeachingAssignment_Click (object sender, EventArgs e) => OpenChildForm(new TeachingAssignmentForm());
         // --- ĐĂNG XUẤT ---
         private void btnLogout_Click(object sender, EventArgs e)
         {
@@ -568,7 +570,24 @@ namespace ClassProject.Presentation.Forms.Main
                 this.Close();
             }
         }
+        private void CourseSection1_Click(object sender, EventArgs e)
+        {
+            // Truyền Mã giảng viên đang đăng nhập vào Form Lớp học phần
+            //string currentTeacherId = UserSession.CurrentUserID;
+            //var form = new InstructorClassScheduleForm(currentTeacherId);
+            //OpenChildForm(form); // Hàm helper để nhúng Form con vào Panel chính
+        }
+        private void Student1_Click(object sender, EventArgs e)
+        {
+            // Truyền Mã lớp của giảng viên đang đăng nhập vào Form Lớp học phần
+            //...
+            //var rosterForm = new ClassRosterForm(selectedMaLopHP);
+            //OpenChildForm(form); // Hàm helper để nhúng Form con vào Panel chính
+        }
+        private void Score1_Click(object sender, EventArgs e)
+        {
 
+        }
         #endregion
 
         private void timerClock_Tick(object sender, EventArgs e)

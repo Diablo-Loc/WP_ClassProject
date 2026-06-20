@@ -1,6 +1,6 @@
 ﻿using ClassProject.DataAccess.Db;
-using ClassProject.DataAccess.Repositories;
-using ClassProject.Models;
+using ClassProject.DataAccess.Entities;
+using ClassProject.DataAccess.Repositories.Implementations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
