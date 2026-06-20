@@ -125,7 +125,17 @@ namespace ClassProject.Presentation.Forms.Students
                     };
 
                     // Ghi nhận ngầm hồ sơ rỗng này vào Database trước
-                    bool isInserted = _teacherRepository.InsertTeacherProfile(_currentTeacher);
+                    bool isInserted = _teacherRepository.InsertTeacher(
+                        _currentTeacher.UserId,
+                        _currentTeacher.MSGV,
+                        _currentTeacher.FirstName,
+                        _currentTeacher.LastName,
+                        null,          // DateOfBirth (Tài khoản rỗng chưa có)
+                        null,          // Gender
+                        null,          // Phone
+                        _currentTeacher.Email,
+                        null           // AcademicRank
+                    );
 
                     if (!isInserted)
                     {

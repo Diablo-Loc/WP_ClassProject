@@ -3,6 +3,7 @@ using ClassProject.DataAccess.Repositories;
 using ClassProject.Models;
 using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -20,32 +21,65 @@ namespace ClassProject
         private bool isDataLoading = false;
         private bool isSaving = false;
 
+        // Định nghĩa hằng số quy chuẩn cấu trúc miền cho Sinh viên
+        private const string STUDENT_EMAIL_SUBDOMAIN = "@student.";
+        private const string REQUIRED_EMAIL_SUFFIX = ".edu.vn";
+
         public AddStudentForm(string mssv)
         {
             InitializeComponent();
             targetMssv = mssv;
             studentRepo = new StudentRepository();
+
+            // ⚡ Đăng ký sự kiện tự động sinh Email theo MSSV khi người dùng nhập liệu
+            txtMSSV.TextChanged += AutoGenerateStudentEmail_TextChanged;
         }
 
         private void AddStudentForm_Load(object sender, EventArgs e)
         {
             isDataLoading = true;
             LoadMajorComboBox();
+
+            cboMaNganh.SelectedIndexChanged -= CboMaNganh_SelectedIndexChanged;
             cboMaNganh.SelectedIndexChanged += CboMaNganh_SelectedIndexChanged;
+
             LoadClassroomComboBoxFiltered();
             isDataLoading = false;
 
             // CHẾ ĐỘ CHỈNH SỬA (EDIT)
             if (!string.IsNullOrEmpty(targetMssv))
             {
+                // Tạm hủy bắt sự kiện sinh tự động để không ghi đè dữ liệu cũ từ DB
+                txtMSSV.TextChanged -= AutoGenerateStudentEmail_TextChanged;
+
                 this.Text = "Chỉnh sửa thông tin sinh viên";
                 btnSave.Text = "Cập nhật";
                 txtMSSV.Text = targetMssv;
                 txtMSSV.ReadOnly = true;
+                txtMSSV.BackColor = SystemColors.InactiveCaption;
 
                 LoadStudentDataForEdit();
             }
         }
+
+        #region 💡 TỰ ĐỘNG SINH EMAIL SINH VIÊN CHUẨN ĐỊNH DẠNG
+        private void AutoGenerateStudentEmail_TextChanged(object sender, EventArgs e)
+        {
+            // Chỉ tự động gợi ý điền khi thêm mới
+            if (string.IsNullOrEmpty(targetMssv))
+            {
+                string mssvRaw = txtMSSV.Text.Trim();
+                if (string.IsNullOrWhiteSpace(mssvRaw))
+                {
+                    txtEmail.Clear();
+                    return;
+                }
+
+                // Tự sinh cấu trúc: [mssv]@student.school.edu.vn (Sinh viên có thể tùy biến subdomain 'school')
+                txtEmail.Text = mssvRaw.ToLower() + STUDENT_EMAIL_SUBDOMAIN + "school" + REQUIRED_EMAIL_SUFFIX;
+            }
+        }
+        #endregion
 
         private void LoadMajorComboBox()
         {
@@ -53,12 +87,13 @@ namespace ClassProject
             {
                 using (SqlConnection conn = db.GetConnection())
                 {
-                    conn.Open();
+                    if (conn.State == ConnectionState.Closed) conn.Open();
                     string query = "SELECT MaNganh, TenNganh FROM dbo.Major ORDER BY TenNganh ASC";
                     using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
+
                         cboMaNganh.DataSource = dt;
                         cboMaNganh.DisplayMember = "TenNganh";
                         cboMaNganh.ValueMember = "MaNganh";
@@ -68,6 +103,10 @@ namespace ClassProject
             catch (SqlException)
             {
                 MessageBox.Show("Mất kết nối đến cơ sở dữ liệu khi tải danh mục Ngành!", "Lỗi Kết Nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải danh mục Ngành ngoài dự kiến: {ex.Message}", "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -80,15 +119,16 @@ namespace ClassProject
             {
                 using (SqlConnection conn = db.GetConnection())
                 {
-                    conn.Open();
+                    if (conn.State == ConnectionState.Closed) conn.Open();
                     string query = "SELECT MaLop, TenLop FROM dbo.Classroom WHERE MaNganh = @MaNganh ORDER BY TenLop ASC";
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@MaNganh", selectedMajor);
+                        cmd.Parameters.Add(new SqlParameter("@MaNganh", SqlDbType.Char, 10) { Value = selectedMajor });
                         using (SqlDataAdapter da = new SqlDataAdapter(cmd))
                         {
                             DataTable dt = new DataTable();
                             da.Fill(dt);
+
                             cboMaLop.DataSource = dt;
                             cboMaLop.DisplayMember = "TenLop";
                             cboMaLop.ValueMember = "MaLop";
@@ -99,6 +139,10 @@ namespace ClassProject
             catch (SqlException)
             {
                 MessageBox.Show("Mất kết nối đến cơ sở dữ liệu khi tải danh mục Lớp!", "Lỗi Kết Nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải danh mục Lớp ngoài dự kiến: {ex.Message}", "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -114,8 +158,8 @@ namespace ClassProject
                 Student sv = studentRepo.GetStudentByMssv(targetMssv);
                 if (sv != null)
                 {
-                    txtFirstName.Text = sv.FirstName;
-                    txtLastName.Text = sv.LastName;
+                    txtFirstName.Text = sv.FirstName?.Trim() ?? "";
+                    txtLastName.Text = sv.LastName?.Trim() ?? "";
 
                     if (sv.DateOfBirth.HasValue)
                     {
@@ -123,20 +167,17 @@ namespace ClassProject
                             dtpDateOfBirth.Value = sv.DateOfBirth.Value;
                     }
 
-                    cboGender.Text = string.IsNullOrWhiteSpace(sv.Gender) ? "Nam" : sv.Gender;
-                    txtPhone.Text = sv.Phone;
-                    txtAddress.Text = sv.Address;
-                    txtHometown.Text = sv.Hometown;
-                    txtEmail.Text = sv.Email;
+                    cboGender.Text = string.IsNullOrWhiteSpace(sv.Gender) ? "Nam" : sv.Gender.Trim();
+                    txtPhone.Text = sv.Phone?.Trim() ?? "";
+                    txtAddress.Text = sv.Address?.Trim() ?? "";
+                    txtHometown.Text = sv.Hometown?.Trim() ?? "";
+                    txtEmail.Text = sv.Email?.Trim() ?? "";
 
-                    // KHÓA EMAIL NẾU ĐÃ GẮN USER_ID 
                     if (sv.UserId != null)
                     {
                         txtEmail.ReadOnly = true;
                         txtEmail.BackColor = SystemColors.InactiveCaption;
 
-                        // FIX LỖI lblEmailWarning: Thay vì gán trực tiếp vào label điều khiển (có thể thiếu cấu hình UI), 
-                        // ta sử dụng thuộc tính ToolTip tích hợp sẵn trên ô text để thông báo thông minh cho người dùng.
                         ToolTip toolTip = new ToolTip();
                         toolTip.SetToolTip(txtEmail, "Trường dữ liệu này được cố định do tài khoản đang hoạt động.");
                     }
@@ -148,21 +189,21 @@ namespace ClassProject
                     }
                     if (!string.IsNullOrEmpty(sv.MaLop)) cboMaLop.SelectedValue = sv.MaLop;
 
-                    // KIỂM TRA CHỐNG FILE ẢNH HỎNG
                     if (sv.Picture != null && sv.Picture.Length > 0)
                     {
                         studentImage = sv.Picture;
                         using (MemoryStream ms = new MemoryStream(studentImage))
                         {
-                            picStudent.Image?.Dispose();
+                            Image oldImg = picStudent.Image;
                             picStudent.Image = Image.FromStream(ms);
+                            oldImg?.Dispose();
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi hiển thị hồ sơ: " + ex.Message, "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi hiển thị hồ sơ hệ thống: " + ex.Message, "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -171,13 +212,13 @@ namespace ClassProject
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = "Image Files|*.jpg;*.png;*.jpeg";
+                ofd.Title = "Chọn ảnh đại diện sinh viên";
+
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     try
                     {
                         FileInfo fInfo = new FileInfo(ofd.FileName);
-
-                        // Đồng bộ giới hạn dung lượng ảnh <= 2MB chuẩn Enterprise chống phình DB
                         if (fInfo.Length > 2 * 1024 * 1024)
                         {
                             MessageBox.Show("Dung lượng ảnh vượt quá giới hạn cho phép (Tối đa 2MB)!", "Xác thực tệp tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -193,8 +234,9 @@ namespace ClassProject
                         {
                             using (Image testImg = Image.FromStream(fs))
                             {
-                                picStudent.Image?.Dispose();
+                                Image oldImg = picStudent.Image;
                                 picStudent.Image = new Bitmap(testImg);
+                                oldImg?.Dispose();
 
                                 using (MemoryStream ms = new MemoryStream())
                                 {
@@ -208,7 +250,9 @@ namespace ClassProject
                     {
                         MessageBox.Show("Tệp tin không đúng cấu trúc đồ họa chuẩn, nghi vấn giả mạo định dạng hoặc file hỏng!", "An Ninh Dữ Liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         studentImage = null;
+                        Image oldImg = picStudent.Image;
                         picStudent.Image = null;
+                        oldImg?.Dispose();
                     }
                 }
             }
@@ -224,57 +268,97 @@ namespace ClassProject
                 string mssv = txtMSSV.Text.Trim();
                 string lastName = txtLastName.Text.Trim();
                 string firstName = txtFirstName.Text.Trim();
-                string email = txtEmail.Text.Trim();
+                string email = txtEmail.Text.Trim().ToLower(); // Chuẩn hóa chữ thường
                 string phone = txtPhone.Text.Trim();
 
+                // [Các bước Validate 1, 2, 3, 4 giữ nguyên...]
                 if (!Regex.IsMatch(mssv, @"^[A-Za-z0-9]{6,20}$"))
                 {
-                    MessageBox.Show("MSSV không hợp lệ! Độ dài yêu cầu từ 6-20 ký tự, không trống, không chứa khoảng trắng hoặc ký tự đặc biệt.", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("MSSV không hợp lệ! Độ dài yêu cầu từ 6-20 ký tự, không chứa khoảng trắng hoặc ký tự đặc biệt.", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtMSSV.Focus(); return;
                 }
-
                 if (string.IsNullOrEmpty(lastName) || lastName.Length > 100)
                 {
-                    MessageBox.Show("Họ đệm không được trống và không được vượt quá 100 ký tự!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Họ đệm không được trống và không vượt quá 100 ký tự!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtLastName.Focus(); return;
                 }
                 if (string.IsNullOrEmpty(firstName) || firstName.Length > 100)
                 {
-                    MessageBox.Show("Tên sinh viên không được trống và không được vượt quá 100 ký tự!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Tên sinh viên không được trống và không vượt quá 100 ký tự!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtFirstName.Focus(); return;
                 }
-
                 if (dtpDateOfBirth.Value.Date > DateTime.Today || dtpDateOfBirth.Value.Year < 1900)
                 {
-                    MessageBox.Show("Ngày sinh không thể lớn hơn ngày hiện tại hoặc nhỏ hơn năm 1900!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Ngày sinh không hợp lệ!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
                 if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$") || email.Length > 100)
                 {
-                    MessageBox.Show("Email không đúng định dạng quy chuẩn hoặc vượt quá 100 ký tự!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Địa chỉ Email không đúng định dạng tiêu chuẩn!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtEmail.Focus(); return;
                 }
-
-                if (!Regex.IsMatch(phone, @"^[0-9]{10,15}$"))
+                if (!email.StartsWith(mssv, StringComparison.OrdinalIgnoreCase) ||
+                    !email.Contains(STUDENT_EMAIL_SUBDOMAIN, StringComparison.OrdinalIgnoreCase) ||
+                    !email.EndsWith(REQUIRED_EMAIL_SUFFIX, StringComparison.OrdinalIgnoreCase))
                 {
-                    MessageBox.Show("Số điện thoại phải từ 10-15 ký số thuần túy!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show($"Email sinh viên không khớp quy chuẩn quản lý!\n\nCấu trúc bắt buộc: {mssv.ToLower()}{STUDENT_EMAIL_SUBDOMAIN}[tên_miền]{REQUIRED_EMAIL_SUFFIX}", "Xác thực Giáo vụ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtEmail.Focus(); return;
+                }
+                if (!Regex.IsMatch(phone, @"^(03|05|07|08|09)\d{8}$"))
+                {
+                    MessageBox.Show("Số điện thoại không hợp lệ! Yêu cầu sử dụng đầu số di động Việt Nam chuẩn và đủ 10 chữ số.", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtPhone.Focus(); return;
                 }
-
                 if (cboMaNganh.SelectedValue == null || cboMaLop.SelectedValue == null)
                 {
-                    MessageBox.Show("Vui lòng chọn đầy đủ Chuyên ngành và Lớp hành chính hợp lệ!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Vui lòng chọn đầy đủ Chuyên ngành và Lớp hành chính!", "Xác thực", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
+                // ==========================================
+                // ✨ ĐÃ THÊM: PASS ALL TEST CASES - CHECK TRÙNG TRƯỚC KHI XUỐNG DB
+                // ==========================================
+                if (string.IsNullOrEmpty(targetMssv)) // Chế độ THÊM MỚI
+                {
+                    // 1. Kiểm tra trùng MSSV bằng hàm có sẵn hoặc gọi truy vấn nhanh
+                    if (studentRepo.GetStudentByMssv(mssv) != null)
+                    {
+                        MessageBox.Show($"Mã số sinh viên '{mssv}' đã tồn tại trên hệ thống. Không thể thêm trùng lặp!",
+                                        "Trùng lặp dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        txtMSSV.Focus();
+                        return;
+                    }
+
+                    // 2. Kiểm tra trùng Email để triệt tiêu lỗi UNIQUE KEY 'UQ_Students_Email'
+                    // (Giả định trong studentRepo của bạn đã có hàm CheckEmailExists, nếu chưa có, xem hướng dẫn viết nhanh ở dưới)
+                    if (IsEmailAlreadyExists(email, string.Empty))
+                    {
+                        MessageBox.Show($"Địa chỉ Email hệ thống '{email}' đã được cấp phát cho một sinh viên khác trước đó!\n\nVui lòng kiểm tra lại danh sách hoặc dọn dẹp tài khoản rác.",
+                                        "Trùng lặp Email", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        txtEmail.Focus();
+                        return;
+                    }
+                }
+                else // Chế độ CẬP NHẬT (EDIT)
+                {
+                    // Nếu sửa thông tin mà đổi email (nếu được phép), phải chắc chắn email mới không đụng hàng với ai khác
+                    if (IsEmailAlreadyExists(email, targetMssv))
+                    {
+                        MessageBox.Show($"Không thể cập nhật! Email '{email}' đang được sử dụng bởi một sinh viên khác.",
+                                        "Trùng lặp dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        txtEmail.Focus();
+                        return;
+                    }
+                }
+
+                // Đóng gói Model dữ liệu
                 Student sv = new Student
                 {
                     Mssv = mssv,
                     FirstName = firstName,
                     LastName = lastName,
                     DateOfBirth = dtpDateOfBirth.Value,
-                    Gender = cboGender.Text,
+                    Gender = string.IsNullOrWhiteSpace(cboGender.Text) ? "Nam" : cboGender.Text.Trim(),
                     Phone = phone,
                     Address = txtAddress.Text.Trim(),
                     Hometown = txtHometown.Text.Trim(),
@@ -284,7 +368,7 @@ namespace ClassProject
                     MaLop = cboMaLop.SelectedValue.ToString()
                 };
 
-                // Đẩy thực thi trực tiếp xuống Database thông qua khối try-catch bọc lỗi ngoại lệ bên dưới.
+                // Thực thi xuống DB
                 if (string.IsNullOrEmpty(targetMssv))
                 {
                     if (studentRepo.AddStudent(sv))
@@ -306,12 +390,19 @@ namespace ClassProject
             }
             catch (InvalidOperationException ex)
             {
-                // Bắt chính xác thông điệp lỗi trùng MSSV hoặc trùng Email được đẩy ra từ tầng Engine SQL của StudentRepository
                 MessageBox.Show(ex.Message, "Ràng Buộc Dữ Liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            catch (SqlException)
+            catch (SqlException ex)
             {
-                MessageBox.Show("Mất kết nối đột ngột với SQL Server Engine! Dữ liệu chưa được ghi nhận bảo an.", "Lỗi Hệ Thống Cơ Sở Dữ Liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Bẫy phòng hờ tầng cuối nếu tầng kiểm tra trên RAM lọt lưới do hạ tầng mạng chậm trễ (Race Condition)
+                if (ex.Number == 2627 || ex.Number == 2601)
+                {
+                    MessageBox.Show("Lỗi đồng bộ: Email hoặc Mã định danh này vừa mới được đăng ký ngầm bởi một phiên làm việc khác!", "Dữ liệu trùng lặp", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    MessageBox.Show("Mất kết nối đột ngột với SQL Server Engine!", "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
@@ -325,8 +416,40 @@ namespace ClassProject
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            picStudent.Image?.Dispose();
+            Image oldImg = picStudent.Image;
+            picStudent.Image = null;
+            oldImg?.Dispose();
             this.Close();
+        }
+        private bool IsEmailAlreadyExists(string email, string currentMssv)
+        {
+            try
+            {
+                using (SqlConnection conn = db.GetConnection())
+                {
+                    if (conn.State == ConnectionState.Closed) conn.Open();
+
+                    // Nếu ở chế độ Edit (currentMssv có giá trị), ta loại trừ chính nó ra khỏi danh sách kiểm tra trùng
+                    string query = "SELECT COUNT(1) FROM dbo.Students WHERE Email = @Email";
+                    if (!string.IsNullOrEmpty(currentMssv))
+                    {
+                        query += " AND MSSV != @CurrentMssv";
+                    }
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Email", email);
+                        if (!string.IsNullOrEmpty(currentMssv))
+                        {
+                            cmd.Parameters.AddWithValue("@CurrentMssv", currentMssv);
+                        }
+
+                        int count = Convert.ToInt32(cmd.ExecuteScalar());
+                        return count > 0;
+                    }
+                }
+            }
+            catch { return false; } // Phục hồi an toàn mặc định
         }
     }
 }

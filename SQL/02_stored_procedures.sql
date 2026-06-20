@@ -201,3 +201,103 @@ BEGIN
     SELECT MaNganh, TenNganh FROM dbo.Major ORDER BY TenNganh ASC;
 END;
 GO
+
+--8. Tự động tạo user và pass cho staff
+CREATE OR ALTER PROCEDURE dbo.sp_CreateStaffAccount
+    @Username NVARCHAR(50),
+    @Email NVARCHAR(100),
+    @PasswordHash NVARCHAR(255), -- Mật khẩu băm BCrypt truyền từ C#
+    @MSNV NVARCHAR(30),
+    @FirstName NVARCHAR(100),
+    @LastName NVARCHAR(100),
+    @Phone NVARCHAR(15),
+    @Department NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Sử dụng TRANSACTION để đảm bảo an toàn dữ liệu (thêm cả 2 bảng hoặc không bảng nào cả)
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        -- 1. Kiểm tra trùng lặp dữ liệu trước khi chèn
+        IF EXISTS (SELECT 1 FROM dbo.Users WHERE Username = @Username)
+        BEGIN
+            RAISERROR(N'Tên đăng nhập (Username) này đã tồn tại trong hệ thống!', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+
+        IF EXISTS (SELECT 1 FROM dbo.Users WHERE Email = @Email) OR EXISTS (SELECT 1 FROM dbo.Staffs WHERE Email = @Email)
+        BEGIN
+            RAISERROR(N'Địa chỉ Email này đã được đăng ký!', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+
+        IF EXISTS (SELECT 1 FROM dbo.Staffs WHERE MSNV = @MSNV)
+        BEGIN
+            RAISERROR(N'Mã số nhân viên (MSNV) này đã tồn tại!', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+
+        -- 2. Chèn vào bảng Users (RoleId = 3 đại diện cho Giáo Vụ)
+        DECLARE @NewUserId INT;
+        
+        INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid, Status)
+        VALUES (@Username, @Email, @PasswordHash, 3, 1, 1);
+        
+        -- Lấy Id vừa tự động sinh của bảng Users
+        SET @NewUserId = SCOPE_IDENTITY();
+
+        -- 3. Chèn vào bảng Staffs liên kết hồ sơ vật lý
+        INSERT INTO dbo.Staffs (UserId, MSNV, FirstName, LastName, Phone, Email, Department, Status)
+        VALUES (@NewUserId, @MSNV, @FirstName, @LastName, @Phone, @Email, @Department, 1);
+
+        -- Nếu mọi thứ mượt mà, xác nhận lưu vào CSDL
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+            
+        DECLARE @ErrMsg NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(@ErrMsg, 16, 1);
+    END CATCH
+END;
+GO
+
+--9.
+CREATE PROCEDURE dbo.sp_GetStaffAccountSecurityInfo
+    @StaffId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Truy vấn lấy thẳng dữ liệu từ Id (Khóa chính), không sợ lỗi khoảng trắng MSNV
+    SELECT 
+        s.MSNV,
+        u.Username, 
+        u.Password, 
+        s.Email,
+        (s.LastName + ' ' + s.FirstName) AS FullName
+    FROM dbo.Staffs s 
+    INNER JOIN dbo.Users u ON s.UserId = u.Id 
+    WHERE s.Id = @StaffId;
+END;
+GO
+
+--8. tạo pass mới mỗi khi nhấn xem
+CREATE PROCEDURE dbo.sp_ResetStaffPassword
+    @StaffId INT,
+    @NewPasswordHash NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Cập nhật trực tiếp vào bảng Users thông qua UserId lấy từ bảng Staffs
+    UPDATE dbo.Users
+    SET Password = @NewPasswordHash
+    WHERE Id = (SELECT UserId FROM dbo.Staffs WHERE Id = @StaffId);
+END;
+GO

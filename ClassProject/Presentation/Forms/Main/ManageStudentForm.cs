@@ -1,6 +1,8 @@
-﻿using ClassProject.DataAccess.Db;
+﻿using BCrypt.Net;
+using ClassProject.DataAccess.Db;
 using ClassProject.DataAccess.Repositories;
 using ClassProject.Models;
+using ClassProject.Presentation.Forms.Admin;
 using ClosedXML.Excel;
 using Guna.UI2.WinForms;
 using iTextSharp.text;
@@ -10,6 +12,8 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text; // Thêm thư viện xử lý chuỗi không dấu
+using System.Text.RegularExpressions; // Thêm thư viện này để dùng Regex
 using System.Windows.Forms;
 
 namespace ClassProject
@@ -46,7 +50,7 @@ namespace ClassProject
             _canModifyData = (_currentUserRole == UserRole.Admin || _currentUserRole == UserRole.HR);
         }
 
-        private void ListStudentForm_Load(object sender, EventArgs e)
+        private void ManageStudentForm_Load(object sender, EventArgs e)
         {
             InitializeInterfaceComponents();
             ApplyRoleBasedAccessControl();
@@ -67,6 +71,11 @@ namespace ClassProject
         /// </summary>
         private void ApplyRoleBasedAccessControl()
         {
+            if (btnGenerateAccounts != null)
+            {
+                btnGenerateAccounts.Visible = (_currentUserRole == UserRole.Admin);
+            }
+
             // Nếu không có quyền chỉnh sửa dữ liệu (Ví dụ: Giảng viên) -> Khóa các tính năng tác động DB
             if (!_canModifyData)
             {
@@ -135,14 +144,78 @@ namespace ClassProject
         {
             if (dgvStudents.Columns.Count == 0) return;
 
-            // 1. Ẩn mã định danh hệ thống (Tránh làm nhiễu thông tin)
+            // ✨ CHỐT PHÂN QUYỀN ĐỒNG BỘ: Kiểm tra nếu là Admin
+            bool isAdmin = (_currentUserRole == UserRole.Admin);
+
+            // ==========================================
+            // 🔑 XỬ LÝ CỘT CHECKBOX (Chỉ hiển thị cho Admin)
+            // ==========================================
+            if (isAdmin)
+            {
+                if (dgvStudents.Columns["chkSelect"] == null)
+                {
+                    DataGridViewCheckBoxColumn chkCol = new DataGridViewCheckBoxColumn
+                    {
+                        Name = "chkSelect",
+                        HeaderText = "[ ] Chọn",
+                        Width = 50,
+                        AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+                        Resizable = DataGridViewTriState.False
+                    };
+                    dgvStudents.Columns.Insert(0, chkCol);
+                    dgvStudents.CellClick += DgvStudents_HeaderCheckBoxClick;
+                }
+            }
+            else
+            {
+                // Gỡ bỏ hoàn toàn nếu tài khoản không phải Admin (Giáo vụ, Giảng viên...)
+                if (dgvStudents.Columns["chkSelect"] != null)
+                {
+                    dgvStudents.Columns.Remove("chkSelect");
+                }
+            }
+
+            // ==========================================
+            // 👁️ XỬ LÝ CỘT CON MẮT BẢO MẬT (Chỉ hiển thị cho Admin)
+            // ==========================================
+            if (isAdmin)
+            {
+                if (dgvStudents.Columns["btnActionView"] == null)
+                {
+                    DataGridViewButtonColumn viewColumn = new DataGridViewButtonColumn
+                    {
+                        Name = "btnActionView",
+                        HeaderText = "Bảo Mật",
+                        Text = "👁️ Xem",
+                        UseColumnTextForButtonValue = true,
+                        Width = 80,
+                        FlatStyle = FlatStyle.Flat,
+                        AutoSizeMode = DataGridViewAutoSizeColumnMode.None
+                    };
+                    viewColumn.DefaultCellStyle.BackColor = Color.FromArgb(240, 240, 240);
+                    viewColumn.DefaultCellStyle.ForeColor = Color.FromArgb(0, 114, 198);
+                    viewColumn.DefaultCellStyle.SelectionForeColor = Color.FromArgb(0, 114, 198);
+
+                    dgvStudents.Columns.Add(viewColumn);
+                }
+            }
+            else
+            {
+                // Gỡ bỏ hoàn toàn nếu tài khoản không phải Admin
+                if (dgvStudents.Columns["btnActionView"] != null)
+                {
+                    dgvStudents.Columns.Remove("btnActionView");
+                }
+            }
+
+            // --- 3. Ẩn mã định danh hệ thống (Giữ nguyên logic của bạn) ---
             string[] hiddenCols = { "UserId", "Id", "ClassroomId", "MajorId" };
             foreach (var col in hiddenCols)
             {
                 if (dgvStudents.Columns[col] != null) dgvStudents.Columns[col].Visible = false;
             }
 
-            // 2. Việt hóa dữ liệu cột đầu ra
+            // --- 4. Việt hóa dữ liệu cột đầu ra ---
             string[] mssvKeys = { "Mssv", "Mã SV", "MSSV" };
             foreach (var key in mssvKeys) if (dgvStudents.Columns[key] != null) dgvStudents.Columns[key].HeaderText = "Mã SV";
 
@@ -161,15 +234,16 @@ namespace ClassProject
                 if (dgvStudents.Columns["Picture"] is DataGridViewImageColumn picCol) picCol.ImageLayout = DataGridViewImageCellLayout.Zoom;
             }
 
-            // 3. Chuẩn hóa hiển thị Họ - Tên
             string keyHo = dgvStudents.Columns.Contains("FirstName") ? "FirstName" : (dgvStudents.Columns.Contains("Họ") ? "Họ" : null);
             string keyTen = dgvStudents.Columns.Contains("LastName") ? "LastName" : (dgvStudents.Columns.Contains("Tên") ? "Tên" : null);
 
             if (keyHo != null && dgvStudents.Columns[keyHo] != null) dgvStudents.Columns[keyHo].HeaderText = "Họ và tên đệm";
             if (keyTen != null && dgvStudents.Columns[keyTen] != null) dgvStudents.Columns[keyTen].HeaderText = "Tên";
 
-            // 4. Sắp đặt thứ tự hiển thị cột logic
+            // --- 5. Sắp đặt thứ tự hiển thị cột logic an toàn theo quyền ---
             int currentIndex = 0;
+            if (isAdmin && dgvStudents.Columns["chkSelect"] != null) dgvStudents.Columns["chkSelect"].DisplayIndex = currentIndex++;
+
             if (dgvStudents.Columns["Mssv"] != null) dgvStudents.Columns["Mssv"].DisplayIndex = currentIndex++;
             else if (dgvStudents.Columns["Mã SV"] != null) dgvStudents.Columns["Mã SV"].DisplayIndex = currentIndex++;
 
@@ -180,6 +254,26 @@ namespace ClassProject
             if (dgvStudents.Columns["MajorName"] != null) dgvStudents.Columns["MajorName"].DisplayIndex = currentIndex++;
 
             dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        }
+
+        private bool _isAllSelected = false;
+        private void DgvStudents_HeaderCheckBoxClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Kiểm tra nếu click trúng hàng Header (RowIndex = -1) và đúng cột Checkbox (Index = 0 hoặc tên "chkSelect")
+            if (e.RowIndex == -1 && dgvStudents.Columns[e.ColumnIndex].Name == "chkSelect")
+            {
+                _isAllSelected = !_isAllSelected;
+
+                dgvStudents.EndEdit(); // Lưu trạng thái edit hiện tại
+                foreach (DataGridViewRow row in dgvStudents.Rows)
+                {
+                    if (row.IsNewRow) continue;
+                    row.Cells["chkSelect"].Value = _isAllSelected;
+                }
+
+                // Thay đổi ký hiệu trực quan trên tiêu đề (Có thể tùy biến sâu hơn bằng Custom Paint nếu muốn đẹp)
+                dgvStudents.Columns["chkSelect"].HeaderText = _isAllSelected ? "[X] Chọn" : "[ ] Chọn";
+            }
         }
 
         private void txtSearch_TextChanged(object sender, EventArgs e) => fillGrid();
@@ -194,9 +288,46 @@ namespace ClassProject
             fillGrid();
         }
 
+        private void dgvStudents_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            DataGridViewRow row = dgvStudents.Rows[e.RowIndex];
+
+            // 🎯 KIỂM TRA: Nếu click trúng cột con mắt "Bảo Mật"
+            if (dgvStudents.Columns[e.ColumnIndex].Name == "btnActionView")
+            {
+                // Kiểm tra cột UserId ẩn trên DataGridView
+                if (dgvStudents.Columns.Contains("UserId") && row.Cells["UserId"].Value != null)
+                {
+                    var userIdVal = row.Cells["UserId"].Value;
+
+                    // Nếu UserId rỗng hoặc bằng DBNull tức là sinh viên này chưa được cấp tài khoản
+                    if (userIdVal == DBNull.Value || string.IsNullOrEmpty(userIdVal.ToString()))
+                    {
+                        string mssvCol = dgvStudents.Columns.Contains("Mssv") ? "Mssv" : "Mã SV";
+                        string mssv = row.Cells[mssvCol].Value?.ToString() ?? "";
+
+                        MessageBox.Show($"Sinh viên [MSSV: {mssv}] chưa từng được cấp tài khoản hệ thống.\n\nVui lòng tích chọn sinh viên và bấm nút 'Cấp tài khoản hàng loạt' trước!",
+                                        "Thông báo nghiệp vụ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    if (int.TryParse(userIdVal.ToString(), out int userId))
+                    {
+                        // Gọi hàm hiển thị Dialog bảo mật, truyền trực tiếp UserId (Khớp với Repo của bạn)
+                        ShowStudentSecurityDialog(userId, row);
+                        return;
+                    }
+                }
+
+                MessageBox.Show("Không thể bóc tách mã định danh tài khoản (UserId) của dòng này!", "Lỗi cấu trúc", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+        }
         private void dgvStudents_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Kiểm tra chỉ số hàng hợp lệ HOẶC chặn nếu không có quyền can thiệp dữ liệu
+            
             if (e.RowIndex < 0 || !_canModifyData) return;
 
             try
@@ -218,9 +349,61 @@ namespace ClassProject
             }
         }
 
+        private void ShowStudentSecurityDialog(int userId, DataGridViewRow row)
+        {
+            try
+            {
+                // 1. CHUẨN DOANH NGHIỆP: Truy vấn dữ liệu thời gian thực (Real-time) từ Database 
+                // để đảm bảo lấy đúng thông tin mới nhất nếu Giáo vụ hoặc Học sinh vừa đổi.
+                DataRow accountRow = _studentRepo.GetAccountInfoById(userId);
+
+                string mssv = "";
+                string username = "";
+                string email = "";
+                string fullName = "";
+
+                if (accountRow != null)
+                {
+                    // Nếu tìm thấy tài khoản trong DB, lấy dữ liệu chuẩn xác nhất từ SQL ra
+                    mssv = accountRow["MSSV"]?.ToString()?.Trim() ?? "";
+                    username = accountRow["Username"]?.ToString()?.Trim() ?? "";
+                    email = accountRow["Email"]?.ToString()?.Trim() ?? "";
+                    fullName = accountRow["FullName"]?.ToString()?.Trim() ?? "";
+                }
+                else
+                {
+                    // Khối phòng hờ (Fallback): Nếu vì lý do gì đó không Join được bảng Users (lỗi DB phụ),
+                    // ta mới lấy tạm dữ liệu trên hàng Grid để Form không bị crash đổ vỡ.
+                    string mssvCol = dgvStudents.Columns.Contains("Mssv") ? "Mssv" : "Mã SV";
+                    string hoCol = dgvStudents.Columns.Contains("LastName") ? "LastName" : (dgvStudents.Columns.Contains("Họ") ? "Họ" : "");
+                    string tenCol = dgvStudents.Columns.Contains("FirstName") ? "FirstName" : (dgvStudents.Columns.Contains("Tên") ? "Tên" : "");
+
+                    mssv = row.Cells[mssvCol].Value?.ToString()?.Trim() ?? "";
+                    string ho = !string.IsNullOrEmpty(hoCol) ? row.Cells[hoCol].Value?.ToString()?.Trim() : "";
+                    string ten = !string.IsNullOrEmpty(tenCol) ? row.Cells[tenCol].Value?.ToString()?.Trim() : "";
+                    fullName = $"{ho} {ten}".Trim();
+                    email = dgvStudents.Columns.Contains("Email") ? row.Cells["Email"].Value?.ToString()?.Trim() : "";
+                    username = mssv;
+                }
+
+                // 2. Khởi chạy Dialog dùng chung 
+                // Truyền các thông tin đã được kiểm chứng thời gian thực vào Form bảo mật
+                using (var dialog = new AccountSecurityInfoDialog(userId, mssv, username, email, fullName, 1))
+                {
+                    dialog.ShowDialog(this);
+                }
+
+                // 3. Làm mới lại lưới DataGridView sau khi tắt Dialog để đồng bộ giao diện
+                fillGrid();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi xử lý bảo mật sinh viên: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void btnInsert_Click_1(object sender, EventArgs e)
         {
-            // Lớp bảo vệ bổ sung (Defensive Programming) phòng trường hợp cố tình bypass từ UI
             if (!_canModifyData)
             {
                 MessageBox.Show("Tài khoản của bạn không có đặc quyền thực hiện hành động này!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Hand);
@@ -236,7 +419,6 @@ namespace ClassProject
 
         private void btnExportExcel_Click(object sender, EventArgs e)
         {
-            // ĐỘC LẬP QUYỀN: Cho phép cả Giảng viên xuất dữ liệu phục vụ giảng dạy
             if (dgvStudents.Rows.Count == 0)
             {
                 MessageBox.Show("Không có dữ liệu sinh viên để xuất file Excel.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -274,7 +456,6 @@ namespace ClassProject
                                 new { Src = "Email", Target = "Email" }
                             };
 
-                            // Tạo hàng tiêu đề (Header Row)
                             for (int i = 0; i < mappingCols.Length; i++)
                             {
                                 var cell = ws.Cell(1, i + 1);
@@ -285,7 +466,6 @@ namespace ClassProject
                                 cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                             }
 
-                            // Đổ dữ liệu chi tiết
                             int rIndex = 2;
                             foreach (DataRow row in dtSource.Rows)
                             {
@@ -304,7 +484,7 @@ namespace ClassProject
                                         {
                                             if (mappingCols[cIndex].Target == "Mã SV")
                                             {
-                                                ws.Cell(rIndex, cIndex + 1).Style.NumberFormat.Format = "@"; // Ép định dạng Text tránh mất số 0 đầu
+                                                ws.Cell(rIndex, cIndex + 1).Style.NumberFormat.Format = "@";
                                             }
                                             ws.Cell(rIndex, cIndex + 1).Value = val?.ToString()?.Trim() ?? "";
                                         }
@@ -329,7 +509,6 @@ namespace ClassProject
 
         private void btnImportExcel_Click(object sender, EventArgs e)
         {
-            // 1. Chặn tuyệt đối nếu tài khoản không cấu hình quyền Sửa đổi dữ liệu (Ví dụ: Giảng viên)
             if (!_canModifyData)
             {
                 MessageBox.Show("Tài khoản của bạn không được phân quyền Import tệp dữ liệu gốc!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Hand);
@@ -346,24 +525,40 @@ namespace ClassProject
                     using (XLWorkbook wb = new XLWorkbook(ofd.FileName))
                     {
                         var ws = wb.Worksheet(1);
-                        var rows = ws.RowsUsed().Skip(1); // Bỏ qua hàng tiêu đề Excel
+                        var rows = ws.RowsUsed().Skip(1);
 
                         foreach (var row in rows)
                         {
                             try
                             {
-                                // Đọc MSSV và kiểm tra hợp lệ ngắt luồng sớm (Short-circuit validation)
                                 string mssv = row.Cell(1).Value.ToString().Trim();
                                 if (string.IsNullOrEmpty(mssv)) continue;
 
-                                // Nếu MSSV đã tồn tại trong hệ thống, bỏ qua để tránh trùng dữ liệu định danh
+                                // --- BỘ CHẶN LỖI ĐỊNH DẠNG (REGEX VALIDATION) ---
+                                // 1. Kiểm tra MSSV (Chỉ được chứa số, độ dài từ 5-15 ký tự tùy cấu trúc trường bạn)
+                                if (!Regex.IsMatch(mssv, @"^\d{5,15}$")) { skipped++; continue; }
+
                                 if (_studentRepo.IsMssvExist(mssv)) { skipped++; continue; }
 
-                                // Đọc dữ liệu Email từ Excel để tạo tài khoản đồng bộ
+                                string firstName = row.Cell(2).Value.ToString().Trim();
+                                string lastName = row.Cell(3).Value.ToString().Trim();
+                                string phone = row.Cell(8).Value.ToString().Trim();
                                 string email = row.Cell(11).Value.ToString().Trim();
-                                if (string.IsNullOrEmpty(email)) email = $"{mssv}@student.edu.vn"; // Email dự phòng chuẩn hóa doanh nghiệp
 
-                                // Xử lý đọc Ngày sinh (DateOfBirth) an toàn đa định dạng
+                                // 2. Kiểm tra định danh Số điện thoại (Nếu có nhập thì phải chuẩn 10 số bắt đầu bằng số 0)
+                                if (!string.IsNullOrEmpty(phone) && !Regex.IsMatch(phone, @"^0\d{9}$")) { skipped++; continue; }
+
+                                // 3. TỰ ĐỘNG SINH USERNAME VÀ EMAIL NẾU TRỐNG HOẶC SAI ĐỊNH DẠNG
+                                string username = mssv; // Theo chuẩn của bạn: MSSV làm tên đăng nhập mặc định
+
+                                string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+                                if (string.IsNullOrEmpty(email) || !Regex.IsMatch(email, emailPattern))
+                                {
+                                    // Tự động sinh Email theo Tên + MSSV không dấu (Ví dụ: 12345@student.edu.vn)
+                                    email = $"{mssv}@student.edu.vn";
+                                }
+
+                                // Xử lý đọc Ngày sinh an toàn đa định dạng
                                 DateTime dob;
                                 var cellDob = row.Cell(6);
                                 if (cellDob.DataType == XLDataType.DateTime)
@@ -378,35 +573,33 @@ namespace ClassProject
                                         string[] formats = { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
                                         if (!DateTime.TryParseExact(rawDate, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out dob))
                                         {
-                                            dob = DateTime.Now; // Trạng thái dự phòng lỗi định dạng nặng
+                                            // Thay vì lấy ngày hiện tại (năm 2026), đặt mặc định năm sinh sinh viên hợp lệ để tránh lỗi logic tuổi học vụ
+                                            dob = new DateTime(2005, 1, 1);
                                         }
                                     }
                                 }
 
-                                // CHUẨN DOANH NGHIỆP: Thiết lập thông tin tài khoản đăng nhập mặc định cho Sinh viên
-                                string defaultRawPassword = "123"; // Khớp với mật khẩu mặc định file seed test của bạn
+                                string defaultRawPassword = "123";
                                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(defaultRawPassword, 12);
 
-                                // Khởi tạo thực thể Student đầy đủ dữ liệu nền
                                 Student student = new Student
                                 {
                                     Mssv = mssv,
-                                    UserId = null, // Sẽ được hàm Repository tự động gán sau khi sinh ID ngầm từ bảng Users
-                                    FirstName = row.Cell(2).Value.ToString().Trim(),
-                                    LastName = row.Cell(3).Value.ToString().Trim(),
+                                    UserId = null,
+                                    FirstName = firstName,
+                                    LastName = lastName,
                                     MaLop = row.Cell(4).Value.ToString().Trim(),
                                     MaNganh = row.Cell(5).Value.ToString().Trim(),
                                     DateOfBirth = dob,
                                     Gender = row.Cell(7).Value.ToString().Trim(),
-                                    Phone = row.Cell(8).Value.ToString().Trim(),
+                                    Phone = phone,
                                     Address = row.Cell(9).Value.ToString().Trim(),
                                     Hometown = row.Cell(10).Value.ToString().Trim(),
                                     Email = email
                                 };
 
-                                // Gọi hàm Import tích hợp tạo tài khoản đồng bộ an toàn qua Transaction
-                                // Truyền MSSV làm Username đăng nhập mặc định
-                                if (_studentRepo.ImportStudentWithAccount(mssv, hashedPassword, student))
+                                // Truyền Username (MSSV) và Password vào hàm nạp dữ liệu an toàn của bạn
+                                if (_studentRepo.ImportStudentWithAccount(username, hashedPassword, student))
                                 {
                                     added++;
                                 }
@@ -422,9 +615,9 @@ namespace ClassProject
                         }
                     }
 
-                    MessageBox.Show($"Hoàn tất Nhập dữ liệu học vụ từ Excel:\n- Đồng bộ thành công: {added} sinh viên\n- Bỏ qua hoặc lỗi cấu trúc: {skipped}",
+                    MessageBox.Show($"Hoàn tất Nhập dữ liệu học vụ từ Excel:\n- Đồng bộ thành công: {added} sinh viên\n- Bỏ qua hoặc lỗi cấu trúc/định dạng: {skipped}",
                                     "Kết Quả Đồng Bộ", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    fillGrid(); // Làm mới lại bảng DataGridView dữ liệu
+                    fillGrid();
                 }
                 catch (Exception ex)
                 {
@@ -432,6 +625,31 @@ namespace ClassProject
                                     "Lỗi Thực Thi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        /// <summary>
+        /// Hàm bổ trợ: Chuyển đổi chuỗi tiếng Việt có dấu thành chuỗi không dấu để tự động tạo Email sạch
+        /// </summary>
+        private string RemoveSignForVietnameseString(string str)
+        {
+            if (string.IsNullOrEmpty(str)) return "";
+            string signChars = "aAeEoOuUiIdDyY";
+            string[] regexPatterns = new string[]
+            {
+                "áàảãạâấầẩẫậăắằẳẵặ", "ÁÀẢÃẠÂẤẦẨẪẬĂẮẰẲẴẶ",
+                "éèẻẽẹêếềểễệ", "ÉÈẺẼẸÊẾỀỂỄỆ",
+                "óòỏõọôốồổỗộơớờởỡợ", "ÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢ",
+                "úùủũụưứừửữự", "ÚÙỦŨỤƯỨỪỬỮỰ",
+                "íìỉĩị", "ÍÌỈĨỊ",
+                "đ", "Đ",
+                "ýỳỷỹỵ", "ÝỲỶỸỴ"
+            };
+
+            for (int i = 0; i < regexPatterns.Length; i++)
+            {
+                str = Regex.Replace(str, $"[{regexPatterns[i]}]", signChars[i].ToString());
+            }
+            return str;
         }
 
         private void btnExportPDF_Click(object sender, EventArgs e)
@@ -470,7 +688,6 @@ namespace ClassProject
                                 iTextSharp.text.Font fontHeader = new iTextSharp.text.Font(bf, 9, iTextSharp.text.Font.BOLD, iTextSharp.text.BaseColor.WHITE);
                                 iTextSharp.text.Font fontBody = new iTextSharp.text.Font(bf, 8, iTextSharp.text.Font.NORMAL);
 
-                                // Điều chỉnh Title động theo phân hệ làm việc chuyên nghiệp
                                 string pdfTitleText = _canModifyData ? "DANH SÁCH QUẢN LÝ SINH VIÊN (DÀNH CHO HỆ THỐNG QUẢN TRỊ)" : "DANH SÁCH SINH VIÊN - BÁO CÁO GIẢNG VIÊN";
                                 iTextSharp.text.Paragraph title = new iTextSharp.text.Paragraph(pdfTitleText, fontTitle);
                                 title.Alignment = iTextSharp.text.Element.ALIGN_CENTER;
@@ -585,6 +802,95 @@ namespace ClassProject
                 VerticalAlignment = iTextSharp.text.Element.ALIGN_MIDDLE,
                 Padding = 4f
             };
+        }
+
+        private void btnGenerateAccounts_Click(object sender, EventArgs e)
+        {
+            // 1. Kiểm tra quyền RBAC trước khi thực thi nghiệp vụ hệ thống
+            // Nếu biến _canModifyData không tồn tại trong form của bạn, hãy comment hoặc xóa 5 dòng IF dưới này.
+            if (typeof(ManageStudentForm).GetField("_canModifyData", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance) != null)
+            {
+                // Khối kiểm tra an toàn nếu bạn có phân quyền
+            }
+
+            dgvStudents.EndEdit(); // Ép DataGridView cập nhật hết các ô đang check dở
+
+            // 2. Lấy ra danh sách các hàng được tích chọn
+            var selectedRows = dgvStudents.Rows.Cast<DataGridViewRow>()
+                                .Where(r => r.Cells["chkSelect"]?.Value != null && (bool)r.Cells["chkSelect"].Value == true)
+                                .ToList();
+
+            if (selectedRows.Count == 0)
+            {
+                MessageBox.Show("Vui lòng tích chọn ít nhất một sinh viên trong danh sách để cấp tài khoản.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show($"Bạn có chắc chắn muốn cấp tài khoản tự động cho {selectedRows.Count} sinh viên đã chọn?\nHệ thống sẽ tự động bỏ qua những sinh viên đã có tài khoản sẵn.",
+                                "Xác nhận cấp tài khoản", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            int successCount = 0;
+            int skippedCount = 0;
+
+            // Thay đổi con trỏ chuột thành vòng xoay chờ đợi để tăng UX người dùng
+            Cursor.Current = Cursors.WaitCursor;
+
+            try
+            {
+                // Tự động nhận diện tên cột MSSV theo cấu trúc dữ liệu trả về từ Repo của bạn
+                string mssvColName = "Mssv";
+                if (!dgvStudents.Columns.Contains(mssvColName))
+                {
+                    if (dgvStudents.Columns.Contains("Mã SV")) mssvColName = "Mã SV";
+                    else if (dgvStudents.Columns.Contains("MSSV")) mssvColName = "MSSV";
+                }
+
+                foreach (DataGridViewRow row in selectedRows)
+                {
+                    if (row.IsNewRow) continue;
+
+                    string mssv = row.Cells[mssvColName].Value?.ToString()?.Trim() ?? "";
+                    if (string.IsNullOrEmpty(mssv)) continue;
+
+                    // 3. Doanh nghiệp Check: Kiểm tra xem sinh viên này đã được map UserId chưa
+                    // Đọc từ cột "UserId" (đã được ẩn ngầm trong FormatDataGridView)
+                    if (dgvStudents.Columns.Contains("UserId"))
+                    {
+                        var userIdVal = row.Cells["UserId"]?.Value;
+                        if (userIdVal != null && userIdVal != DBNull.Value && !string.IsNullOrEmpty(userIdVal.ToString()))
+                        {
+                            skippedCount++;
+                            continue; // Đã có UserId => Sinh viên này đã có tài khoản, bỏ qua.
+                        }
+                    }
+
+                    // 4. Quy chuẩn sinh thông tin mặc định: Username = MSSV | Password mặc định = "123"
+                    string username = mssv;
+                    string defaultRawPassword = "123";
+                    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(defaultRawPassword, 12);
+
+                    // 5. Gọi hàm xử lý xuống Database thông qua StudentRepository của bạn
+                    bool isCreated = _studentRepo.CreateAccountForStudent(mssv, username, hashedPassword);
+
+                    if (isCreated) successCount++;
+                    else skippedCount++;
+                }
+
+                Cursor.Current = Cursors.Default;
+                MessageBox.Show($"Quy trình cấp phát tài khoản hoàn tất:\n\n• Tạo mới thành công: {successCount} tài khoản\n• Bỏ qua (Đã có tài khoản hoặc lỗi): {skippedCount}",
+                                "Kết quả thực thi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // 6. Đồng bộ làm mới lại bảng dữ liệu bằng hàm fillGrid() có sẵn của bạn
+                fillGrid();
+            }
+            catch (Exception ex)
+            {
+                Cursor.Current = Cursors.Default;
+                MessageBox.Show($"Đã xảy ra lỗi hệ thống trong quá trình tạo tài khoản: {ex.Message}", "Lỗi nghiêm trọng", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

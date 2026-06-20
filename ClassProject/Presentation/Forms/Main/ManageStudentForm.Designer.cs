@@ -22,8 +22,8 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
@@ -36,24 +36,27 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges31 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges32 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges27 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges23 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges25 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges26 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges27 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             pnlTopNavbar = new Guna.UI2.WinForms.Guna2Panel();
             lblTitle = new Label();
             pnlSidebar = new Guna.UI2.WinForms.Guna2Panel();
+            btnGenerateAccounts = new Guna.UI2.WinForms.Guna2Button();
             btnExportPDF = new Guna.UI2.WinForms.Guna2Button();
             btnExportExcel = new Guna.UI2.WinForms.Guna2Button();
             btnImportExcel = new Guna.UI2.WinForms.Guna2Button();
@@ -126,6 +129,7 @@
             // pnlSidebar
             // 
             pnlSidebar.BackColor = Color.White;
+            pnlSidebar.Controls.Add(btnGenerateAccounts);
             pnlSidebar.Controls.Add(btnExportPDF);
             pnlSidebar.Controls.Add(btnRefresh);
             pnlSidebar.Controls.Add(btnExportExcel);
@@ -133,19 +137,37 @@
             pnlSidebar.Controls.Add(btnInsert);
             pnlSidebar.Controls.Add(btnActiveTab);
             pnlSidebar.Controls.Add(pnlTotalCard);
-            pnlSidebar.CustomizableEdges = customizableEdges17;
+            pnlSidebar.CustomizableEdges = customizableEdges19;
             pnlSidebar.Dock = DockStyle.Left;
             pnlSidebar.Location = new Point(0, 100);
             pnlSidebar.Margin = new Padding(5, 4, 5, 4);
             pnlSidebar.Name = "pnlSidebar";
-            pnlSidebar.ShadowDecoration.CustomizableEdges = customizableEdges18;
+            pnlSidebar.ShadowDecoration.CustomizableEdges = customizableEdges20;
             pnlSidebar.Size = new Size(294, 1071);
             pnlSidebar.TabIndex = 1;
+            // 
+            // btnGenerateAccounts
+            // 
+            btnGenerateAccounts.BorderRadius = 8;
+            btnGenerateAccounts.CustomizableEdges = customizableEdges5;
+            btnGenerateAccounts.FillColor = Color.Transparent;
+            btnGenerateAccounts.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnGenerateAccounts.ForeColor = Color.FromArgb(108, 117, 125);
+            btnGenerateAccounts.HoverState.FillColor = Color.FromArgb(248, 249, 250);
+            btnGenerateAccounts.Location = new Point(16, 501);
+            btnGenerateAccounts.Margin = new Padding(5, 4, 5, 4);
+            btnGenerateAccounts.Name = "btnGenerateAccounts";
+            btnGenerateAccounts.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            btnGenerateAccounts.Size = new Size(262, 69);
+            btnGenerateAccounts.TabIndex = 7;
+            btnGenerateAccounts.Text = "➕  Tạo tài khoản";
+            btnGenerateAccounts.TextAlign = HorizontalAlignment.Left;
+            btnGenerateAccounts.Click += btnGenerateAccounts_Click;
             // 
             // btnExportPDF
             // 
             btnExportPDF.BorderRadius = 8;
-            btnExportPDF.CustomizableEdges = customizableEdges5;
+            btnExportPDF.CustomizableEdges = customizableEdges7;
             btnExportPDF.FillColor = Color.Transparent;
             btnExportPDF.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnExportPDF.ForeColor = Color.FromArgb(108, 117, 125);
@@ -153,7 +175,7 @@
             btnExportPDF.Location = new Point(16, 345);
             btnExportPDF.Margin = new Padding(5, 4, 5, 4);
             btnExportPDF.Name = "btnExportPDF";
-            btnExportPDF.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            btnExportPDF.ShadowDecoration.CustomizableEdges = customizableEdges8;
             btnExportPDF.Size = new Size(262, 69);
             btnExportPDF.TabIndex = 6;
             btnExportPDF.Text = "📤 Export PDF";
@@ -163,7 +185,7 @@
             // btnExportExcel
             // 
             btnExportExcel.BorderRadius = 8;
-            btnExportExcel.CustomizableEdges = customizableEdges7;
+            btnExportExcel.CustomizableEdges = customizableEdges9;
             btnExportExcel.FillColor = Color.Transparent;
             btnExportExcel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnExportExcel.ForeColor = Color.FromArgb(108, 117, 125);
@@ -171,7 +193,7 @@
             btnExportExcel.Location = new Point(16, 269);
             btnExportExcel.Margin = new Padding(5, 4, 5, 4);
             btnExportExcel.Name = "btnExportExcel";
-            btnExportExcel.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            btnExportExcel.ShadowDecoration.CustomizableEdges = customizableEdges10;
             btnExportExcel.Size = new Size(262, 69);
             btnExportExcel.TabIndex = 4;
             btnExportExcel.Text = "📤  Export Excel";
@@ -181,7 +203,7 @@
             // btnImportExcel
             // 
             btnImportExcel.BorderRadius = 8;
-            btnImportExcel.CustomizableEdges = customizableEdges9;
+            btnImportExcel.CustomizableEdges = customizableEdges11;
             btnImportExcel.FillColor = Color.Transparent;
             btnImportExcel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnImportExcel.ForeColor = Color.FromArgb(108, 117, 125);
@@ -189,7 +211,7 @@
             btnImportExcel.Location = new Point(16, 184);
             btnImportExcel.Margin = new Padding(5, 4, 5, 4);
             btnImportExcel.Name = "btnImportExcel";
-            btnImportExcel.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            btnImportExcel.ShadowDecoration.CustomizableEdges = customizableEdges12;
             btnImportExcel.Size = new Size(262, 69);
             btnImportExcel.TabIndex = 3;
             btnImportExcel.Text = "📥  Import Excel";
@@ -199,7 +221,7 @@
             // btnInsert
             // 
             btnInsert.BorderRadius = 8;
-            btnInsert.CustomizableEdges = customizableEdges11;
+            btnInsert.CustomizableEdges = customizableEdges13;
             btnInsert.FillColor = Color.Transparent;
             btnInsert.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnInsert.ForeColor = Color.FromArgb(108, 117, 125);
@@ -207,7 +229,7 @@
             btnInsert.Location = new Point(16, 100);
             btnInsert.Margin = new Padding(5, 4, 5, 4);
             btnInsert.Name = "btnInsert";
-            btnInsert.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            btnInsert.ShadowDecoration.CustomizableEdges = customizableEdges14;
             btnInsert.Size = new Size(262, 69);
             btnInsert.TabIndex = 2;
             btnInsert.Text = "➕  Thêm sinh viên";
@@ -217,14 +239,14 @@
             // btnActiveTab
             // 
             btnActiveTab.BorderRadius = 8;
-            btnActiveTab.CustomizableEdges = customizableEdges13;
+            btnActiveTab.CustomizableEdges = customizableEdges15;
             btnActiveTab.FillColor = Color.FromArgb(230, 242, 255);
             btnActiveTab.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnActiveTab.ForeColor = Color.FromArgb(13, 110, 253);
             btnActiveTab.Location = new Point(16, 16);
             btnActiveTab.Margin = new Padding(5, 4, 5, 4);
             btnActiveTab.Name = "btnActiveTab";
-            btnActiveTab.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            btnActiveTab.ShadowDecoration.CustomizableEdges = customizableEdges16;
             btnActiveTab.Size = new Size(262, 69);
             btnActiveTab.TabIndex = 1;
             btnActiveTab.Text = "👥  Danh sách sinh viên";
@@ -236,12 +258,12 @@
             pnlTotalCard.BorderRadius = 12;
             pnlTotalCard.Controls.Add(lblTotalCount);
             pnlTotalCard.Controls.Add(lblTotalTitle);
-            pnlTotalCard.CustomizableEdges = customizableEdges15;
+            pnlTotalCard.CustomizableEdges = customizableEdges17;
             pnlTotalCard.FillColor = Color.FromArgb(51, 122, 255);
             pnlTotalCard.Location = new Point(16, 883);
             pnlTotalCard.Margin = new Padding(5, 4, 5, 4);
             pnlTotalCard.Name = "pnlTotalCard";
-            pnlTotalCard.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            pnlTotalCard.ShadowDecoration.CustomizableEdges = customizableEdges18;
             pnlTotalCard.Size = new Size(262, 169);
             pnlTotalCard.TabIndex = 0;
             // 
@@ -277,13 +299,13 @@
             pnlMainContainer.Controls.Add(dgvStudents);
             pnlMainContainer.Controls.Add(pnlPagination);
             pnlMainContainer.Controls.Add(pnlFilterBar);
-            pnlMainContainer.CustomizableEdges = customizableEdges29;
+            pnlMainContainer.CustomizableEdges = customizableEdges31;
             pnlMainContainer.Dock = DockStyle.Fill;
             pnlMainContainer.Location = new Point(294, 100);
             pnlMainContainer.Margin = new Padding(5, 4, 5, 4);
             pnlMainContainer.Name = "pnlMainContainer";
             pnlMainContainer.Padding = new Padding(26, 31, 26, 31);
-            pnlMainContainer.ShadowDecoration.CustomizableEdges = customizableEdges30;
+            pnlMainContainer.ShadowDecoration.CustomizableEdges = customizableEdges32;
             pnlMainContainer.Size = new Size(1392, 1071);
             pnlMainContainer.TabIndex = 2;
             // 
@@ -342,17 +364,18 @@
             dgvStudents.ThemeStyle.RowsStyle.Height = 60;
             dgvStudents.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(230, 242, 255);
             dgvStudents.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(13, 110, 253);
+            dgvStudents.CellClick += dgvStudents_CellClick;
             dgvStudents.CellDoubleClick += dgvStudents_CellDoubleClick;
             // 
             // pnlPagination
             // 
             pnlPagination.Controls.Add(lblPaginationInfo);
-            pnlPagination.CustomizableEdges = customizableEdges19;
+            pnlPagination.CustomizableEdges = customizableEdges21;
             pnlPagination.Dock = DockStyle.Bottom;
             pnlPagination.Location = new Point(26, 963);
             pnlPagination.Margin = new Padding(5, 4, 5, 4);
             pnlPagination.Name = "pnlPagination";
-            pnlPagination.ShadowDecoration.CustomizableEdges = customizableEdges20;
+            pnlPagination.ShadowDecoration.CustomizableEdges = customizableEdges22;
             pnlPagination.Size = new Size(1340, 77);
             pnlPagination.TabIndex = 2;
             // 
@@ -373,12 +396,12 @@
             pnlFilterBar.Controls.Add(cbSort);
             pnlFilterBar.Controls.Add(cboFilterGender);
             pnlFilterBar.Controls.Add(txtSearch);
-            pnlFilterBar.CustomizableEdges = customizableEdges27;
+            pnlFilterBar.CustomizableEdges = customizableEdges29;
             pnlFilterBar.Dock = DockStyle.Top;
             pnlFilterBar.Location = new Point(26, 31);
             pnlFilterBar.Margin = new Padding(5, 4, 5, 4);
             pnlFilterBar.Name = "pnlFilterBar";
-            pnlFilterBar.ShadowDecoration.CustomizableEdges = customizableEdges28;
+            pnlFilterBar.ShadowDecoration.CustomizableEdges = customizableEdges30;
             pnlFilterBar.Size = new Size(1340, 92);
             pnlFilterBar.TabIndex = 0;
             // 
@@ -387,7 +410,7 @@
             cbSort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cbSort.BackColor = Color.Transparent;
             cbSort.BorderRadius = 8;
-            cbSort.CustomizableEdges = customizableEdges21;
+            cbSort.CustomizableEdges = customizableEdges23;
             cbSort.DrawMode = DrawMode.OwnerDrawFixed;
             cbSort.DropDownStyle = ComboBoxStyle.DropDownList;
             cbSort.FocusedColor = Color.FromArgb(94, 148, 255);
@@ -399,7 +422,7 @@
             cbSort.Location = new Point(1048, 16);
             cbSort.Margin = new Padding(5, 4, 5, 4);
             cbSort.Name = "cbSort";
-            cbSort.ShadowDecoration.CustomizableEdges = customizableEdges22;
+            cbSort.ShadowDecoration.CustomizableEdges = customizableEdges24;
             cbSort.Size = new Size(292, 36);
             cbSort.StartIndex = 0;
             cbSort.TabIndex = 2;
@@ -410,7 +433,7 @@
             cboFilterGender.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cboFilterGender.BackColor = Color.Transparent;
             cboFilterGender.BorderRadius = 8;
-            cboFilterGender.CustomizableEdges = customizableEdges23;
+            cboFilterGender.CustomizableEdges = customizableEdges25;
             cboFilterGender.DrawMode = DrawMode.OwnerDrawFixed;
             cboFilterGender.DropDownStyle = ComboBoxStyle.DropDownList;
             cboFilterGender.FocusedColor = Color.FromArgb(94, 148, 255);
@@ -422,7 +445,7 @@
             cboFilterGender.Location = new Point(786, 16);
             cboFilterGender.Margin = new Padding(5, 4, 5, 4);
             cboFilterGender.Name = "cboFilterGender";
-            cboFilterGender.ShadowDecoration.CustomizableEdges = customizableEdges24;
+            cboFilterGender.ShadowDecoration.CustomizableEdges = customizableEdges26;
             cboFilterGender.Size = new Size(238, 36);
             cboFilterGender.StartIndex = 0;
             cboFilterGender.TabIndex = 1;
@@ -432,7 +455,7 @@
             // 
             txtSearch.BorderRadius = 8;
             txtSearch.Cursor = Cursors.IBeam;
-            txtSearch.CustomizableEdges = customizableEdges25;
+            txtSearch.CustomizableEdges = customizableEdges27;
             txtSearch.DefaultText = "";
             txtSearch.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
             txtSearch.DisabledState.FillColor = Color.FromArgb(226, 226, 226);
@@ -446,12 +469,12 @@
             txtSearch.Name = "txtSearch";
             txtSearch.PlaceholderText = "Nhập mã SV, họ hoặc tên để tìm kiếm...";
             txtSearch.SelectedText = "";
-            txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges26;
+            txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges28;
             txtSearch.Size = new Size(506, 56);
             txtSearch.TabIndex = 0;
             txtSearch.TextChanged += txtSearch_TextChanged;
             // 
-            // ListStudentForm
+            // ManageStudentForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -461,10 +484,10 @@
             Controls.Add(pnlTopNavbar);
             Margin = new Padding(5, 4, 5, 4);
             MinimumSize = new Size(1360, 1084);
-            Name = "ListStudentForm";
+            Name = "ManageStudentForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Hệ thống quản lý UTEID";
-            Load += ListStudentForm_Load;
+            Load += ManageStudentForm_Load;
             pnlTopNavbar.ResumeLayout(false);
             pnlTopNavbar.PerformLayout();
             pnlSidebar.ResumeLayout(false);
@@ -501,5 +524,6 @@
         private Guna.UI2.WinForms.Guna2Panel pnlPagination;
         private System.Windows.Forms.Label lblPaginationInfo;
         private Guna.UI2.WinForms.Guna2Button btnExportPDF;
+        private Guna.UI2.WinForms.Guna2Button btnGenerateAccounts;
     }
 }
