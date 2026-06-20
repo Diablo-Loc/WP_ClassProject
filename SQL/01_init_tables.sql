@@ -248,6 +248,17 @@ CREATE TABLE dbo.Requests
 );
 GO
 
+CREATE TABLE UserLoginLogs (
+    Id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(50) NOT NULL,
+    LoginTime DATETIME NOT NULL DEFAULT GETDATE(),
+    IsSuccess BIT NOT NULL,                 -- 1: Thành công, 0: Thất bại
+    LoginMethod NVARCHAR(20) NOT NULL,       -- 'PASSWORD' hoặc 'FACE_ID'
+    IPAddress NVARCHAR(45) NULL,            -- Lưu được cả IPv4 và IPv6
+    UserAgent NVARCHAR(500) NULL,           -- Lưu thông tin thiết bị/HĐH (Windows 11, WinForms App...)
+    FailureReason NVARCHAR(250) NULL        -- Lý do sai: 'Wrong Password', 'Face Not Match', 'Account Locked'
+);
+
 
 -- ============================================================================
 -- 4. HIỆU NĂNG TRUY VẤN (INDEXES) & TRÌNH XEM (VIEWS)
@@ -265,6 +276,8 @@ CREATE NONCLUSTERED INDEX IX_Teachers_MSGV ON dbo.Teachers(MSGV);
 CREATE UNIQUE NONCLUSTERED INDEX UX_Teachers_Phone 
 ON dbo.Teachers(Phone) WHERE Phone IS NOT NULL;
 CREATE NONCLUSTERED INDEX IX_Major_TenNganh ON dbo.Major(TenNganh);
+CREATE NONCLUSTERED INDEX IX_UserLoginLogs_Username_LoginTime 
+ON UserLoginLogs (Username, LoginTime);
 GO
 
 CREATE OR ALTER VIEW dbo.vw_StudentTranscript
