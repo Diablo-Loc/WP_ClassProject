@@ -361,3 +361,14 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# 1. Bảo mật: Chặn file chứa API Key và Mật khẩu không cho lên Git
+secrets.config
+
+# 2. Tiện ích: Cho phép push file cấu hình mẫu để nhóm biết cách làm
+!secrets.config.example
+
+# 3. Dữ liệu AI: Bắt buộc cho phép đẩy các file model/data này lên Git
+# (Phủ định lại quy tắc chặn *.xml chung ở phía trên hệ thống)
+!**/haarcascade_frontalface_default.xml
+!**/*.traineddata

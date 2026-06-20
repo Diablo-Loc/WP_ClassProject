@@ -1,6 +1,6 @@
 ﻿using Guna.UI2.WinForms;
 
-namespace ClassProject.Presentation.Forms.Course
+namespace ClassProject.Presentation.Forms.Score
 {
     partial class ManageScoreForm
     {

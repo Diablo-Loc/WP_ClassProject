@@ -9,7 +9,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace ClassProject.Presentation.Forms.Course
+namespace ClassProject.Presentation.Forms.Score
 {
     public partial class ManageScoreForm : Form
     {
