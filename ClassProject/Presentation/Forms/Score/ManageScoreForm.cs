@@ -49,8 +49,7 @@ namespace ClassProject.Presentation.Forms.Score
 
         private void ManageScoreForm_Load(object sender, EventArgs e)
         {
-            // 🌟 CHỐT CHẶN BẢO MẬT: Chỉ cho phép tài khoản Admin, Giáo vụ (Staff) HOẶC Giảng viên có quyền thao tác bảng điểm
-            // Sử dụng toán tử phủ định (!) bọc toàn bộ các quyền hợp lệ hợp thành bằng toán tử HOẶC (||)
+            // CHỐT CHẶN BẢO MẬT: Chỉ cho phép tài khoản Admin, Giáo vụ (Staff) HOẶC Giảng viên có quyền thao tác bảng điểm
             if (!UserSession.IsLoggedIn || !(UserSession.IsAdmin || UserSession.IsStaff || UserSession.IsTeacher))
             {
                 MessageBox.Show("Quyền truy cập bị từ chối! Phân hệ quản lý và nhập điểm số chỉ dành cho Admin, Giáo vụ ban đào tạo hoặc Giảng viên phụ trách.",
@@ -60,12 +59,31 @@ namespace ClassProject.Presentation.Forms.Score
                 this.BeginInvoke(new MethodInvoker(this.Close));
                 return;
             }
-
+            PhanQuyenGiaoDien();
             _isBinding = true;
             try
             {
-                LoadStudentCombo();
-                LoadCourseSectionCombo(); // Nạp danh sách Lớp học phần
+                // 1. Nạp danh sách Lớp học phần trước (Giữ nguyên dòng này của bạn)
+                LoadCourseSectionCombo();
+
+                // 2. 🌟 SỬA LỖI TRỐNG COMBOBOX CHO ADMIN: Lấy trực tiếp từ DataTable gốc
+                if (cboCourse.DataSource is DataTable dtCourses && dtCourses.Rows.Count > 0)
+                {
+                    // Đảm bảo ComboBox chọn dòng đầu tiên
+                    cboCourse.SelectedIndex = 0;
+
+                    // Lấy chính xác Mã lớp học phần từ dòng đầu tiên của bảng dữ liệu
+                    string firstMaLopHP = dtCourses.Rows[0]["MaLopHP"].ToString();
+
+                    // Nạp sinh viên theo mã vừa lấy
+                    LoadStudentByClassCombo(firstMaLopHP);
+                }
+                else
+                {
+                    LoadStudentByClassCombo("");
+                }
+
+                // 3. Giữ nguyên các hàm phía dưới của bạn...
                 LoadGridData();
                 LoadQuickStats();
 
@@ -134,99 +152,190 @@ namespace ClassProject.Presentation.Forms.Score
             }
         }
 
-        private void LoadStudentCombo()
+        private void LoadStudentByClassCombo(string maLopHP)
         {
-            DataTable dt = _studentRepo.SearchStudents("", "Tất cả");
-            if (dt != null)
+            if (string.IsNullOrEmpty(maLopHP))
             {
-                string idColumn = dt.Columns.Contains("Mssv") ? "Mssv" : "MSSV";
-                if (!dt.Columns.Contains("FullNameWithId"))
+                cboStudent.DataSource = null;
+                return;
+            }
+
+            using (var conn = _db.GetConnection())
+            {
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                // SỬA: Đổi từ dbo.Register sang dbo.DKMH cho đúng với cấu trúc Database của bạn
+                string query = @"
+                    SELECT s.* FROM dbo.Students s                    
+                    INNER JOIN dbo.DKMH r ON s.MSSV = r.MSSV                    
+                    WHERE r.MaLopHP = @MaLopHP";
+
+                using (Microsoft.Data.SqlClient.SqlCommand cmd = new Microsoft.Data.SqlClient.SqlCommand(query, (Microsoft.Data.SqlClient.SqlConnection)conn))
                 {
-                    dt.Columns.Add("FullNameWithId", typeof(string), idColumn + " + ' - ' + LastName + ' ' + FirstName");
+                    cmd.Parameters.AddWithValue("@MaLopHP", maLopHP);
+
+                    using (Microsoft.Data.SqlClient.SqlDataAdapter da = new Microsoft.Data.SqlClient.SqlDataAdapter(cmd))
+                    {
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+
+                        if (dt != null && dt.Rows.Count >= 0)
+                        {
+                            // Xác định chính xác tên cột MSSV trong bảng Students (Database của bạn đang định nghĩa viết HOA là MSSV)
+                            string idColumn = dt.Columns.Contains("MSSV") ? "MSSV" : "Mssv";
+
+                            // Thêm cột hiển thị ghép "Mã - Họ Tên" nếu chưa có
+                            if (!dt.Columns.Contains("FullNameWithId"))
+                            {
+                                dt.Columns.Add("FullNameWithId", typeof(string), idColumn + " + ' - ' + LastName + ' ' + FirstName");
+                            }
+
+                            // Tạm khóa trigger sự kiện SelectedIndexChanged để tránh lỗi binding chéo chập dữ liệu
+                            bool oldBinding = _isBinding;
+                            _isBinding = true;
+
+                            cboStudent.DataSource = dt;
+                            cboStudent.DisplayMember = "FullNameWithId";
+                            cboStudent.ValueMember = idColumn;
+
+                            // Reset lại trạng thái binding
+                            cboStudent.SelectedIndex = -1; // Đưa về mặc định chưa chọn để an toàn
+
+                            _isBinding = oldBinding;
+                        }
+                    }
                 }
-                cboStudent.DataSource = dt;
-                cboStudent.DisplayMember = "FullNameWithId";
-                cboStudent.ValueMember = idColumn;
             }
         }
 
-        /// <summary>
-        /// Nạp danh sách Lớp học phần (CourseSection) vào ComboBox thay vì danh sách Môn học cũ
-        /// </summary>
         private void LoadCourseSectionCombo()
         {
             using (var conn = _db.GetConnection())
             {
                 if (conn.State == ConnectionState.Closed) conn.Open();
 
-                // Lấy thông tin từ bảng CourseSection kết hợp bảng Course để hiển thị tên môn học trực quan
+                // 1. Xây dựng câu truy vấn động dựa trên vai trò của User
                 string query = @"SELECT cs.MaLopHP, cs.HocKy, cs.NamHoc, 
                                        (cs.MaLopHP + ' - ' + c.TenMH) AS DisplayText 
                                 FROM dbo.CourseSection cs
                                 JOIN dbo.Course c ON cs.MaMH = c.MaMH";
 
-                using (Microsoft.Data.SqlClient.SqlDataAdapter da = new Microsoft.Data.SqlClient.SqlDataAdapter(query, (Microsoft.Data.SqlClient.SqlConnection)conn))
+                // Nếu CHỈ là giảng viên (không phải Admin/Staff) thì lọc theo mã giảng viên của họ
+                bool isOnlyTeacher = UserSession.IsTeacher && !UserSession.IsAdmin && !UserSession.IsStaff;
+
+                if (isOnlyTeacher)
                 {
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
+                    query += " WHERE cs.MSGV = @MSGV";
+                }
 
-                    // 1. Nạp dữ liệu vào ComboBox Lớp học phần
-                    cboCourse.DataSource = dt;
-                    cboCourse.DisplayMember = "DisplayText";
-                    cboCourse.ValueMember = "MaLopHP";
-
-                    // 2. Nạp dữ liệu lọc cho ComboBox Học Kỳ
-                    DataView viewHky = new DataView(dt);
-                    DataTable dtHkyRaw = viewHky.ToTable(true, "HocKy");
-                    DataTable dtHky = new DataTable();
-                    dtHky.Columns.Add("HocKy", typeof(string));
-
-                    DataRow rowHkAll = dtHky.NewRow();
-                    rowHkAll["HocKy"] = "-- Tất cả --";
-                    dtHky.Rows.Add(rowHkAll);
-
-                    foreach (DataRow r in dtHkyRaw.Rows)
+                using (Microsoft.Data.SqlClient.SqlCommand cmd = new Microsoft.Data.SqlClient.SqlCommand(query, (Microsoft.Data.SqlClient.SqlConnection)conn))
+                {
+                    if (isOnlyTeacher)
                     {
-                        if (r["HocKy"] != DBNull.Value)
-                        {
-                            DataRow newRow = dtHky.NewRow();
-                            newRow["HocKy"] = r["HocKy"].ToString();
-                            dtHky.Rows.Add(newRow);
-                        }
+                        string teacherId = UserSession.TeacherId?.ToString()?.Trim();
+                        cmd.Parameters.AddWithValue("@MSGV", string.IsNullOrEmpty(teacherId) ? (object)DBNull.Value : teacherId);
                     }
-                    cboHocKy.DataSource = dtHky;
-                    cboHocKy.DisplayMember = "HocKy";
-                    cboHocKy.ValueMember = "HocKy";
 
-                    // 3. Nạp dữ liệu lọc cho ComboBox Năm Học
-                    DataView viewNamHoc = new DataView(dt);
-                    DataTable dtNamHocRaw = viewNamHoc.ToTable(true, "NamHoc");
-                    DataTable dtNamHoc = new DataTable();
-                    dtNamHoc.Columns.Add("NamHoc", typeof(string));
-
-                    DataRow rowNamAll = dtNamHoc.NewRow();
-                    rowNamAll["NamHoc"] = "-- Tất cả --";
-                    dtNamHoc.Rows.Add(rowNamAll);
-
-                    foreach (DataRow r in dtNamHocRaw.Rows)
+                    using (Microsoft.Data.SqlClient.SqlDataAdapter da = new Microsoft.Data.SqlClient.SqlDataAdapter(cmd))
                     {
-                        if (r["NamHoc"] != DBNull.Value)
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+
+                        // 2. Nạp dữ liệu vào ComboBox Lớp học phần
+                        cboCourse.DataSource = dt;
+                        cboCourse.DisplayMember = "DisplayText";
+                        cboCourse.ValueMember = "MaLopHP";
+
+                        // 3. Nạp dữ liệu lọc cho ComboBox Học Kỳ
+                        DataView viewHky = new DataView(dt);
+                        DataTable dtHkyRaw = viewHky.ToTable(true, "HocKy");
+                        DataTable dtHky = new DataTable();
+                        dtHky.Columns.Add("HocKy", typeof(string));
+
+                        DataRow rowHkAll = dtHky.NewRow();
+                        rowHkAll["HocKy"] = "-- Tất cả --";
+                        dtHky.Rows.Add(rowHkAll);
+
+                        foreach (DataRow r in dtHkyRaw.Rows)
                         {
-                            DataRow newRow = dtNamHoc.NewRow();
-                            newRow["NamHoc"] = r["NamHoc"].ToString();
-                            dtNamHoc.Rows.Add(newRow);
+                            if (r["HocKy"] != DBNull.Value)
+                            {
+                                DataRow newRow = dtHky.NewRow();
+                                newRow["HocKy"] = r["HocKy"].ToString();
+                                dtHky.Rows.Add(newRow);
+                            }
                         }
+                        cboHocKy.DataSource = dtHky;
+                        cboHocKy.DisplayMember = "HocKy";
+                        cboHocKy.ValueMember = "HocKy";
+
+                        // 4. Nạp dữ liệu lọc cho ComboBox Năm Học
+                        DataView viewNamHoc = new DataView(dt);
+                        DataTable dtNamHocRaw = viewNamHoc.ToTable(true, "NamHoc");
+                        DataTable dtNamHoc = new DataTable();
+                        dtNamHoc.Columns.Add("NamHoc", typeof(string));
+
+                        DataRow rowNamAll = dtNamHoc.NewRow();
+                        rowNamAll["NamHoc"] = "-- Tất cả --";
+                        dtNamHoc.Rows.Add(rowNamAll);
+
+                        foreach (DataRow r in dtNamHocRaw.Rows)
+                        {
+                            if (r["NamHoc"] != DBNull.Value)
+                            {
+                                DataRow newRow = dtNamHoc.NewRow();
+                                newRow["NamHoc"] = r["NamHoc"].ToString();
+                                dtNamHoc.Rows.Add(newRow);
+                            }
+                        }
+                        cboNamHoc.DataSource = dtNamHoc;
+                        cboNamHoc.DisplayMember = "NamHoc";
+                        cboNamHoc.ValueMember = "NamHoc";
                     }
-                    cboNamHoc.DataSource = dtNamHoc;
-                    cboNamHoc.DisplayMember = "NamHoc";
-                    cboNamHoc.ValueMember = "NamHoc";
                 }
             }
         }
 
         private void LoadGridData()
         {
-            dgvScores.DataSource = _scoreRepo.GetScoreList();
+            DataTable dtScores = _scoreRepo.GetScoreList();
+
+            // Nếu là giảng viên và không phải Admin/Staff, tiến hành lọc dữ liệu trên Grid 
+            if (UserSession.IsTeacher && !UserSession.IsAdmin && !UserSession.IsStaff)
+            {
+                // Thu thập danh sách các Mã Lớp HP mà giảng viên này được phép dạy từ cboCourse
+                List<string> validClassIds = new List<string>();
+                if (cboCourse.DataSource is DataTable dtCourses)
+                {
+                    foreach (DataRow row in dtCourses.Rows)
+                    {
+                        validClassIds.Add($"'{row["MaLopHP"].ToString().Replace("'", "''")}'");
+                    }
+                }
+
+                // Nếu giảng viên có lớp dạy, lọc bảng điểm chỉ hiển thị các lớp đó
+                if (validClassIds.Count > 0)
+                {
+                    string filterExpression = $"[Mã Lớp HP] IN ({string.Join(",", validClassIds)})";
+
+                    // Tạo bản sao DataTable đã lọc để gán vào Grid công khai
+                    DataView dv = new DataView(dtScores);
+                    dv.RowFilter = filterExpression;
+                    dgvScores.DataSource = dv.ToTable();
+                }
+                else
+                {
+                    // Nếu không dạy lớp nào, cho bảng trống
+                    dgvScores.DataSource = dtScores.Clone();
+                }
+            }
+            else
+            {
+                // Admin hoặc Giáo vụ: xem toàn bộ dữ liệu
+                dgvScores.DataSource = dtScores;
+            }
+
+            // Cấu hình UI Grid giữ nguyên
             if (dgvScores.Columns.Count > 0)
             {
                 dgvScores.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -332,16 +441,20 @@ namespace ClassProject.Presentation.Forms.Score
 
                 string idColumn = dgvScores.Columns.Contains("Mã SV") ? "Mã SV" : "MSSV";
 
-                // 1. Đồng bộ Sinh viên
-                if (row.Cells[idColumn].Value != null)
-                    cboStudent.SelectedValue = row.Cells[idColumn].Value.ToString();
-
-                // 2. Đồng bộ theo cột "Mã Lớp HP"
+                // 1. Đồng bộ theo cột "Mã Lớp HP" trước để nạp tập sinh viên phù hợp vào ComboBox
                 if (row.Cells["Mã Lớp HP"].Value != null)
                 {
-                    cboCourse.SelectedValue = row.Cells["Mã Lớp HP"].Value.ToString();
+                    string currentClass = row.Cells["Mã Lớp HP"].Value.ToString();
+                    cboCourse.SelectedValue = currentClass;
+
+                    // 🌟 BỔ SUNG: Nạp lại danh sách sinh viên của lớp vừa được click
+                    LoadStudentByClassCombo(currentClass);
                     UpdateSemesterAndYearInfo();
                 }
+
+                // 2. Đồng bộ Sinh viên
+                if (row.Cells[idColumn].Value != null)
+                    cboStudent.SelectedValue = row.Cells[idColumn].Value.ToString();
 
                 // 3. Đồng bộ Điểm Quá trình
                 if (decimal.TryParse(row.Cells["Điểm QT (40%)"].Value?.ToString(), out decimal qt))
@@ -365,6 +478,13 @@ namespace ClassProject.Presentation.Forms.Score
         private void cboCourse_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (_isBinding) return;
+
+            // 🌟 ĐÃ ĐỒNG BỘ: Mỗi khi chuyển lớp, cboStudent lập tức cập nhật danh sách sinh viên tương ứng
+            if (cboCourse.SelectedValue != null)
+            {
+                LoadStudentByClassCombo(cboCourse.SelectedValue.ToString());
+            }
+
             UpdateSemesterAndYearInfo();
             HienThiDiemTheoCapHocVienMonHoc();
         }
@@ -436,8 +556,14 @@ namespace ClassProject.Presentation.Forms.Score
             txtGhiChu.Clear();
             txtSearch.Clear();
 
-            if (cboStudent.Items.Count > 0) cboStudent.SelectedIndex = 0;
             if (cboCourse.Items.Count > 0) cboCourse.SelectedIndex = 0;
+
+            // 🌟 ĐÃ ĐỒNG BỘ: Sau khi reset môn học về index 0, phải nạp lại danh sách sinh viên của môn đó
+            if (cboCourse.SelectedValue != null)
+            {
+                LoadStudentByClassCombo(cboCourse.SelectedValue.ToString());
+            }
+            if (cboStudent.Items.Count > 0) cboStudent.SelectedIndex = 0;
 
             UpdateSemesterAndYearInfo();
 
@@ -630,6 +756,45 @@ namespace ClassProject.Presentation.Forms.Score
                     txtDiemHe4.Text = "0.0";
                     txtXepLoai.Text = "Chưa xếp loại";
                 }
+            }
+        }
+        private void PhanQuyenGiaoDien()
+        {
+            // Kiểm tra nếu USER là Admin hoặc Giáo vụ ban đào tạo (Staff)
+            // Hoặc kiểm tra: nếu KHÔNG PHẢI Giảng viên thì khóa tính năng nhập liệu
+            if (UserSession.IsAdmin || UserSession.IsStaff)
+            {
+                // 1. Làm mờ / Vô hiệu hóa các control nhập liệu (Chỉ cho xem)
+                numQT.Enabled = false;
+                numCK.Enabled = false;
+                txtGhiChu.ReadOnly = true;
+                cboStudent.Enabled = false; // Khóa luôn chọn sinh viên lẻ nếu muốn họ chỉ xem trên Grid
+
+                // 2. Ẩn hoặc làm mờ các nút chức năng can thiệp dữ liệu
+                btnSaveScore.Enabled = false;  // Nút Lưu/Thêm
+                btnUpdate.Enabled = false;     // Nút Cập nhật
+                btnDeleteScore.Enabled = false; // Nút Xóa
+                btnClear.Enabled = false;      // Nút Nhập lại
+
+                // 3. Giữ lại các nút nghiệp vụ của Admin/Giáo vụ
+                btnExport.Enabled = true;      // Xuất Excel (Báo cáo)
+                txtSearch.Enabled = true;      // Ô tìm kiếm nhanh
+                cboCourse.Enabled = true;      // Combo lọc lớp học phần
+                cboHocKy.Enabled = true;
+                cboNamHoc.Enabled = true;
+            }
+            else
+            {
+                // Nếu là Giảng viên: Mở khóa toàn bộ để họ làm việc
+                numQT.Enabled = true;
+                numCK.Enabled = true;
+                txtGhiChu.ReadOnly = false;
+                cboStudent.Enabled = true;
+
+                btnSaveScore.Enabled = true;
+                btnUpdate.Enabled = true;
+                btnDeleteScore.Enabled = true;
+                btnClear.Enabled = true;
             }
         }
     }

@@ -1,7 +1,7 @@
 Set-Location $PSScriptRoot
 
 # Bạn có thể để mặc định là tên máy của bạn để tiện test nhanh
-$DefaultServer = "ABC\SQLEXPRESS" 
+$DefaultServer = ".\SQLEXPRESS" 
 
 Write-Host "=== HE THONG KHOI TAO DATABASE ===" -ForegroundColor Cyan
 Write-Host "Thu muc: $PSScriptRoot" -ForegroundColor Gray

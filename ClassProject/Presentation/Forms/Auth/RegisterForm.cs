@@ -28,6 +28,11 @@ namespace ClassProject.Presentation.Forms
         {
             InitializeComponent();
         }
+        private void RegisterForm_Load(object sender, EventArgs e)
+        {
+            // Thiết lập đổ bóng mờ xung quanh khung Card trắng giống Form Login
+            guna2ShadowForm1.SetShadowForm(this);
+        }
 
         // Luồng xử lý chính: Đóng vai trò Controller điều hướng nghiệp vụ sạch sẽ (SOLID)
         private async void btnRegister_Click(object sender, EventArgs e)

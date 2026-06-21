@@ -3,10 +3,11 @@ using ClassProject.DataAccess.Db;
 using ClassProject.DataAccess.Entities;
 using ClassProject.DataAccess.Repositories.Implementations;
 using ClassProject.Presentation.Forms.Admin;
+using ClassProject.Presentation.Forms.Analytics;
 using ClassProject.Presentation.Forms.Auth;
 using ClassProject.Presentation.Forms.Course;
-using ClassProject.Presentation.Forms.Students;
 using ClassProject.Presentation.Forms.Score;
+using ClassProject.Presentation.Forms.Students;
 using Guna.UI2.WinForms;
 using Microsoft.Data.SqlClient;
 using System;
@@ -365,9 +366,9 @@ namespace ClassProject.Presentation.Forms.Main
             {
                 // Giảng viên: Tập trung hoàn toàn vào lớp phụ trách và nghiệp vụ giảng dạy
                 flowMenu.Controls.Add(CreateMenuButton("Thông tin cá nhân", Profile_Click));
-                flowMenu.Controls.Add(CreateMenuButton("Lớp học phần của tôi", CourseSection1_Click)); // Tái sử dụng form, tự lọc theo mã GV
-                flowMenu.Controls.Add(CreateMenuButton("Sinh viên lớp tôi phụ trách", Student1_Click)); // Tái sử dụng form, tự lọc danh sách sinh viên học lớp phần của GV
-                flowMenu.Controls.Add(CreateMenuButton("Nhập & Sửa điểm số", Score1_Click));         // Tái sử dụng form, khóa chỉ cho sửa lớp mình dạy
+                flowMenu.Controls.Add(CreateMenuButton("Lớp học phần của tôi", CourseSection_Click)); // Tái sử dụng form, tự lọc theo mã GV
+                flowMenu.Controls.Add(CreateMenuButton("Sinh viên lớp tôi phụ trách", Student_Click)); // Tái sử dụng form, tự lọc danh sách sinh viên học lớp phần của GV
+                flowMenu.Controls.Add(CreateMenuButton("Nhập & Sửa điểm số", Score_Click));         // Tái sử dụng form, khóa chỉ cho sửa lớp mình dạy
             }
             else if (UserSession.IsStudent)
             {
@@ -390,7 +391,39 @@ namespace ClassProject.Presentation.Forms.Main
 
         #region Menu Click Route Events (Định tuyến sự kiện sạch)
 
-        private void Dashboard_Click(object sender, EventArgs e) => OpenChildForm(new DashBoardForm());
+        private void Dashboard_Click(object sender, EventArgs e)
+        {
+            // 1. Lấy chuỗi kết nối an toàn từ My_DB mà bạn đã khai báo ở đầu Main Form
+            // (Giúp tái sử dụng kết nối, tránh hardcode chuỗi string)
+            string connString = _db.GetConnection().ConnectionString;
+
+            // 2. Định tuyến theo vai trò (Role-based Routing) và tiêm phụ thuộc (Dependency Injection)
+            if (UserSession.IsStudent)
+            {
+                // Khởi tạo các nguyên liệu chuyên biệt cho Dashboard Sinh viên
+                var dashboardRepo = new DashboardRepository(connString);
+                var requestRepo = new RequestRepository(connString);
+                var registerRepo = new RegisterRepository();
+
+                // Mở Form StudentDashboardForm mới tinh đã dọn dẹp sạch layer
+                OpenChildForm(new StudentDashboardForm(dashboardRepo, registerRepo, requestRepo));
+            }
+            else if (UserSession.IsAdmin || UserSession.IsStaff)
+            {
+                // Đối với Admin hoặc Giáo vụ, mở màn hình Dashboard tổng quan toàn trường
+                var dashboardRepo = new DashboardRepository(connString);
+
+                // Giả sử DashBoardForm tổng của bạn nhận vào dashboardRepo tổng quan:
+                OpenChildForm(new DashBoardForm());
+            }
+            else if (UserSession.IsTeacher)
+            {
+                string maGV = UserSession.TeacherId;
+
+                // Truyền mã này vào trong ngoặc khi khởi tạo Form con
+                OpenChildForm(new TeacherDashBoardForm(maGV));
+            }
+        }
         private void Account_Click(object sender, EventArgs e) => OpenChildForm(new AccountManageForm());
         private void Staff_Click(object sender, EventArgs e) => OpenChildForm(new ManageStaffForm());
         private void Teacher_Click(object sender, EventArgs e) => OpenChildForm(new ManageTeacherForm());
@@ -400,7 +433,15 @@ namespace ClassProject.Presentation.Forms.Main
         private void Course_Click(object sender, EventArgs e) => OpenChildForm(new ManageCourseForm());
         private void CourseSection_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new ManageCourseSectionForm());
+            if (!UserSession.IsLoggedIn || (!UserSession.IsAdmin && !UserSession.IsStaff && !UserSession.IsTeacher))
+            {
+                MessageBox.Show("Bạn không có quyền truy cập vào chức năng quản lý lớp học phần!",
+                                "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            var frm = new ManageCourseSectionForm();
+            frm.FormClosed += (s, args) => frm.Dispose();
+            OpenChildForm(frm);
         }
         private void Score_Click(object sender, EventArgs e)
         {
@@ -513,20 +554,6 @@ namespace ClassProject.Presentation.Forms.Main
                 UserSession.Clear();
                 this.Close();
             }
-        }
-        private void CourseSection1_Click(object sender, EventArgs e)
-        {
-            // Truyền Mã giảng viên đang đăng nhập vào Form Lớp học phần
-            //string currentTeacherId = UserSession.CurrentUserID;
-            //var form = new InstructorClassScheduleForm(currentTeacherId);
-            //OpenChildForm(form); // Hàm helper để nhúng Form con vào Panel chính
-        }
-        private void Student1_Click(object sender, EventArgs e)
-        {
-            // Truyền Mã lớp của giảng viên đang đăng nhập vào Form Lớp học phần
-            //...
-            //var rosterForm = new ClassRosterForm(selectedMaLopHP);
-            //OpenChildForm(form); // Hàm helper để nhúng Form con vào Panel chính
         }
         private void Score1_Click(object sender, EventArgs e)
         {

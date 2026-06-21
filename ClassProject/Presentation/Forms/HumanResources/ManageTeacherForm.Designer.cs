@@ -17,343 +17,435 @@
 
         private void InitializeComponent()
         {
-            this.pnlLeft = new Guna.UI2.WinForms.Guna2Panel();
-            this.lblTitle = new System.Windows.Forms.Label();
-            this.txtTeacherCode = new Guna.UI2.WinForms.Guna2TextBox();
-            this.txtFirstName = new Guna.UI2.WinForms.Guna2TextBox();
-            this.txtLastName = new Guna.UI2.WinForms.Guna2TextBox();
-            this.cboGender = new Guna.UI2.WinForms.Guna2ComboBox();
-            this.dtpBirthDate = new Guna.UI2.WinForms.Guna2DateTimePicker();
-            this.txtPhone = new Guna.UI2.WinForms.Guna2TextBox();
-            this.txtEmail = new Guna.UI2.WinForms.Guna2TextBox();
-            this.cboRank = new Guna.UI2.WinForms.Guna2ComboBox();
-            this.chkActive = new Guna.UI2.WinForms.Guna2CheckBox();
-            this.btnSave = new Guna.UI2.WinForms.Guna2Button();
-            this.btnDelete = new Guna.UI2.WinForms.Guna2Button();
-            this.btnClear = new Guna.UI2.WinForms.Guna2Button();
-            this.pnlRight = new Guna.UI2.WinForms.Guna2Panel();
-            this.txtSearch = new Guna.UI2.WinForms.Guna2TextBox();
-            this.lblTotalTeachers = new System.Windows.Forms.Label();
-            this.dgvTeachers = new Guna.UI2.WinForms.Guna2DataGridView();
-            this.pnlLeft.SuspendLayout();
-            this.pnlRight.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvTeachers)).BeginInit();
-            this.SuspendLayout();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges51 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges52 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges31 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges32 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges33 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges34 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges35 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges36 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges37 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges38 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges39 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges40 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges41 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges42 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges43 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges44 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges45 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges46 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges47 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges48 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges49 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges50 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges55 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges56 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges53 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges54 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
+            pnlLeft = new Guna.UI2.WinForms.Guna2Panel();
+            lblTitle = new Label();
+            txtTeacherCode = new Guna.UI2.WinForms.Guna2TextBox();
+            txtLastName = new Guna.UI2.WinForms.Guna2TextBox();
+            txtFirstName = new Guna.UI2.WinForms.Guna2TextBox();
+            cboGender = new Guna.UI2.WinForms.Guna2ComboBox();
+            dtpBirthDate = new Guna.UI2.WinForms.Guna2DateTimePicker();
+            txtPhone = new Guna.UI2.WinForms.Guna2TextBox();
+            txtEmail = new Guna.UI2.WinForms.Guna2TextBox();
+            cboRank = new Guna.UI2.WinForms.Guna2ComboBox();
+            chkActive = new Guna.UI2.WinForms.Guna2CheckBox();
+            btnSave = new Guna.UI2.WinForms.Guna2Button();
+            btnDelete = new Guna.UI2.WinForms.Guna2Button();
+            btnClear = new Guna.UI2.WinForms.Guna2Button();
+            pnlRight = new Guna.UI2.WinForms.Guna2Panel();
+            txtSearch = new Guna.UI2.WinForms.Guna2TextBox();
+            lblTotalTeachers = new Label();
+            dgvTeachers = new Guna.UI2.WinForms.Guna2DataGridView();
+            pnlLeft.SuspendLayout();
+            pnlRight.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTeachers).BeginInit();
+            SuspendLayout();
             // 
-            // pnlLeft (Vùng nhập liệu cố định bên trái)
+            // pnlLeft
             // 
-            this.pnlLeft.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-            this.pnlLeft.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(232)))), ((int)(((byte)(240)))));
-            this.pnlLeft.BorderThickness = 1;
-            this.pnlLeft.Controls.Add(this.lblTitle);
-            this.pnlLeft.Controls.Add(this.txtTeacherCode);
-            this.pnlLeft.Controls.Add(this.txtFirstName);
-            this.pnlLeft.Controls.Add(this.txtLastName);
-            this.pnlLeft.Controls.Add(this.cboGender);
-            this.pnlLeft.Controls.Add(this.dtpBirthDate);
-            this.pnlLeft.Controls.Add(this.txtPhone);
-            this.pnlLeft.Controls.Add(this.txtEmail);
-            this.pnlLeft.Controls.Add(this.cboRank);
-            this.pnlLeft.Controls.Add(this.chkActive);
-            this.pnlLeft.Controls.Add(this.btnSave);
-            this.pnlLeft.Controls.Add(this.btnDelete);
-            this.pnlLeft.Controls.Add(this.btnClear);
-            this.pnlLeft.Dock = System.Windows.Forms.DockStyle.Left;
-            this.pnlLeft.Location = new System.Drawing.Point(0, 0);
-            this.pnlLeft.Name = "pnlLeft";
-            this.pnlLeft.Size = new System.Drawing.Size(340, 680);
-            this.pnlLeft.TabIndex = 0;
+            pnlLeft.BackColor = Color.FromArgb(248, 250, 252);
+            pnlLeft.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlLeft.BorderThickness = 1;
+            pnlLeft.Controls.Add(lblTitle);
+            pnlLeft.Controls.Add(txtTeacherCode);
+            pnlLeft.Controls.Add(txtLastName);
+            pnlLeft.Controls.Add(txtFirstName);
+            pnlLeft.Controls.Add(cboGender);
+            pnlLeft.Controls.Add(dtpBirthDate);
+            pnlLeft.Controls.Add(txtPhone);
+            pnlLeft.Controls.Add(txtEmail);
+            pnlLeft.Controls.Add(cboRank);
+            pnlLeft.Controls.Add(chkActive);
+            pnlLeft.Controls.Add(btnSave);
+            pnlLeft.Controls.Add(btnDelete);
+            pnlLeft.Controls.Add(btnClear);
+            pnlLeft.CustomizableEdges = customizableEdges51;
+            pnlLeft.Dock = DockStyle.Left;
+            pnlLeft.Location = new Point(0, 0);
+            pnlLeft.Margin = new Padding(3, 4, 3, 4);
+            pnlLeft.Name = "pnlLeft";
+            pnlLeft.ShadowDecoration.CustomizableEdges = customizableEdges52;
+            pnlLeft.Size = new Size(389, 907);
+            pnlLeft.TabIndex = 0;
             // 
             // lblTitle
             // 
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
-            this.lblTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.lblTitle.Location = new System.Drawing.Point(20, 20);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(300, 30);
-            this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "HỒ SƠ GIẢNG VIÊN";
-            this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblTitle.Location = new Point(23, 27);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(343, 40);
+            lblTitle.TabIndex = 0;
+            lblTitle.Text = "HỒ SƠ GIẢNG VIÊN";
+            lblTitle.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // txtTeacherCode
             // 
-            this.txtTeacherCode.BorderRadius = 6;
-            this.txtTeacherCode.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.txtTeacherCode.DefaultText = "";
-            this.txtTeacherCode.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            this.txtTeacherCode.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.txtTeacherCode.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.txtTeacherCode.Location = new System.Drawing.Point(20, 70);
-            this.txtTeacherCode.Name = "txtTeacherCode";
-            this.txtTeacherCode.PlaceholderText = "Mã số giảng viên (MSGV)*";
-            this.txtTeacherCode.SelectedText = "";
-            this.txtTeacherCode.Size = new System.Drawing.Size(300, 38);
-            this.txtTeacherCode.TabIndex = 1;
-            // 
-            // txtFirstName
-            // 
-            this.txtFirstName.BorderRadius = 6;
-            this.txtFirstName.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.txtFirstName.DefaultText = "";
-            this.txtFirstName.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            this.txtFirstName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.txtFirstName.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.txtFirstName.Location = new System.Drawing.Point(20, 120);
-            this.txtFirstName.Name = "txtFirstName";
-            this.txtFirstName.PlaceholderText = "Họ và tên đệm*";
-            this.txtFirstName.SelectedText = "";
-            this.txtFirstName.Size = new System.Drawing.Size(300, 38);
-            this.txtFirstName.TabIndex = 2;
+            txtTeacherCode.BorderRadius = 6;
+            txtTeacherCode.Cursor = Cursors.IBeam;
+            txtTeacherCode.CustomizableEdges = customizableEdges29;
+            txtTeacherCode.DefaultText = "";
+            txtTeacherCode.Font = new Font("Segoe UI", 9.5F);
+            txtTeacherCode.ForeColor = Color.FromArgb(15, 23, 42);
+            txtTeacherCode.HoverState.BorderColor = Color.FromArgb(99, 102, 241);
+            txtTeacherCode.Location = new Point(23, 93);
+            txtTeacherCode.Margin = new Padding(3, 5, 3, 5);
+            txtTeacherCode.Name = "txtTeacherCode";
+            txtTeacherCode.PlaceholderText = "Mã số giảng viên (MSGV)*";
+            txtTeacherCode.SelectedText = "";
+            txtTeacherCode.ShadowDecoration.CustomizableEdges = customizableEdges30;
+            txtTeacherCode.Size = new Size(343, 51);
+            txtTeacherCode.TabIndex = 1;
             // 
             // txtLastName
             // 
-            this.txtLastName.BorderRadius = 6;
-            this.txtLastName.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.txtLastName.DefaultText = "";
-            this.txtLastName.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            this.txtLastName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.txtLastName.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.txtLastName.Location = new System.Drawing.Point(20, 170);
-            this.txtLastName.Name = "txtLastName";
-            this.txtLastName.PlaceholderText = "Tên giảng viên*";
-            this.txtLastName.SelectedText = "";
-            this.txtLastName.Size = new System.Drawing.Size(300, 38);
-            this.txtLastName.TabIndex = 3;
+            txtLastName.BorderRadius = 6;
+            txtLastName.Cursor = Cursors.IBeam;
+            txtLastName.CustomizableEdges = customizableEdges31;
+            txtLastName.DefaultText = "";
+            txtLastName.Font = new Font("Segoe UI", 9.5F);
+            txtLastName.ForeColor = Color.FromArgb(15, 23, 42);
+            txtLastName.HoverState.BorderColor = Color.FromArgb(99, 102, 241);
+            txtLastName.Location = new Point(23, 160);
+            txtLastName.Margin = new Padding(3, 5, 3, 5);
+            txtLastName.Name = "txtLastName";
+            txtLastName.PlaceholderText = "Họ và tên đệm*";
+            txtLastName.SelectedText = "";
+            txtLastName.ShadowDecoration.CustomizableEdges = customizableEdges32;
+            txtLastName.Size = new Size(343, 51);
+            txtLastName.TabIndex = 2;
+            // 
+            // txtFirstName
+            // 
+            txtFirstName.BorderRadius = 6;
+            txtFirstName.Cursor = Cursors.IBeam;
+            txtFirstName.CustomizableEdges = customizableEdges33;
+            txtFirstName.DefaultText = "";
+            txtFirstName.Font = new Font("Segoe UI", 9.5F);
+            txtFirstName.ForeColor = Color.FromArgb(15, 23, 42);
+            txtFirstName.HoverState.BorderColor = Color.FromArgb(99, 102, 241);
+            txtFirstName.Location = new Point(23, 227);
+            txtFirstName.Margin = new Padding(3, 5, 3, 5);
+            txtFirstName.Name = "txtFirstName";
+            txtFirstName.PlaceholderText = "Tên giảng viên*";
+            txtFirstName.SelectedText = "";
+            txtFirstName.ShadowDecoration.CustomizableEdges = customizableEdges34;
+            txtFirstName.Size = new Size(343, 51);
+            txtFirstName.TabIndex = 3;
             // 
             // cboGender
             // 
-            this.cboGender.BackColor = System.Drawing.Color.Transparent;
-            this.cboGender.BorderRadius = 6;
-            this.cboGender.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.cboGender.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboGender.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            this.cboGender.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.cboGender.ItemHeight = 32;
-            this.cboGender.Items.AddRange(new object[] { "Nam", "Nữ", "Khác" });
-            this.cboGender.Location = new System.Drawing.Point(20, 220);
-            this.cboGender.Name = "cboGender";
-            this.cboGender.Size = new System.Drawing.Size(300, 38);
-            this.cboGender.StartIndex = 0;
-            this.cboGender.TabIndex = 4;
+            cboGender.BackColor = Color.Transparent;
+            cboGender.BorderRadius = 6;
+            cboGender.CustomizableEdges = customizableEdges35;
+            cboGender.DrawMode = DrawMode.OwnerDrawFixed;
+            cboGender.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboGender.FocusedColor = Color.Empty;
+            cboGender.Font = new Font("Segoe UI", 9.5F);
+            cboGender.ForeColor = Color.FromArgb(15, 23, 42);
+            cboGender.ItemHeight = 32;
+            cboGender.Items.AddRange(new object[] { "Nam", "Nữ", "Khác" });
+            cboGender.Location = new Point(23, 293);
+            cboGender.Margin = new Padding(3, 4, 3, 4);
+            cboGender.Name = "cboGender";
+            cboGender.ShadowDecoration.CustomizableEdges = customizableEdges36;
+            cboGender.Size = new Size(342, 38);
+            cboGender.StartIndex = 0;
+            cboGender.TabIndex = 4;
             // 
             // dtpBirthDate
             // 
-            this.dtpBirthDate.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(213)))), ((int)(((byte)(218)))), ((int)(((byte)(223)))));
-            this.dtpBirthDate.BorderRadius = 6;
-            this.dtpBirthDate.BorderThickness = 1;
-            this.dtpBirthDate.Checked = true;
-            this.dtpBirthDate.FillColor = System.Drawing.Color.White;
-            this.dtpBirthDate.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            this.dtpBirthDate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.dtpBirthDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpBirthDate.Location = new System.Drawing.Point(20, 270);
-            this.dtpBirthDate.MaxDate = new System.DateTime(9998, 12, 31, 0, 0, 0, 0);
-            this.dtpBirthDate.MinDate = new System.DateTime(1753, 1, 1, 0, 0, 0, 0);
-            this.dtpBirthDate.Name = "dtpBirthDate";
-            this.dtpBirthDate.Size = new System.Drawing.Size(300, 38);
-            this.dtpBirthDate.TabIndex = 5;
-            this.dtpBirthDate.Value = new System.DateTime(1990, 1, 1, 0, 0, 0, 0);
+            dtpBirthDate.BorderColor = Color.FromArgb(213, 218, 223);
+            dtpBirthDate.BorderRadius = 6;
+            dtpBirthDate.BorderThickness = 1;
+            dtpBirthDate.Checked = true;
+            dtpBirthDate.CustomizableEdges = customizableEdges37;
+            dtpBirthDate.FillColor = Color.White;
+            dtpBirthDate.Font = new Font("Segoe UI", 9.5F);
+            dtpBirthDate.ForeColor = Color.FromArgb(15, 23, 42);
+            dtpBirthDate.Format = DateTimePickerFormat.Short;
+            dtpBirthDate.Location = new Point(23, 360);
+            dtpBirthDate.Margin = new Padding(3, 4, 3, 4);
+            dtpBirthDate.MaxDate = new DateTime(9998, 12, 31, 0, 0, 0, 0);
+            dtpBirthDate.MinDate = new DateTime(1753, 1, 1, 0, 0, 0, 0);
+            dtpBirthDate.Name = "dtpBirthDate";
+            dtpBirthDate.ShadowDecoration.CustomizableEdges = customizableEdges38;
+            dtpBirthDate.Size = new Size(343, 51);
+            dtpBirthDate.TabIndex = 5;
+            dtpBirthDate.Value = new DateTime(1990, 1, 1, 0, 0, 0, 0);
             // 
             // txtPhone
             // 
-            this.txtPhone.BorderRadius = 6;
-            this.txtPhone.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.txtPhone.DefaultText = "";
-            this.txtPhone.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            this.txtPhone.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.txtPhone.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.txtPhone.Location = new System.Drawing.Point(20, 320);
-            this.txtPhone.Name = "txtPhone";
-            this.txtPhone.PlaceholderText = "Số điện thoại di động";
-            this.txtPhone.SelectedText = "";
-            this.txtPhone.Size = new System.Drawing.Size(300, 38);
-            this.txtPhone.TabIndex = 6;
+            txtPhone.BorderRadius = 6;
+            txtPhone.Cursor = Cursors.IBeam;
+            txtPhone.CustomizableEdges = customizableEdges39;
+            txtPhone.DefaultText = "";
+            txtPhone.Font = new Font("Segoe UI", 9.5F);
+            txtPhone.ForeColor = Color.FromArgb(15, 23, 42);
+            txtPhone.HoverState.BorderColor = Color.FromArgb(99, 102, 241);
+            txtPhone.Location = new Point(23, 427);
+            txtPhone.Margin = new Padding(3, 5, 3, 5);
+            txtPhone.Name = "txtPhone";
+            txtPhone.PlaceholderText = "Số điện thoại di động";
+            txtPhone.SelectedText = "";
+            txtPhone.ShadowDecoration.CustomizableEdges = customizableEdges40;
+            txtPhone.Size = new Size(343, 51);
+            txtPhone.TabIndex = 6;
             // 
             // txtEmail
             // 
-            this.txtEmail.BorderRadius = 6;
-            this.txtEmail.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.txtEmail.DefaultText = "";
-            this.txtEmail.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            this.txtEmail.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.txtEmail.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.txtEmail.Location = new System.Drawing.Point(20, 370);
-            this.txtEmail.Name = "txtEmail";
-            this.txtEmail.PlaceholderText = "Địa chỉ Email liên hệ";
-            this.txtEmail.SelectedText = "";
-            this.txtEmail.Size = new System.Drawing.Size(300, 38);
-            this.txtEmail.TabIndex = 7;
+            txtEmail.BorderRadius = 6;
+            txtEmail.Cursor = Cursors.IBeam;
+            txtEmail.CustomizableEdges = customizableEdges41;
+            txtEmail.DefaultText = "";
+            txtEmail.Font = new Font("Segoe UI", 9.5F);
+            txtEmail.ForeColor = Color.FromArgb(15, 23, 42);
+            txtEmail.HoverState.BorderColor = Color.FromArgb(99, 102, 241);
+            txtEmail.Location = new Point(23, 493);
+            txtEmail.Margin = new Padding(3, 5, 3, 5);
+            txtEmail.Name = "txtEmail";
+            txtEmail.PlaceholderText = "Địa chỉ Email liên hệ";
+            txtEmail.SelectedText = "";
+            txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges42;
+            txtEmail.Size = new Size(343, 51);
+            txtEmail.TabIndex = 7;
             // 
             // cboRank
             // 
-            this.cboRank.BackColor = System.Drawing.Color.Transparent;
-            this.cboRank.BorderRadius = 6;
-            this.cboRank.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.cboRank.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboRank.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            this.cboRank.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            this.cboRank.ItemHeight = 32;
-            this.cboRank.Items.AddRange(new object[] { "Cử nhân", "Thạc sĩ", "Tiến sĩ", "Phó giáo sư", "Giáo sư" });
-            this.cboRank.Location = new System.Drawing.Point(20, 420);
-            this.cboRank.Name = "cboRank";
-            this.cboRank.Size = new System.Drawing.Size(300, 38);
-            this.cboRank.StartIndex = 1;
-            this.cboRank.TabIndex = 8;
+            cboRank.BackColor = Color.Transparent;
+            cboRank.BorderRadius = 6;
+            cboRank.CustomizableEdges = customizableEdges43;
+            cboRank.DrawMode = DrawMode.OwnerDrawFixed;
+            cboRank.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboRank.FocusedColor = Color.Empty;
+            cboRank.Font = new Font("Segoe UI", 9.5F);
+            cboRank.ForeColor = Color.FromArgb(15, 23, 42);
+            cboRank.ItemHeight = 32;
+            cboRank.Items.AddRange(new object[] { "Cử nhân", "Thạc sĩ", "Tiến sĩ", "Phó giáo sư", "Giáo sư" });
+            cboRank.Location = new Point(23, 560);
+            cboRank.Margin = new Padding(3, 4, 3, 4);
+            cboRank.Name = "cboRank";
+            cboRank.ShadowDecoration.CustomizableEdges = customizableEdges44;
+            cboRank.Size = new Size(342, 38);
+            cboRank.StartIndex = 1;
+            cboRank.TabIndex = 8;
             // 
             // chkActive
             // 
-            this.chkActive.AutoSize = true;
-            this.chkActive.Checked = true;
-            this.chkActive.CheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.chkActive.CheckedState.BorderRadius = 2;
-            this.chkActive.CheckedState.BorderThickness = 0;
-            this.chkActive.CheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.chkActive.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkActive.Font = new System.Drawing.Font("Segoe UI", 9.5f, System.Drawing.FontStyle.Regular);
-            this.chkActive.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(85)))), ((int)(((byte)(105)))));
-            this.chkActive.Location = new System.Drawing.Point(24, 475);
-            this.chkActive.Name = "chkActive";
-            this.chkActive.Size = new System.Drawing.Size(150, 21);
-            this.chkActive.TabIndex = 9;
-            this.chkActive.Text = "Đang trong nhiệm sở";
+            chkActive.AutoSize = true;
+            chkActive.Checked = true;
+            chkActive.CheckedState.BorderColor = Color.FromArgb(99, 102, 241);
+            chkActive.CheckedState.BorderRadius = 2;
+            chkActive.CheckedState.BorderThickness = 0;
+            chkActive.CheckedState.FillColor = Color.FromArgb(99, 102, 241);
+            chkActive.CheckState = CheckState.Checked;
+            chkActive.Font = new Font("Segoe UI", 9.5F);
+            chkActive.ForeColor = Color.FromArgb(71, 85, 105);
+            chkActive.Location = new Point(27, 633);
+            chkActive.Margin = new Padding(3, 4, 3, 4);
+            chkActive.Name = "chkActive";
+            chkActive.Size = new Size(180, 25);
+            chkActive.TabIndex = 9;
+            chkActive.Text = "Đang trong nhiệm sở";
+            chkActive.UncheckedState.BorderRadius = 0;
+            chkActive.UncheckedState.BorderThickness = 0;
             // 
             // btnSave
             // 
-            this.btnSave.BorderRadius = 6;
-            this.btnSave.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(124)))), ((int)(((byte)(65)))));
-            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSave.ForeColor = System.Drawing.Color.White;
-            this.btnSave.Location = new System.Drawing.Point(20, 520);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(300, 42);
-            this.btnSave.TabIndex = 10;
-            this.btnSave.Text = "(+) Thêm Giảng Viên";
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            btnSave.BorderRadius = 6;
+            btnSave.CustomizableEdges = customizableEdges45;
+            btnSave.FillColor = Color.FromArgb(16, 124, 65);
+            btnSave.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnSave.ForeColor = Color.White;
+            btnSave.Location = new Point(23, 693);
+            btnSave.Margin = new Padding(3, 4, 3, 4);
+            btnSave.Name = "btnSave";
+            btnSave.ShadowDecoration.CustomizableEdges = customizableEdges46;
+            btnSave.Size = new Size(343, 56);
+            btnSave.TabIndex = 10;
+            btnSave.Text = "(+) Thêm Giảng Viên";
+            btnSave.Click += btnSave_Click;
             // 
             // btnDelete
             // 
-            this.btnDelete.BorderRadius = 6;
-            this.btnDelete.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(68)))), ((int)(((byte)(68)))));
-            this.btnDelete.Font = new System.Drawing.Font("Segoe UI", 9.5f, System.Drawing.FontStyle.Bold);
-            this.btnDelete.ForeColor = System.Drawing.Color.White;
-            this.btnDelete.Location = new System.Drawing.Point(20, 572);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(142, 38);
-            this.btnDelete.TabIndex = 11;
-            this.btnDelete.Text = "🗑 Xóa Hồ Sơ";
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            btnDelete.BorderRadius = 6;
+            btnDelete.CustomizableEdges = customizableEdges47;
+            btnDelete.FillColor = Color.FromArgb(239, 68, 68);
+            btnDelete.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnDelete.ForeColor = Color.White;
+            btnDelete.Location = new Point(23, 763);
+            btnDelete.Margin = new Padding(3, 4, 3, 4);
+            btnDelete.Name = "btnDelete";
+            btnDelete.ShadowDecoration.CustomizableEdges = customizableEdges48;
+            btnDelete.Size = new Size(162, 51);
+            btnDelete.TabIndex = 11;
+            btnDelete.Text = "🗑 Xóa Hồ Sơ";
+            btnDelete.Click += btnDelete_Click;
             // 
             // btnClear
             // 
-            this.btnClear.BorderRadius = 6;
-            this.btnClear.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(148)))), ((int)(((byte)(163)))), ((int)(((byte)(184)))));
-            this.btnClear.Font = new System.Drawing.Font("Segoe UI", 9.5f, System.Drawing.FontStyle.Bold);
-            this.btnClear.ForeColor = System.Drawing.Color.White;
-            this.btnClear.Location = new System.Drawing.Point(178, 572);
-            this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(142, 38);
-            this.btnClear.TabIndex = 12;
-            this.btnClear.Text = "🔄 Làm Mới";
-            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            btnClear.BorderRadius = 6;
+            btnClear.CustomizableEdges = customizableEdges49;
+            btnClear.FillColor = Color.FromArgb(148, 163, 184);
+            btnClear.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnClear.ForeColor = Color.White;
+            btnClear.Location = new Point(203, 763);
+            btnClear.Margin = new Padding(3, 4, 3, 4);
+            btnClear.Name = "btnClear";
+            btnClear.ShadowDecoration.CustomizableEdges = customizableEdges50;
+            btnClear.Size = new Size(162, 51);
+            btnClear.TabIndex = 12;
+            btnClear.Text = "🔄 Làm Mới";
+            btnClear.Click += btnClear_Click;
             // 
-            // pnlRight (Vùng hiển thị bảng dữ liệu thích ứng bên phải)
+            // pnlRight
             // 
-            this.pnlRight.BackColor = System.Drawing.Color.White;
-            this.pnlRight.Controls.Add(this.txtSearch);
-            this.pnlRight.Controls.Add(this.lblTotalTeachers);
-            this.pnlRight.Controls.Add(this.dgvTeachers);
-            this.pnlRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRight.Location = new System.Drawing.Point(340, 0);
-            this.pnlRight.Name = "pnlRight";
-            this.pnlRight.Size = new System.Drawing.Size(760, 680);
-            this.pnlRight.TabIndex = 1;
+            pnlRight.BackColor = Color.White;
+            pnlRight.Controls.Add(txtSearch);
+            pnlRight.Controls.Add(lblTotalTeachers);
+            pnlRight.Controls.Add(dgvTeachers);
+            pnlRight.CustomizableEdges = customizableEdges55;
+            pnlRight.Dock = DockStyle.Fill;
+            pnlRight.Location = new Point(389, 0);
+            pnlRight.Margin = new Padding(3, 4, 3, 4);
+            pnlRight.Name = "pnlRight";
+            pnlRight.ShadowDecoration.CustomizableEdges = customizableEdges56;
+            pnlRight.Size = new Size(868, 907);
+            pnlRight.TabIndex = 1;
             // 
             // txtSearch
             // 
-            this.txtSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSearch.BorderRadius = 6;
-            this.txtSearch.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.txtSearch.DefaultText = "";
-            this.txtSearch.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            this.txtSearch.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.txtSearch.Location = new System.Drawing.Point(20, 20);
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.PlaceholderText = "🔍 Tìm kiếm giảng viên theo mã, tên, số điện thoại hoặc email...";
-            this.txtSearch.SelectedText = "";
-            this.txtSearch.Size = new System.Drawing.Size(720, 38);
-            this.txtSearch.TabIndex = 0;
-            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+            txtSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtSearch.BorderRadius = 6;
+            txtSearch.Cursor = Cursors.IBeam;
+            txtSearch.CustomizableEdges = customizableEdges53;
+            txtSearch.DefaultText = "";
+            txtSearch.Font = new Font("Segoe UI", 9.5F);
+            txtSearch.HoverState.BorderColor = Color.FromArgb(99, 102, 241);
+            txtSearch.Location = new Point(23, 27);
+            txtSearch.Margin = new Padding(3, 5, 3, 5);
+            txtSearch.Name = "txtSearch";
+            txtSearch.PlaceholderText = "🔍 Tìm kiếm giảng viên theo mã, tên, số điện thoại hoặc email...";
+            txtSearch.SelectedText = "";
+            txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges54;
+            txtSearch.Size = new Size(822, 51);
+            txtSearch.TabIndex = 0;
+            txtSearch.TextChanged += txtSearch_TextChanged;
             // 
             // lblTotalTeachers
             // 
-            this.lblTotalTeachers.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblTotalTeachers.AutoSize = true;
-            this.lblTotalTeachers.Font = new System.Drawing.Font("Segoe UI", 9.5f, System.Drawing.FontStyle.Italic);
-            this.lblTotalTeachers.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(116)))), ((int)(((byte)(139)))));
-            this.lblTotalTeachers.Location = new System.Drawing.Point(22, 68);
-            this.lblTotalTeachers.Name = "lblTotalTeachers";
-            this.lblTotalTeachers.Size = new System.Drawing.Size(142, 17);
-            this.lblTotalTeachers.TabIndex = 1;
-            this.lblTotalTeachers.Text = "Tổng số giảng viên: 0";
+            lblTotalTeachers.AutoSize = true;
+            lblTotalTeachers.Font = new Font("Segoe UI", 9.5F, FontStyle.Italic);
+            lblTotalTeachers.ForeColor = Color.FromArgb(100, 116, 139);
+            lblTotalTeachers.Location = new Point(25, 91);
+            lblTotalTeachers.Name = "lblTotalTeachers";
+            lblTotalTeachers.Size = new Size(157, 21);
+            lblTotalTeachers.TabIndex = 1;
+            lblTotalTeachers.Text = "Tổng số giảng viên: 0";
             // 
             // dgvTeachers
             // 
-            System.Windows.Forms.DataGridViewCellStyle cellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle cellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle cellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.dgvTeachers.AllowUserToAddRows = false;
-            this.dgvTeachers.AllowUserToDeleteRows = false;
-            this.dgvTeachers.AllowUserToResizeRows = false;
-            this.dgvTeachers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dgvTeachers.BackgroundColor = System.Drawing.Color.White;
-            this.dgvTeachers.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            cellStyle1.BackColor = System.Drawing.Color.White;
-            this.dgvTeachers.AlternatingRowsDefaultCellStyle = cellStyle1;
-            this.dgvTeachers.ThemeStyle.AlternatingRowsStyle.BackColor = System.Drawing.Color.White;
-            // Tiêu đề cột (Dark Slate)
-            cellStyle2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(23)))), ((int)(((byte)(42)))));
-            cellStyle2.ForeColor = System.Drawing.Color.White;
-            cellStyle2.Font = new System.Drawing.Font("Segoe UI", 9.5f, System.Drawing.FontStyle.Bold);
-            this.dgvTeachers.ColumnHeadersDefaultCellStyle = cellStyle2;
-            this.dgvTeachers.ColumnHeadersHeight = 35;
-            // Dòng dữ liệu mượt mà
-            cellStyle3.BackColor = System.Drawing.Color.White;
-            cellStyle3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(65)))), ((int)(((byte)(85)))));
-            cellStyle3.Font = new System.Drawing.Font("Segoe UI", 9.5f);
-            cellStyle3.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(242)))), ((int)(((byte)(255)))));
-            cellStyle3.SelectionForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
-            this.dgvTeachers.DefaultCellStyle = cellStyle3;
-            this.dgvTeachers.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(241)))), ((int)(((byte)(245)))), ((int)(((byte)(249)))));
-            this.dgvTeachers.Location = new System.Drawing.Point(20, 95);
-            this.dgvTeachers.Name = "dgvTeachers";
-            this.dgvTeachers.ReadOnly = true;
-            this.dgvTeachers.RowHeadersVisible = false;
-            this.dgvTeachers.RowTemplate.Height = 32;
-            this.dgvTeachers.Size = new System.Drawing.Size(720, 565);
-            this.dgvTeachers.TabIndex = 2;
-            this.dgvTeachers.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvTeachers_CellClick);
+            dgvTeachers.AllowUserToAddRows = false;
+            dgvTeachers.AllowUserToDeleteRows = false;
+            dgvTeachers.AllowUserToResizeRows = false;
+            dataGridViewCellStyle4.BackColor = Color.White;
+            dgvTeachers.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle4;
+            dgvTeachers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dataGridViewCellStyle5.BackColor = Color.FromArgb(15, 23, 42);
+            dataGridViewCellStyle5.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dataGridViewCellStyle5.ForeColor = Color.White;
+            dgvTeachers.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dgvTeachers.ColumnHeadersHeight = 35;
+            dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = Color.White;
+            dataGridViewCellStyle6.Font = new Font("Segoe UI", 9.5F);
+            dataGridViewCellStyle6.ForeColor = Color.FromArgb(51, 65, 85);
+            dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(238, 242, 255);
+            dataGridViewCellStyle6.SelectionForeColor = Color.FromArgb(79, 70, 229);
+            dataGridViewCellStyle6.WrapMode = DataGridViewTriState.False;
+            dgvTeachers.DefaultCellStyle = dataGridViewCellStyle6;
+            dgvTeachers.GridColor = Color.FromArgb(241, 245, 249);
+            dgvTeachers.Location = new Point(23, 127);
+            dgvTeachers.Margin = new Padding(3, 4, 3, 4);
+            dgvTeachers.Name = "dgvTeachers";
+            dgvTeachers.ReadOnly = true;
+            dgvTeachers.RowHeadersVisible = false;
+            dgvTeachers.RowHeadersWidth = 51;
+            dgvTeachers.RowTemplate.Height = 32;
+            dgvTeachers.Size = new Size(822, 753);
+            dgvTeachers.TabIndex = 2;
+            dgvTeachers.ThemeStyle.AlternatingRowsStyle.BackColor = Color.White;
+            dgvTeachers.ThemeStyle.AlternatingRowsStyle.Font = null;
+            dgvTeachers.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.Empty;
+            dgvTeachers.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = Color.Empty;
+            dgvTeachers.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = Color.Empty;
+            dgvTeachers.ThemeStyle.BackColor = Color.White;
+            dgvTeachers.ThemeStyle.GridColor = Color.FromArgb(241, 245, 249);
+            dgvTeachers.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(100, 88, 255);
+            dgvTeachers.ThemeStyle.HeaderStyle.BorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvTeachers.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9F);
+            dgvTeachers.ThemeStyle.HeaderStyle.ForeColor = Color.White;
+            dgvTeachers.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvTeachers.ThemeStyle.HeaderStyle.Height = 35;
+            dgvTeachers.ThemeStyle.ReadOnly = true;
+            dgvTeachers.ThemeStyle.RowsStyle.BackColor = Color.White;
+            dgvTeachers.ThemeStyle.RowsStyle.BorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvTeachers.ThemeStyle.RowsStyle.Font = new Font("Segoe UI", 9F);
+            dgvTeachers.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(71, 69, 94);
+            dgvTeachers.ThemeStyle.RowsStyle.Height = 32;
+            dgvTeachers.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(231, 229, 255);
+            dgvTeachers.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(71, 69, 94);
+            dgvTeachers.CellClick += dgvTeachers_CellClick;
             // 
             // ManageTeacherForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1100, 680);
-            this.Controls.Add(this.pnlRight);
-            this.Controls.Add(this.pnlLeft);
-            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None; // Để hiển thị mượt mà khi nhúng vào Main Dashboard
-            this.Name = "ManageTeacherForm";
-            this.Text = "Quản Lý Giảng Viên";
-            this.Load += new System.EventHandler(this.ManageTeacherForm_Load);
-            this.pnlLeft.ResumeLayout(false);
-            this.pnlLeft.PerformLayout();
-            this.pnlRight.ResumeLayout(false);
-            this.pnlRight.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvTeachers)).EndInit();
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1257, 907);
+            Controls.Add(pnlRight);
+            Controls.Add(pnlLeft);
+            Font = new Font("Segoe UI", 9F);
+            FormBorderStyle = FormBorderStyle.None;
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "ManageTeacherForm";
+            Text = "Quản Lý Giảng Viên";
+            Load += ManageTeacherForm_Load;
+            pnlLeft.ResumeLayout(false);
+            pnlLeft.PerformLayout();
+            pnlRight.ResumeLayout(false);
+            pnlRight.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTeachers).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -361,8 +453,8 @@
         private Guna.UI2.WinForms.Guna2Panel pnlLeft;
         private System.Windows.Forms.Label lblTitle;
         private Guna.UI2.WinForms.Guna2TextBox txtTeacherCode;
-        private Guna.UI2.WinForms.Guna2TextBox txtFirstName;
         private Guna.UI2.WinForms.Guna2TextBox txtLastName;
+        private Guna.UI2.WinForms.Guna2TextBox txtFirstName;
         private Guna.UI2.WinForms.Guna2ComboBox cboGender;
         private Guna.UI2.WinForms.Guna2DateTimePicker dtpBirthDate;
         private Guna.UI2.WinForms.Guna2TextBox txtPhone;

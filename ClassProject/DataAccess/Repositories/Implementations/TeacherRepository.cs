@@ -15,7 +15,7 @@ namespace ClassProject.DataAccess.Repositories.Implementations
         {
             DataTable dt = new DataTable();
             string query = @"SELECT Id, UserId, MSGV, FirstName, LastName, DateOfBirth, Gender, Phone, Email, AcademicRank, Status,
-                            (FirstName + ' ' + LastName) AS FullName,
+                            (LastName + ' ' + FirstName) AS FullName,
                             CASE WHEN Status = 1 THEN N'Đang công tác' ELSE N'Nghỉ việc / Đình chỉ' END AS StatusText
                             FROM dbo.Teachers ORDER BY MSGV ASC";
             try
@@ -42,7 +42,7 @@ namespace ClassProject.DataAccess.Repositories.Implementations
         {
             DataTable dt = new DataTable();
             string query = @"SELECT Id, UserId, MSGV, FirstName, LastName, DateOfBirth, Gender, Phone, Email, AcademicRank, Status,
-                            (FirstName + ' ' + LastName) AS FullName,
+                            (LastName + ' ' + FirstName) AS FullName,
                             CASE WHEN Status = 1 THEN N'Đang công tác' ELSE N'Nghỉ việc / Đình chỉ' END AS StatusText
                             FROM dbo.Teachers 
                             WHERE MSGV LIKE @Key OR FirstName LIKE @Key OR LastName LIKE @Key OR Phone LIKE @Key OR Email LIKE @Key

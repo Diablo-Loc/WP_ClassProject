@@ -19,6 +19,6 @@ namespace ClassProject.DataAccess.Entities
         public DateTime? Updated_At { get; set; }
 
         // Thuộc tính mở rộng phục vụ hiển thị nhanh lên UI
-        public string FullName => $"{FirstName} {LastName}".Trim();
+        public string FullName => $"{LastName} {FirstName}".Trim();
     }
 }

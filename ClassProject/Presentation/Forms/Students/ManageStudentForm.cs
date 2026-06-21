@@ -55,18 +55,14 @@ namespace ClassProject
             fillGrid();
         }
 
-        /// <summary>
         /// Khởi tạo giá trị mặc định cho các Combobox một cách an toàn
-        /// </summary>
         private void InitializeInterfaceComponents()
         {
             if (cboFilterGender.Items.Count > 0) cboFilterGender.SelectedIndex = 0;
             if (cbSort.Items.Count > 0) cbSort.SelectedIndex = 0;
         }
 
-        /// <summary>
         /// Áp dụng Phân quyền RBAC trực tiếp lên UI (Tăng trải nghiệm UX doanh nghiệp)
-        /// </summary>
         private void ApplyRoleBasedAccessControl()
         {
             if (btnGenerateAccounts != null)
@@ -79,7 +75,7 @@ namespace ClassProject
             {
                 btnInsert.Enabled = false;
                 btnImportExcel.Enabled = false;
-
+                btnDelete.Enabled = false;
                 ToolTip systemToolTip = new ToolTip();
                 systemToolTip.SetToolTip(btnInsert, "Tài khoản của bạn không có quyền thêm mới sinh viên.");
                 systemToolTip.SetToolTip(btnImportExcel, "Tài khoản của bạn không có quyền nhập dữ liệu từ Excel.");
@@ -97,15 +93,28 @@ namespace ClassProject
                 dgvStudents.DataSource = null;
 
                 string keyword = txtSearch.Text.Trim();
-                string gender = cboFilterGender.Text;
-                if (gender.Contains("Tất cả")) gender = "Tất cả";
+                string gender = cboFilterGender.Text.Trim();
+                if (string.IsNullOrEmpty(gender) || gender.Contains("Tất cả") || gender.Contains("---"))
+                {
+                    gender = "";
+                }
 
-                DataTable dt = _studentRepo.SearchStudents(keyword, gender);
+                DataTable dt = null;
+                string currentTeacherId = UserSession.TeacherId ?? "NULL (Trống)";
+
+                if (_currentUserRole == UserRole.Lecturer)
+                {
+                    dt = _studentRepo.SearchStudentsByCourseSection(keyword, string.IsNullOrEmpty(gender) ? "All" : gender, currentTeacherId);
+                }
+                else
+                {
+                    dt = _studentRepo.SearchStudents(keyword, gender);
+                }
+
                 if (dt == null) return;
 
                 DataView dv = dt.DefaultView;
 
-                // Xử lý sắp xếp động tối ưu hóa hiệu năng bằng DataView
                 if (cbSort.SelectedIndex > 0)
                 {
                     string sortText = cbSort.Text.Trim();
@@ -123,7 +132,7 @@ namespace ClassProject
 
                 dgvStudents.DataSource = dv;
 
-                // Đồng bộ chỉ số đếm trực quan trên Dashboard thu nhỏ
+                // Đồng bộ chỉ số đếm
                 lblTotalCount.Text = dv.Count.ToString();
                 if (lblPaginationInfo != null)
                 {
@@ -866,5 +875,66 @@ namespace ClassProject
                 MessageBox.Show($"Đã xảy ra lỗi hệ thống trong quá trình tạo tài khoản: {ex.Message}", "Lỗi nghiêm trọng", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            // 1. Kiểm tra phân quyền sửa đổi dữ liệu (Chỉ Admin và HR)
+            if (!_canModifyData)
+            {
+                MessageBox.Show("Tài khoản của bạn không có đặc quyền thực hiện hành động này!",
+                                "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                return;
+            }
+
+            // 2. Kiểm tra xem người dùng đã chọn dòng nào trên Grid chưa
+            if (dgvStudents.CurrentRow == null || dgvStudents.CurrentRow.Index < 0)
+            {
+                MessageBox.Show("Vui lòng chọn một sinh viên trong danh sách để xóa.",
+                                "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                // 3. Lấy MSSV từ dòng đang chọn một cách an toàn (tương thích mọi cấu trúc tên cột)
+                DataGridViewRow currentRow = dgvStudents.CurrentRow;
+                string mssvCol = dgvStudents.Columns.Contains("Mssv") ? "Mssv" : "Mã SV";
+                string mssv = currentRow.Cells[mssvCol].Value?.ToString()?.Trim() ?? "";
+
+                if (string.IsNullOrEmpty(mssv))
+                {
+                    MessageBox.Show("Không thể lấy mã sinh viên từ dòng đã chọn!",
+                                    "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Lấy thêm Họ và Tên hiển thị lên cảnh báo cho trực quan
+                string hoCol = dgvStudents.Columns.Contains("LastName") ? "LastName" : (dgvStudents.Columns.Contains("Họ") ? "Họ" : "");
+                string tenCol = dgvStudents.Columns.Contains("FirstName") ? "FirstName" : (dgvStudents.Columns.Contains("Tên") ? "Tên" : "");
+                string hoTen = $"{currentRow.Cells[hoCol].Value?.ToString()} {currentRow.Cells[tenCol].Value?.ToString()}".Trim();
+
+                // 4. Hiển thị hộp thoại cảnh báo xác nhận xóa dữ liệu gốc
+                DialogResult confirm = MessageBox.Show($"Bạn có chắc chắn muốn xóa sinh viên [{hoTen}] (MSSV: {mssv}) ra khỏi hệ thống?\nHành động này không thể hoàn tác!",
+                                                       "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (confirm == DialogResult.Yes)
+                {
+                    // 5. Gọi hàm xóa từ Repository (Bạn cần đảm bảo _studentRepo đã có hàm DeleteStudent nhận tham số string mssv)
+                    if (_studentRepo.DeleteStudent(mssv))
+                    {
+                        MessageBox.Show("Xóa sinh viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        fillGrid(); // Làm mới lại lưới hiển thị
+                    }
+                    else
+                    {
+                        MessageBox.Show("Xóa sinh viên thất bại hoặc sinh viên không tồn tại.", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Có lỗi xảy ra khi thực hiện xóa: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
     }
 }

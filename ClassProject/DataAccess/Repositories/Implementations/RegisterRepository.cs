@@ -7,27 +7,25 @@ namespace ClassProject.DataAccess.Repositories.Implementations
 {
     public class RegisterRepository
     {
-        private readonly string _connString;
         private readonly My_DB _db = new My_DB();
 
         public RegisterRepository()
         {
         }
 
-        // 1. Lấy danh sách các Lớp học phần một sinh viên ĐÃ ĐĂNG KÝ (Đã sửa lỗi 207 & Đọc tên giảng viên)
+        // 1. Lấy danh sách các Lớp học phần một sinh viên ĐÃ ĐĂNG KÝ
         public DataTable GetRegistrationList(string mssv)
         {
             DataTable table = new DataTable();
             using (SqlConnection conn = _db.GetConnection())
             {
-                // Truy vấn trực tiếp từ View để lấy trường 'TenGiangVien' đã được đồng bộ với CSDL mới
                 string query = @"
             SELECT 
                 STT,
                 MaLopHP,
                 TenMH,
                 SoTC,
-                TenGiangVien, -- An toàn, không lo sai lệch cấu trúc cột vật lý
+                TenGiangVien, 
                 PhongHoc,
                 RegistrationDate
             FROM dbo.vw_StudentRegistrationDetail
@@ -35,6 +33,28 @@ namespace ClassProject.DataAccess.Repositories.Implementations
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
+                    cmd.Parameters.Add("@mssv", SqlDbType.NVarChar, 30).Value = mssv.Trim();
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                    {
+                        adapter.Fill(table);
+                    }
+                }
+            }
+            return table;
+        }
+
+        // Lấy thời khóa biểu chi tiết từ View vw_StudentDailySchedule
+        public DataTable GetStudentDailySchedule(string mssv)
+        {
+            DataTable table = new DataTable();
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                // Gọi chính xác từ View thời khóa biểu hàng ngày của bạn
+                string query = "SELECT * FROM dbo.vw_StudentDailySchedule WHERE MSSV = @mssv";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    // Sử dụng SqlBackground Parameter chuẩn của SQL Server
                     cmd.Parameters.Add("@mssv", SqlDbType.NVarChar, 30).Value = mssv.Trim();
                     using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                     {
@@ -65,7 +85,6 @@ namespace ClassProject.DataAccess.Repositories.Implementations
         {
             using (SqlConnection conn = _db.GetConnection())
             {
-                //  ĐÃ SỬA: Thay "INNER JOIN JOIN" thành "INNER JOIN" chuẩn cú pháp
                 string query = @"
             SELECT ISNULL(SUM(c.SoTC), 0)
             FROM dbo.DKMH dk
@@ -82,7 +101,7 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             }
         }
 
-        // 4. Lấy số tín chỉ của một Lớp học phần bất kỳ để tính toán trước khi bấm đăng ký
+        // 4. Lấy số tín chỉ của một Lớp học phần bất kỳ để tính toán trước khi đăng ký
         public int GetCreditsOfSection(string maLopHP)
         {
             using (SqlConnection conn = _db.GetConnection())
@@ -102,7 +121,7 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             }
         }
 
-        // 5. Kiểm tra xem sinh viên đã đăng ký Lớp học phần này chưa (Tránh trùng lịch)
+        // 5. Kiểm tra xem sinh viên đã đăng ký Lớp học phần này chưa
         public bool IsRegistered(string mssv, string maLopHP)
         {
             using (SqlConnection conn = _db.GetConnection())

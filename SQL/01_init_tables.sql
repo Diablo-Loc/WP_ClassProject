@@ -185,13 +185,17 @@ GO
 
 CREATE TABLE dbo.CourseSection (
     MaLopHP VARCHAR(30) NOT NULL PRIMARY KEY, 
-    MaMH CHAR(10) NOT NULL,                                                                                                                                                                     
-    HocKy INT NOT NULL,                                                                                                                                                                         
-    NamHoc NVARCHAR(20) NOT NULL,                               
-    MSGV NVARCHAR(30) NULL,                      -- Đã sửa từ NVARCHAR sang liên kết mã số giảng viên (MSGV) làm việc thực tế
+    MaMH CHAR(10) NOT NULL,                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+    HocKy INT NOT NULL,                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+    NamHoc NVARCHAR(20) NOT NULL,                                
+    MSGV NVARCHAR(30) NULL,                      -- Liên kết mã số giảng viên (MSGV) làm việc thực tế
     PhongHoc NVARCHAR(50) NULL,
     MaxStudents INT DEFAULT 50 CONSTRAINT CK_CourseSection_MaxStudents CHECK (MaxStudents > 0),   
-    Status INT DEFAULT 1,         
+    Status INT DEFAULT 1,          
+    
+    ThuHoc INT NOT NULL DEFAULT 2 CONSTRAINT CK_CourseSection_Thu CHECK (ThuHoc BETWEEN 2 AND 7), -- 2: Thứ 2 -> 7: Thứ 7 (Mặc định xếp vào Thứ 2 để không lỗi Form cũ)
+    CaHoc INT NOT NULL DEFAULT 1 CONSTRAINT CK_CourseSection_Ca CHECK (CaHoc BETWEEN 1 AND 4),    -- 1: Ca 1 -> 4: Ca 4 (Mặc định xếp vào Ca 1)
+
     Created_At DATETIME DEFAULT GETDATE(),
     Updated_At DATETIME NULL,     
     CONSTRAINT FK_CourseSection_Course FOREIGN KEY (MaMH) REFERENCES dbo.Course(MaMH) ON DELETE CASCADE,
@@ -315,4 +319,26 @@ FROM dbo.DKMH dk
 INNER JOIN dbo.CourseSection cs ON dk.MaLopHP = cs.MaLopHP
 INNER JOIN dbo.Course c ON cs.MaMH = c.MaMH
 LEFT JOIN dbo.Teachers t ON cs.MSGV = t.MSGV; -- Liên kết an toàn sang bảng giáo viên bằng MSGV
+GO
+
+CREATE OR ALTER VIEW dbo.vw_StudentDailySchedule
+AS
+SELECT 
+    dk.MSSV,
+    cs.MaLopHP,
+    c.TenMH,
+    cs.PhongHoc,
+    cs.ThuHoc,
+    cs.CaHoc,
+    CASE cs.CaHoc
+        WHEN 1 THEN N'07:30 - 09:50'
+        WHEN 2 THEN N'10:00 - 12:20'
+        WHEN 3 THEN N'13:00 - 15:20'
+        WHEN 4 THEN N'15:30 - 17:50'
+        ELSE N'Chưa xếp ca'
+    END AS ThoiGian
+FROM dbo.DKMH dk
+INNER JOIN dbo.CourseSection cs ON dk.MaLopHP = cs.MaLopHP
+INNER JOIN dbo.Course c ON cs.MaMH = c.MaMH
+WHERE cs.Status = 1;
 GO

@@ -1,4 +1,6 @@
 ﻿using System.Windows.Forms;
+using System.Drawing;
+
 namespace ClassProject.Presentation.Forms.Admin
 {
     partial class DashBoardForm
@@ -18,31 +20,56 @@ namespace ClassProject.Presentation.Forms.Admin
 
         private void InitializeComponent()
         {
-            pnlCard1 = new Panel();
-            lblTotalStudentsVal = new Label();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            tlpMainLayout = new TableLayoutPanel();
+            tlpCardsGrid = new TableLayoutPanel();
+            pnlCard1 = new Guna.UI2.WinForms.Guna2Panel();
             lblTotalStudents = new Label();
-            pnlCard2 = new Panel();
-            lblNewAdmissionsVal = new Label();
+            lblTotalStudentsVal = new Label();
+            pnlCard2 = new Guna.UI2.WinForms.Guna2Panel();
             lblNewAdmissions = new Label();
-            pnlCard3 = new Panel();
-            lblAttendanceRateVal = new Label();
+            lblNewAdmissionsVal = new Label();
+            pnlCard3 = new Guna.UI2.WinForms.Guna2Panel();
             lblAttendanceRate = new Label();
-            pnlCard4 = new Panel();
-            lblPassRateVal = new Label();
+            lblAttendanceRateVal = new Label();
+            pnlCard4 = new Guna.UI2.WinForms.Guna2Panel();
             lblPassRate = new Label();
-            pnlPieChart = new Panel();
+            lblPassRateVal = new Label();
+            tlpChartsGrid = new TableLayoutPanel();
+            pnlPieChart = new Guna.UI2.WinForms.Guna2Panel();
+            pnlPieChartContainer = new Panel();
             lblPieTitle = new Label();
-            pnlLineChart = new Panel();
+            pnlLineChart = new Guna.UI2.WinForms.Guna2Panel();
+            pnlLineChartContainer = new Panel();
             lblLineTitle = new Label();
-            pnlDoughnutChart = new Panel();
+            pnlDoughnutChart = new Guna.UI2.WinForms.Guna2Panel();
+            pnlDoughnutChartContainer = new Panel();
             lblDoughnutTitle = new Label();
-            pnlTopCourses = new Panel();
-            lblTopCoursesTitle = new Label();
+            pnlTopCourses = new Guna.UI2.WinForms.Guna2Panel();
             dgvTopCourses = new DataGridView();
+            lblTopCoursesTitle = new Label();
+            tlpMainLayout.SuspendLayout();
+            tlpCardsGrid.SuspendLayout();
             pnlCard1.SuspendLayout();
             pnlCard2.SuspendLayout();
             pnlCard3.SuspendLayout();
             pnlCard4.SuspendLayout();
+            tlpChartsGrid.SuspendLayout();
             pnlPieChart.SuspendLayout();
             pnlLineChart.SuspendLayout();
             pnlDoughnutChart.SuspendLayout();
@@ -50,238 +77,359 @@ namespace ClassProject.Presentation.Forms.Admin
             ((System.ComponentModel.ISupportInitialize)dgvTopCourses).BeginInit();
             SuspendLayout();
             // 
+            // tlpMainLayout
+            // 
+            tlpMainLayout.ColumnCount = 1;
+            tlpMainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlpMainLayout.Controls.Add(tlpCardsGrid, 0, 0);
+            tlpMainLayout.Controls.Add(tlpChartsGrid, 0, 1);
+            tlpMainLayout.Dock = DockStyle.Fill;
+            tlpMainLayout.Location = new Point(0, 0);
+            tlpMainLayout.Name = "tlpMainLayout";
+            tlpMainLayout.Padding = new Padding(20);
+            tlpMainLayout.RowCount = 2;
+            tlpMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 15F));
+            tlpMainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 85F));
+            tlpMainLayout.Size = new Size(1400, 850);
+            tlpMainLayout.TabIndex = 0;
+            // 
+            // tlpCardsGrid
+            // 
+            tlpCardsGrid.ColumnCount = 4;
+            tlpCardsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpCardsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpCardsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpCardsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            tlpCardsGrid.Controls.Add(pnlCard1, 0, 0);
+            tlpCardsGrid.Controls.Add(pnlCard2, 1, 0);
+            tlpCardsGrid.Controls.Add(pnlCard3, 2, 0);
+            tlpCardsGrid.Controls.Add(pnlCard4, 3, 0);
+            tlpCardsGrid.Dock = DockStyle.Fill;
+            tlpCardsGrid.Location = new Point(20, 20);
+            tlpCardsGrid.Margin = new Padding(0, 0, 0, 15);
+            tlpCardsGrid.Name = "tlpCardsGrid";
+            tlpCardsGrid.RowCount = 1;
+            tlpCardsGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpCardsGrid.Size = new Size(1360, 106);
+            tlpCardsGrid.TabIndex = 0;
+            // 
             // pnlCard1
             // 
-            pnlCard1.BackColor = Color.White;
-            pnlCard1.BorderStyle = BorderStyle.FixedSingle;
-            pnlCard1.Controls.Add(lblTotalStudentsVal);
+            pnlCard1.BackColor = Color.Transparent;
+            pnlCard1.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlCard1.BorderRadius = 10;
+            pnlCard1.BorderThickness = 1;
             pnlCard1.Controls.Add(lblTotalStudents);
-            pnlCard1.Location = new Point(33, 119);
-            pnlCard1.Margin = new Padding(5, 4, 5, 4);
+            pnlCard1.Controls.Add(lblTotalStudentsVal);
+            pnlCard1.CustomizableEdges = customizableEdges1;
+            pnlCard1.Dock = DockStyle.Fill;
+            pnlCard1.FillColor = Color.White;
+            pnlCard1.Location = new Point(10, 10);
+            pnlCard1.Margin = new Padding(10);
             pnlCard1.Name = "pnlCard1";
-            pnlCard1.Size = new Size(332, 138);
-            pnlCard1.TabIndex = 1;
-            // 
-            // lblTotalStudentsVal
-            // 
-            lblTotalStudentsVal.AutoSize = true;
-            lblTotalStudentsVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblTotalStudentsVal.ForeColor = Color.FromArgb(15, 23, 42);
-            lblTotalStudentsVal.Location = new Point(21, 55);
-            lblTotalStudentsVal.Margin = new Padding(5, 0, 5, 0);
-            lblTotalStudentsVal.Name = "lblTotalStudentsVal";
-            lblTotalStudentsVal.Size = new Size(109, 46);
-            lblTotalStudentsVal.TabIndex = 1;
-            lblTotalStudentsVal.Text = "2,350";
+            pnlCard1.Padding = new Padding(20);
+            pnlCard1.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            pnlCard1.Size = new Size(320, 86);
+            pnlCard1.TabIndex = 0;
             // 
             // lblTotalStudents
             // 
             lblTotalStudents.AutoSize = true;
-            lblTotalStudents.Font = new Font("Segoe UI", 10F);
-            lblTotalStudents.ForeColor = Color.Gray;
-            lblTotalStudents.Location = new Point(21, 19);
-            lblTotalStudents.Margin = new Padding(5, 0, 5, 0);
+            lblTotalStudents.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            lblTotalStudents.ForeColor = Color.FromArgb(148, 163, 184);
+            lblTotalStudents.Location = new Point(20, 16);
             lblTotalStudents.Name = "lblTotalStudents";
-            lblTotalStudents.Size = new Size(117, 23);
+            lblTotalStudents.Size = new Size(119, 21);
             lblTotalStudents.TabIndex = 0;
-            lblTotalStudents.Text = "Total Students";
+            lblTotalStudents.Text = "Tổng Sinh Viên";
+            // 
+            // lblTotalStudentsVal
+            // 
+            lblTotalStudentsVal.AutoSize = true;
+            lblTotalStudentsVal.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+            lblTotalStudentsVal.ForeColor = Color.FromArgb(15, 23, 42);
+            lblTotalStudentsVal.Location = new Point(16, 38);
+            lblTotalStudentsVal.Name = "lblTotalStudentsVal";
+            lblTotalStudentsVal.Size = new Size(43, 50);
+            lblTotalStudentsVal.TabIndex = 1;
+            lblTotalStudentsVal.Text = "0";
             // 
             // pnlCard2
             // 
-            pnlCard2.BackColor = Color.White;
-            pnlCard2.BorderStyle = BorderStyle.FixedSingle;
-            pnlCard2.Controls.Add(lblNewAdmissionsVal);
+            pnlCard2.BackColor = Color.Transparent;
+            pnlCard2.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlCard2.BorderRadius = 10;
+            pnlCard2.BorderThickness = 1;
             pnlCard2.Controls.Add(lblNewAdmissions);
-            pnlCard2.Location = new Point(400, 119);
-            pnlCard2.Margin = new Padding(5, 4, 5, 4);
+            pnlCard2.Controls.Add(lblNewAdmissionsVal);
+            pnlCard2.CustomizableEdges = customizableEdges3;
+            pnlCard2.Dock = DockStyle.Fill;
+            pnlCard2.FillColor = Color.White;
+            pnlCard2.Location = new Point(350, 10);
+            pnlCard2.Margin = new Padding(10);
             pnlCard2.Name = "pnlCard2";
-            pnlCard2.Size = new Size(332, 138);
-            pnlCard2.TabIndex = 2;
-            // 
-            // lblNewAdmissionsVal
-            // 
-            lblNewAdmissionsVal.AutoSize = true;
-            lblNewAdmissionsVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblNewAdmissionsVal.ForeColor = Color.FromArgb(15, 23, 42);
-            lblNewAdmissionsVal.Location = new Point(21, 55);
-            lblNewAdmissionsVal.Margin = new Padding(5, 0, 5, 0);
-            lblNewAdmissionsVal.Name = "lblNewAdmissionsVal";
-            lblNewAdmissionsVal.Size = new Size(80, 46);
-            lblNewAdmissionsVal.TabIndex = 1;
-            lblNewAdmissionsVal.Text = "320";
+            pnlCard2.Padding = new Padding(20);
+            pnlCard2.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            pnlCard2.Size = new Size(320, 86);
+            pnlCard2.TabIndex = 1;
             // 
             // lblNewAdmissions
             // 
             lblNewAdmissions.AutoSize = true;
-            lblNewAdmissions.Font = new Font("Segoe UI", 10F);
-            lblNewAdmissions.ForeColor = Color.Gray;
-            lblNewAdmissions.Location = new Point(21, 19);
-            lblNewAdmissions.Margin = new Padding(5, 0, 5, 0);
+            lblNewAdmissions.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            lblNewAdmissions.ForeColor = Color.FromArgb(148, 163, 184);
+            lblNewAdmissions.Location = new Point(20, 16);
             lblNewAdmissions.Name = "lblNewAdmissions";
-            lblNewAdmissions.Size = new Size(134, 23);
+            lblNewAdmissions.Size = new Size(116, 21);
             lblNewAdmissions.TabIndex = 0;
-            lblNewAdmissions.Text = "New Admissions";
+            lblNewAdmissions.Text = "Nhập Học Mới";
+            // 
+            // lblNewAdmissionsVal
+            // 
+            lblNewAdmissionsVal.AutoSize = true;
+            lblNewAdmissionsVal.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+            lblNewAdmissionsVal.ForeColor = Color.FromArgb(37, 99, 235);
+            lblNewAdmissionsVal.Location = new Point(16, 38);
+            lblNewAdmissionsVal.Name = "lblNewAdmissionsVal";
+            lblNewAdmissionsVal.Size = new Size(43, 50);
+            lblNewAdmissionsVal.TabIndex = 1;
+            lblNewAdmissionsVal.Text = "0";
             // 
             // pnlCard3
             // 
-            pnlCard3.BackColor = Color.White;
-            pnlCard3.BorderStyle = BorderStyle.FixedSingle;
-            pnlCard3.Controls.Add(lblAttendanceRateVal);
+            pnlCard3.BackColor = Color.Transparent;
+            pnlCard3.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlCard3.BorderRadius = 10;
+            pnlCard3.BorderThickness = 1;
             pnlCard3.Controls.Add(lblAttendanceRate);
-            pnlCard3.Location = new Point(767, 119);
-            pnlCard3.Margin = new Padding(5, 4, 5, 4);
+            pnlCard3.Controls.Add(lblAttendanceRateVal);
+            pnlCard3.CustomizableEdges = customizableEdges5;
+            pnlCard3.Dock = DockStyle.Fill;
+            pnlCard3.FillColor = Color.White;
+            pnlCard3.Location = new Point(690, 10);
+            pnlCard3.Margin = new Padding(10);
             pnlCard3.Name = "pnlCard3";
-            pnlCard3.Size = new Size(332, 138);
+            pnlCard3.Padding = new Padding(20);
+            pnlCard3.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            pnlCard3.Size = new Size(320, 86);
             pnlCard3.TabIndex = 2;
-            // 
-            // lblAttendanceRateVal
-            // 
-            lblAttendanceRateVal.AutoSize = true;
-            lblAttendanceRateVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblAttendanceRateVal.ForeColor = Color.FromArgb(15, 23, 42);
-            lblAttendanceRateVal.Location = new Point(21, 55);
-            lblAttendanceRateVal.Margin = new Padding(5, 0, 5, 0);
-            lblAttendanceRateVal.Name = "lblAttendanceRateVal";
-            lblAttendanceRateVal.Size = new Size(118, 46);
-            lblAttendanceRateVal.TabIndex = 1;
-            lblAttendanceRateVal.Text = "91.6%";
             // 
             // lblAttendanceRate
             // 
             lblAttendanceRate.AutoSize = true;
-            lblAttendanceRate.Font = new Font("Segoe UI", 10F);
-            lblAttendanceRate.ForeColor = Color.Gray;
-            lblAttendanceRate.Location = new Point(21, 19);
-            lblAttendanceRate.Margin = new Padding(5, 0, 5, 0);
+            lblAttendanceRate.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            lblAttendanceRate.ForeColor = Color.FromArgb(148, 163, 184);
+            lblAttendanceRate.Location = new Point(20, 16);
             lblAttendanceRate.Name = "lblAttendanceRate";
-            lblAttendanceRate.Size = new Size(137, 23);
+            lblAttendanceRate.Size = new Size(125, 21);
             lblAttendanceRate.TabIndex = 0;
-            lblAttendanceRate.Text = "Attendance Rate";
+            lblAttendanceRate.Text = "Tỷ Lệ Xử Lý Đơn";
+            // 
+            // lblAttendanceRateVal
+            // 
+            lblAttendanceRateVal.AutoSize = true;
+            lblAttendanceRateVal.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+            lblAttendanceRateVal.ForeColor = Color.FromArgb(16, 185, 129);
+            lblAttendanceRateVal.Location = new Point(16, 38);
+            lblAttendanceRateVal.Name = "lblAttendanceRateVal";
+            lblAttendanceRateVal.Size = new Size(106, 50);
+            lblAttendanceRateVal.TabIndex = 1;
+            lblAttendanceRateVal.Text = "0.0%";
             // 
             // pnlCard4
             // 
-            pnlCard4.BackColor = Color.White;
-            pnlCard4.BorderStyle = BorderStyle.FixedSingle;
-            pnlCard4.Controls.Add(lblPassRateVal);
+            pnlCard4.BackColor = Color.Transparent;
+            pnlCard4.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlCard4.BorderRadius = 10;
+            pnlCard4.BorderThickness = 1;
             pnlCard4.Controls.Add(lblPassRate);
-            pnlCard4.Location = new Point(1134, 119);
-            pnlCard4.Margin = new Padding(5, 4, 5, 4);
+            pnlCard4.Controls.Add(lblPassRateVal);
+            pnlCard4.CustomizableEdges = customizableEdges7;
+            pnlCard4.Dock = DockStyle.Fill;
+            pnlCard4.FillColor = Color.White;
+            pnlCard4.Location = new Point(1030, 10);
+            pnlCard4.Margin = new Padding(10);
             pnlCard4.Name = "pnlCard4";
-            pnlCard4.Size = new Size(365, 138);
-            pnlCard4.TabIndex = 2;
-            // 
-            // lblPassRateVal
-            // 
-            lblPassRateVal.AutoSize = true;
-            lblPassRateVal.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblPassRateVal.ForeColor = Color.FromArgb(15, 23, 42);
-            lblPassRateVal.Location = new Point(21, 55);
-            lblPassRateVal.Margin = new Padding(5, 0, 5, 0);
-            lblPassRateVal.Name = "lblPassRateVal";
-            lblPassRateVal.Size = new Size(118, 46);
-            lblPassRateVal.TabIndex = 1;
-            lblPassRateVal.Text = "89.4%";
+            pnlCard4.Padding = new Padding(20);
+            pnlCard4.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            pnlCard4.Size = new Size(320, 86);
+            pnlCard4.TabIndex = 3;
             // 
             // lblPassRate
             // 
             lblPassRate.AutoSize = true;
-            lblPassRate.Font = new Font("Segoe UI", 10F);
-            lblPassRate.ForeColor = Color.Gray;
-            lblPassRate.Location = new Point(21, 19);
-            lblPassRate.Margin = new Padding(5, 0, 5, 0);
+            lblPassRate.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            lblPassRate.ForeColor = Color.FromArgb(148, 163, 184);
+            lblPassRate.Location = new Point(20, 16);
             lblPassRate.Name = "lblPassRate";
-            lblPassRate.Size = new Size(81, 23);
+            lblPassRate.Size = new Size(119, 21);
             lblPassRate.TabIndex = 0;
-            lblPassRate.Text = "Pass Rate";
+            lblPassRate.Text = "Tỷ Lệ Qua Môn";
+            // 
+            // lblPassRateVal
+            // 
+            lblPassRateVal.AutoSize = true;
+            lblPassRateVal.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+            lblPassRateVal.ForeColor = Color.FromArgb(245, 158, 11);
+            lblPassRateVal.Location = new Point(16, 38);
+            lblPassRateVal.Name = "lblPassRateVal";
+            lblPassRateVal.Size = new Size(106, 50);
+            lblPassRateVal.TabIndex = 1;
+            lblPassRateVal.Text = "0.0%";
+            // 
+            // tlpChartsGrid
+            // 
+            tlpChartsGrid.ColumnCount = 2;
+            tlpChartsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tlpChartsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tlpChartsGrid.Controls.Add(pnlPieChart, 0, 0);
+            tlpChartsGrid.Controls.Add(pnlLineChart, 1, 0);
+            tlpChartsGrid.Controls.Add(pnlDoughnutChart, 0, 1);
+            tlpChartsGrid.Controls.Add(pnlTopCourses, 1, 1);
+            tlpChartsGrid.Dock = DockStyle.Fill;
+            tlpChartsGrid.Location = new Point(23, 144);
+            tlpChartsGrid.Name = "tlpChartsGrid";
+            tlpChartsGrid.RowCount = 2;
+            tlpChartsGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tlpChartsGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tlpChartsGrid.Size = new Size(1354, 683);
+            tlpChartsGrid.TabIndex = 1;
             // 
             // pnlPieChart
             // 
-            pnlPieChart.BackColor = Color.White;
-            pnlPieChart.BorderStyle = BorderStyle.FixedSingle;
+            pnlPieChart.BackColor = Color.Transparent;
+            pnlPieChart.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlPieChart.BorderRadius = 10;
+            pnlPieChart.BorderThickness = 1;
+            pnlPieChart.Controls.Add(pnlPieChartContainer);
             pnlPieChart.Controls.Add(lblPieTitle);
-            pnlPieChart.Location = new Point(33, 284);
-            pnlPieChart.Margin = new Padding(5, 4, 5, 4);
+            pnlPieChart.CustomizableEdges = customizableEdges9;
+            pnlPieChart.Dock = DockStyle.Fill;
+            pnlPieChart.FillColor = Color.White;
+            pnlPieChart.Location = new Point(10, 10);
+            pnlPieChart.Margin = new Padding(10);
             pnlPieChart.Name = "pnlPieChart";
-            pnlPieChart.Size = new Size(699, 491);
-            pnlPieChart.TabIndex = 3;
+            pnlPieChart.Padding = new Padding(20, 15, 20, 15);
+            pnlPieChart.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            pnlPieChart.Size = new Size(657, 321);
+            pnlPieChart.TabIndex = 0;
+            // 
+            // pnlPieChartContainer
+            // 
+            pnlPieChartContainer.Location = new Point(17, 56);
+            pnlPieChartContainer.Name = "pnlPieChartContainer";
+            pnlPieChartContainer.Size = new Size(617, 247);
+            pnlPieChartContainer.TabIndex = 1;
             // 
             // lblPieTitle
             // 
             lblPieTitle.AutoSize = true;
-            lblPieTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            lblPieTitle.Location = new Point(21, 12);
-            lblPieTitle.Margin = new Padding(5, 0, 5, 0);
+            lblPieTitle.Dock = DockStyle.Top;
+            lblPieTitle.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            lblPieTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblPieTitle.Location = new Point(20, 15);
             lblPieTitle.Name = "lblPieTitle";
-            lblPieTitle.Size = new Size(211, 28);
-            lblPieTitle.TabIndex = 1;
-            lblPieTitle.Text = "Students by Program";
+            lblPieTitle.Padding = new Padding(0, 0, 0, 10);
+            lblPieTitle.Size = new Size(330, 38);
+            lblPieTitle.TabIndex = 0;
+            lblPieTitle.Text = "Cơ Cấu Sinh Viên Theo Ngành Học";
             // 
             // pnlLineChart
             // 
-            pnlLineChart.BackColor = Color.White;
-            pnlLineChart.BorderStyle = BorderStyle.FixedSingle;
+            pnlLineChart.BackColor = Color.Transparent;
+            pnlLineChart.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlLineChart.BorderRadius = 10;
+            pnlLineChart.BorderThickness = 1;
+            pnlLineChart.Controls.Add(pnlLineChartContainer);
             pnlLineChart.Controls.Add(lblLineTitle);
-            pnlLineChart.Location = new Point(767, 284);
-            pnlLineChart.Margin = new Padding(5, 4, 5, 4);
+            pnlLineChart.CustomizableEdges = customizableEdges11;
+            pnlLineChart.Dock = DockStyle.Fill;
+            pnlLineChart.FillColor = Color.White;
+            pnlLineChart.Location = new Point(687, 10);
+            pnlLineChart.Margin = new Padding(10);
             pnlLineChart.Name = "pnlLineChart";
-            pnlLineChart.Size = new Size(732, 491);
-            pnlLineChart.TabIndex = 4;
+            pnlLineChart.Padding = new Padding(20, 15, 20, 15);
+            pnlLineChart.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            pnlLineChart.Size = new Size(657, 321);
+            pnlLineChart.TabIndex = 1;
+            // 
+            // pnlLineChartContainer
+            // 
+            pnlLineChartContainer.Location = new Point(20, 56);
+            pnlLineChartContainer.Name = "pnlLineChartContainer";
+            pnlLineChartContainer.Size = new Size(617, 247);
+            pnlLineChartContainer.TabIndex = 2;
             // 
             // lblLineTitle
             // 
             lblLineTitle.AutoSize = true;
-            lblLineTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            lblLineTitle.Location = new Point(21, 12);
-            lblLineTitle.Margin = new Padding(5, 0, 5, 0);
+            lblLineTitle.Dock = DockStyle.Top;
+            lblLineTitle.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            lblLineTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblLineTitle.Location = new Point(20, 15);
             lblLineTitle.Name = "lblLineTitle";
-            lblLineTitle.Size = new Size(175, 28);
-            lblLineTitle.TabIndex = 1;
-            lblLineTitle.Text = "Enrollment Trend";
+            lblLineTitle.Padding = new Padding(0, 0, 0, 10);
+            lblLineTitle.Size = new Size(264, 38);
+            lblLineTitle.TabIndex = 0;
+            lblLineTitle.Text = "Biểu Đồ Xu Hướng Đào Tạo";
             // 
             // pnlDoughnutChart
             // 
-            pnlDoughnutChart.BackColor = Color.White;
-            pnlDoughnutChart.BorderStyle = BorderStyle.FixedSingle;
+            pnlDoughnutChart.BackColor = Color.Transparent;
+            pnlDoughnutChart.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlDoughnutChart.BorderRadius = 10;
+            pnlDoughnutChart.BorderThickness = 1;
+            pnlDoughnutChart.Controls.Add(pnlDoughnutChartContainer);
             pnlDoughnutChart.Controls.Add(lblDoughnutTitle);
-            pnlDoughnutChart.Location = new Point(33, 808);
-            pnlDoughnutChart.Margin = new Padding(5, 4, 5, 4);
+            pnlDoughnutChart.CustomizableEdges = customizableEdges13;
+            pnlDoughnutChart.Dock = DockStyle.Fill;
+            pnlDoughnutChart.FillColor = Color.White;
+            pnlDoughnutChart.Location = new Point(10, 351);
+            pnlDoughnutChart.Margin = new Padding(10);
             pnlDoughnutChart.Name = "pnlDoughnutChart";
-            pnlDoughnutChart.Size = new Size(699, 491);
-            pnlDoughnutChart.TabIndex = 5;
+            pnlDoughnutChart.Padding = new Padding(20, 15, 20, 15);
+            pnlDoughnutChart.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            pnlDoughnutChart.Size = new Size(657, 322);
+            pnlDoughnutChart.TabIndex = 2;
+            // 
+            // pnlDoughnutChartContainer
+            // 
+            pnlDoughnutChartContainer.Location = new Point(17, 53);
+            pnlDoughnutChartContainer.Name = "pnlDoughnutChartContainer";
+            pnlDoughnutChartContainer.Size = new Size(617, 247);
+            pnlDoughnutChartContainer.TabIndex = 2;
             // 
             // lblDoughnutTitle
             // 
             lblDoughnutTitle.AutoSize = true;
-            lblDoughnutTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            lblDoughnutTitle.Location = new Point(21, 12);
-            lblDoughnutTitle.Margin = new Padding(5, 0, 5, 0);
+            lblDoughnutTitle.Dock = DockStyle.Top;
+            lblDoughnutTitle.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            lblDoughnutTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblDoughnutTitle.Location = new Point(20, 15);
             lblDoughnutTitle.Name = "lblDoughnutTitle";
-            lblDoughnutTitle.Size = new Size(217, 28);
-            lblDoughnutTitle.TabIndex = 1;
-            lblDoughnutTitle.Text = "Attendance Overview";
+            lblDoughnutTitle.Padding = new Padding(0, 0, 0, 10);
+            lblDoughnutTitle.Size = new Size(321, 38);
+            lblDoughnutTitle.TabIndex = 0;
+            lblDoughnutTitle.Text = "Tình Trạng Xử Lý Đơn Thư Học Vụ";
             // 
             // pnlTopCourses
             // 
-            pnlTopCourses.BackColor = Color.White;
-            pnlTopCourses.BorderStyle = BorderStyle.FixedSingle;
-            pnlTopCourses.Controls.Add(lblTopCoursesTitle);
+            pnlTopCourses.BackColor = Color.Transparent;
+            pnlTopCourses.BorderColor = Color.FromArgb(226, 232, 240);
+            pnlTopCourses.BorderRadius = 10;
+            pnlTopCourses.BorderThickness = 1;
             pnlTopCourses.Controls.Add(dgvTopCourses);
-            pnlTopCourses.Location = new Point(767, 808);
-            pnlTopCourses.Margin = new Padding(5, 4, 5, 4);
+            pnlTopCourses.Controls.Add(lblTopCoursesTitle);
+            pnlTopCourses.CustomizableEdges = customizableEdges15;
+            pnlTopCourses.Dock = DockStyle.Fill;
+            pnlTopCourses.FillColor = Color.White;
+            pnlTopCourses.Location = new Point(687, 351);
+            pnlTopCourses.Margin = new Padding(10);
             pnlTopCourses.Name = "pnlTopCourses";
-            pnlTopCourses.Size = new Size(732, 491);
-            pnlTopCourses.TabIndex = 6;
-            // 
-            // lblTopCoursesTitle
-            // 
-            lblTopCoursesTitle.AutoSize = true;
-            lblTopCoursesTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            lblTopCoursesTitle.Location = new Point(21, 12);
-            lblTopCoursesTitle.Margin = new Padding(5, 0, 5, 0);
-            lblTopCoursesTitle.Name = "lblTopCoursesTitle";
-            lblTopCoursesTitle.Size = new Size(237, 28);
-            lblTopCoursesTitle.TabIndex = 1;
-            lblTopCoursesTitle.Text = "Top Performing Courses";
+            pnlTopCourses.Padding = new Padding(20, 15, 20, 15);
+            pnlTopCourses.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            pnlTopCourses.Size = new Size(657, 322);
+            pnlTopCourses.TabIndex = 3;
             // 
             // dgvTopCourses
             // 
@@ -291,37 +439,42 @@ namespace ClassProject.Presentation.Forms.Admin
             dgvTopCourses.BackgroundColor = Color.White;
             dgvTopCourses.BorderStyle = BorderStyle.None;
             dgvTopCourses.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvTopCourses.Location = new Point(21, 65);
-            dgvTopCourses.Margin = new Padding(5, 4, 5, 4);
+            dgvTopCourses.Dock = DockStyle.Fill;
+            dgvTopCourses.Location = new Point(20, 53);
             dgvTopCourses.Name = "dgvTopCourses";
             dgvTopCourses.ReadOnly = true;
             dgvTopCourses.RowHeadersVisible = false;
             dgvTopCourses.RowHeadersWidth = 51;
             dgvTopCourses.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvTopCourses.Size = new Size(687, 400);
+            dgvTopCourses.Size = new Size(617, 254);
             dgvTopCourses.TabIndex = 0;
+            // 
+            // lblTopCoursesTitle
+            // 
+            lblTopCoursesTitle.AutoSize = true;
+            lblTopCoursesTitle.Dock = DockStyle.Top;
+            lblTopCoursesTitle.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            lblTopCoursesTitle.ForeColor = Color.FromArgb(15, 23, 42);
+            lblTopCoursesTitle.Location = new Point(20, 15);
+            lblTopCoursesTitle.Name = "lblTopCoursesTitle";
+            lblTopCoursesTitle.Padding = new Padding(0, 0, 0, 10);
+            lblTopCoursesTitle.Size = new Size(262, 38);
+            lblTopCoursesTitle.TabIndex = 1;
+            lblTopCoursesTitle.Text = "Kết Quả Học Phần Xuất Sắc";
             // 
             // DashBoardForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            AutoScroll = true;
             BackColor = Color.FromArgb(241, 245, 249);
-            ClientSize = new Size(1534, 1222);
-            Controls.Add(pnlTopCourses);
-            Controls.Add(pnlDoughnutChart);
-            Controls.Add(pnlLineChart);
-            Controls.Add(pnlPieChart);
-            Controls.Add(pnlCard4);
-            Controls.Add(pnlCard3);
-            Controls.Add(pnlCard2);
-            Controls.Add(pnlCard1);
+            ClientSize = new Size(1400, 850);
+            Controls.Add(tlpMainLayout);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(5, 4, 5, 4);
             Name = "DashBoardForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "StatisticsForm";
-            Load += DashBoardForm_Load;
+            Text = "Hệ Thống Thống Kê Giám Sát";
+            tlpMainLayout.ResumeLayout(false);
+            tlpCardsGrid.ResumeLayout(false);
             pnlCard1.ResumeLayout(false);
             pnlCard1.PerformLayout();
             pnlCard2.ResumeLayout(false);
@@ -330,6 +483,7 @@ namespace ClassProject.Presentation.Forms.Admin
             pnlCard3.PerformLayout();
             pnlCard4.ResumeLayout(false);
             pnlCard4.PerformLayout();
+            tlpChartsGrid.ResumeLayout(false);
             pnlPieChart.ResumeLayout(false);
             pnlPieChart.PerformLayout();
             pnlLineChart.ResumeLayout(false);
@@ -340,33 +494,36 @@ namespace ClassProject.Presentation.Forms.Admin
             pnlTopCourses.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvTopCourses).EndInit();
             ResumeLayout(false);
-
         }
 
         #endregion
-        private System.Windows.Forms.Panel pnlCard1;
+
+        private System.Windows.Forms.TableLayoutPanel tlpMainLayout;
+        private System.Windows.Forms.TableLayoutPanel tlpCardsGrid;
+        private System.Windows.Forms.TableLayoutPanel tlpChartsGrid;
+        private Guna.UI2.WinForms.Guna2Panel pnlCard1;
         private System.Windows.Forms.Label lblTotalStudentsVal;
         private System.Windows.Forms.Label lblTotalStudents;
-        private System.Windows.Forms.Panel pnlCard2;
+        private Guna.UI2.WinForms.Guna2Panel pnlCard2;
         private System.Windows.Forms.Label lblNewAdmissionsVal;
         private System.Windows.Forms.Label lblNewAdmissions;
-        private System.Windows.Forms.Panel pnlCard3;
+        private Guna.UI2.WinForms.Guna2Panel pnlCard3;
         private System.Windows.Forms.Label lblAttendanceRateVal;
         private System.Windows.Forms.Label lblAttendanceRate;
-        private System.Windows.Forms.Panel pnlCard4;
+        private Guna.UI2.WinForms.Guna2Panel pnlCard4;
         private System.Windows.Forms.Label lblPassRateVal;
         private System.Windows.Forms.Label lblPassRate;
-        private System.Windows.Forms.Panel pnlPieChart;
+        private Guna.UI2.WinForms.Guna2Panel pnlPieChart;
         private System.Windows.Forms.Label lblPieTitle;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chartStudentsByProgram;
-        private System.Windows.Forms.Panel pnlLineChart;
+        private Guna.UI2.WinForms.Guna2Panel pnlLineChart;
         private System.Windows.Forms.Label lblLineTitle;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chartEnrollmentTrend;
-        private System.Windows.Forms.Panel pnlDoughnutChart;
+        private Guna.UI2.WinForms.Guna2Panel pnlDoughnutChart;
         private System.Windows.Forms.Label lblDoughnutTitle;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chartAttendanceOverview;
-        private System.Windows.Forms.Panel pnlTopCourses;
+        private Guna.UI2.WinForms.Guna2Panel pnlTopCourses;
         private System.Windows.Forms.Label lblTopCoursesTitle;
         private System.Windows.Forms.DataGridView dgvTopCourses;
+        private Panel pnlPieChartContainer;
+        private Panel pnlLineChartContainer;
+        private Panel pnlDoughnutChartContainer;
     }
 }

@@ -28,8 +28,8 @@ namespace ClassProject.Presentation.Forms.Admin
             if (txtPhone != null) txtPhone.KeyPress += TxtPhone_KeyPress;
 
             // Đăng ký sự kiện tự động tạo Email/Username khi Admin nhập chữ vào ô Họ & Tên
-            txtLastName.TextChanged += AutoGenerateEmail_TextChanged;
             txtFirstName.TextChanged += AutoGenerateEmail_TextChanged;
+            txtLastName.TextChanged += AutoGenerateEmail_TextChanged;
         }
 
         private void ManageTeacherForm_Load(object sender, EventArgs e)
@@ -303,8 +303,8 @@ namespace ClassProject.Presentation.Forms.Admin
             }
 
             // Gán ngược dữ liệu lên TextBox để phục vụ sửa đổi
-            txtLastName.TextChanged -= AutoGenerateEmail_TextChanged;
             txtFirstName.TextChanged -= AutoGenerateEmail_TextChanged;
+            txtLastName.TextChanged -= AutoGenerateEmail_TextChanged;
 
             _selectedTeacherId = Convert.ToInt32(row.Cells["Id"].Value);
             txtTeacherCode.Text = row.Cells["MSGV"].Value?.ToString();
@@ -327,8 +327,8 @@ namespace ClassProject.Presentation.Forms.Admin
                 if (chkActive != null) chkActive.Checked = Convert.ToInt32(row.Cells["Status"].Value) == 1;
             }
 
-            txtLastName.TextChanged += AutoGenerateEmail_TextChanged;
             txtFirstName.TextChanged += AutoGenerateEmail_TextChanged;
+            txtLastName.TextChanged += AutoGenerateEmail_TextChanged;
         }
 
         private void SwitchMode(bool editMode)
@@ -351,8 +351,8 @@ namespace ClassProject.Presentation.Forms.Admin
         private void ResetFormToInsertMode()
         {
             txtTeacherCode.Clear();
-            txtFirstName.Clear();
             txtLastName.Clear();
+            txtFirstName.Clear();
             txtPhone.Clear();
             txtEmail.Clear();
             _selectedTeacherId = -1;
