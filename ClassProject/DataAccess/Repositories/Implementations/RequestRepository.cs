@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ClassProject.DataAccess.Repositories.Implementations
 {
-    internal class RequestRepository
+    public class RequestRepository
     {
         private readonly string _connectionString;
 

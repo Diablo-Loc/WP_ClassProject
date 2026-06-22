@@ -35,6 +35,8 @@ namespace ClassProject.DataAccess.Entities
         public int HocKy { get; set; }
         public string NamHoc { get; set; }
 
+        public int ThuHoc { get; set; } // 2: Thứ 2, 3: Thứ 3, ..., 7: Thứ 7, 8: Chủ nhật
+        public int CaHoc { get; set; } // 1: Sáng, 2: Chiều, 3: Tối
         public string MSGV { get; set; }
 
         public string PhongHoc { get; set; }

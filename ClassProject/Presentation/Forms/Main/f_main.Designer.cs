@@ -58,6 +58,14 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges25 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges23 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges26 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges27 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             guna2PictureBox1 = new Guna.UI2.WinForms.Guna2PictureBox();
             guna2Panel1 = new Guna.UI2.WinForms.Guna2Panel();
             pnlinfor = new Panel();
@@ -82,6 +90,14 @@
             pnlContainer = new Guna.UI2.WinForms.Guna2Panel();
             timerClock = new System.Windows.Forms.Timer(components);
             ctxNotificationMenu = new ContextMenuStrip(components);
+            btnToggleAiChat = new Guna.UI2.WinForms.Guna2CircleButton();
+            pnlAiChatBox = new Guna.UI2.WinForms.Guna2Panel();
+            flowChatHistory = new FlowLayoutPanel();
+            pnlAiHeader = new Guna.UI2.WinForms.Guna2Panel();
+            lblAiTitle = new Label();
+            btnCloseAiChat = new Guna.UI2.WinForms.Guna2CircleButton();
+            lblAiStatus = new Label();
+            txtAiSearch = new Guna.UI2.WinForms.Guna2TextBox();
             ((System.ComponentModel.ISupportInitialize)guna2PictureBox1).BeginInit();
             guna2Panel1.SuspendLayout();
             pnlinfor.SuspendLayout();
@@ -89,6 +105,8 @@
             pnlNavigation.SuspendLayout();
             flowMenu.SuspendLayout();
             pnlStatusBar.SuspendLayout();
+            pnlAiChatBox.SuspendLayout();
+            pnlAiHeader.SuspendLayout();
             SuspendLayout();
             // 
             // guna2PictureBox1
@@ -474,12 +492,137 @@
             ctxNotificationMenu.Name = "ctxNotificationMenu";
             ctxNotificationMenu.Size = new Size(61, 4);
             // 
+            // btnToggleAiChat
+            // 
+            btnToggleAiChat.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnToggleAiChat.Cursor = Cursors.Hand;
+            btnToggleAiChat.FillColor = Color.FromArgb(0, 120, 212);
+            btnToggleAiChat.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            btnToggleAiChat.ForeColor = Color.White;
+            btnToggleAiChat.Location = new Point(1050, 495);
+            btnToggleAiChat.Name = "btnToggleAiChat";
+            btnToggleAiChat.ShadowDecoration.Color = Color.FromArgb(40, 0, 120, 212);
+            btnToggleAiChat.ShadowDecoration.CustomizableEdges = customizableEdges22;
+            btnToggleAiChat.ShadowDecoration.Depth = 10;
+            btnToggleAiChat.ShadowDecoration.Enabled = true;
+            btnToggleAiChat.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
+            btnToggleAiChat.Size = new Size(55, 55);
+            btnToggleAiChat.TabIndex = 6;
+            btnToggleAiChat.Text = "🤖";
+            btnToggleAiChat.Click += btnToggleAiChat_Click;
+            // 
+            // pnlAiChatBox
+            // 
+            pnlAiChatBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            pnlAiChatBox.BackColor = Color.Transparent;
+            pnlAiChatBox.BorderColor = Color.FromArgb(218, 223, 230);
+            pnlAiChatBox.BorderRadius = 16;
+            pnlAiChatBox.BorderThickness = 3;
+            pnlAiChatBox.Controls.Add(flowChatHistory);
+            pnlAiChatBox.Controls.Add(pnlAiHeader);
+            pnlAiChatBox.Controls.Add(lblAiStatus);
+            pnlAiChatBox.Controls.Add(txtAiSearch);
+            pnlAiChatBox.CustomizableEdges = customizableEdges28;
+            pnlAiChatBox.FillColor = Color.FromArgb(192, 255, 255);
+            pnlAiChatBox.Location = new Point(710, 133);
+            pnlAiChatBox.Name = "pnlAiChatBox";
+            pnlAiChatBox.ShadowDecoration.Color = Color.FromArgb(35, 0, 0, 0);
+            pnlAiChatBox.ShadowDecoration.CustomizableEdges = customizableEdges29;
+            pnlAiChatBox.ShadowDecoration.Depth = 15;
+            pnlAiChatBox.ShadowDecoration.Enabled = true;
+            pnlAiChatBox.Size = new Size(395, 415);
+            pnlAiChatBox.TabIndex = 7;
+            pnlAiChatBox.Visible = false;
+            // 
+            // flowChatHistory
+            // 
+            flowChatHistory.AutoScroll = true;
+            flowChatHistory.BackColor = Color.FromArgb(192, 255, 255);
+            flowChatHistory.Location = new Point(1, 46);
+            flowChatHistory.Name = "flowChatHistory";
+            flowChatHistory.Padding = new Padding(10);
+            flowChatHistory.Size = new Size(393, 290);
+            flowChatHistory.TabIndex = 1;
+            // 
+            // pnlAiHeader
+            // 
+            pnlAiHeader.BorderRadius = 16;
+            pnlAiHeader.Controls.Add(lblAiTitle);
+            pnlAiHeader.Controls.Add(btnCloseAiChat);
+            pnlAiHeader.CustomizableEdges = customizableEdges24;
+            pnlAiHeader.Dock = DockStyle.Top;
+            pnlAiHeader.FillColor = Color.FromArgb(0, 120, 212);
+            pnlAiHeader.Location = new Point(0, 0);
+            pnlAiHeader.Name = "pnlAiHeader";
+            pnlAiHeader.ShadowDecoration.CustomizableEdges = customizableEdges25;
+            pnlAiHeader.Size = new Size(395, 45);
+            pnlAiHeader.TabIndex = 0;
+            // 
+            // lblAiTitle
+            // 
+            lblAiTitle.AutoSize = true;
+            lblAiTitle.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold);
+            lblAiTitle.ForeColor = Color.White;
+            lblAiTitle.Location = new Point(15, 11);
+            lblAiTitle.Name = "lblAiTitle";
+            lblAiTitle.Size = new Size(188, 25);
+            lblAiTitle.TabIndex = 0;
+            lblAiTitle.Text = "Trợ lý thông minh AI";
+            // 
+            // btnCloseAiChat
+            // 
+            btnCloseAiChat.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCloseAiChat.BackColor = Color.Transparent;
+            btnCloseAiChat.Cursor = Cursors.Hand;
+            btnCloseAiChat.FillColor = Color.FromArgb(40, 255, 255, 255);
+            btnCloseAiChat.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnCloseAiChat.ForeColor = Color.White;
+            btnCloseAiChat.Location = new Point(355, 9);
+            btnCloseAiChat.Name = "btnCloseAiChat";
+            btnCloseAiChat.ShadowDecoration.CustomizableEdges = customizableEdges23;
+            btnCloseAiChat.Size = new Size(26, 26);
+            btnCloseAiChat.TabIndex = 1;
+            btnCloseAiChat.Text = "✕";
+            btnCloseAiChat.Click += btnCloseAiChat_Click;
+            // 
+            // lblAiStatus
+            // 
+            lblAiStatus.AutoSize = true;
+            lblAiStatus.Font = new Font("Segoe UI", 8.5F, FontStyle.Italic);
+            lblAiStatus.ForeColor = Color.FromArgb(120, 130, 140);
+            lblAiStatus.Location = new Point(12, 342);
+            lblAiStatus.Name = "lblAiStatus";
+            lblAiStatus.Size = new Size(131, 20);
+            lblAiStatus.TabIndex = 2;
+            lblAiStatus.Text = "Hệ thống sẵn sàng.";
+            // 
+            // txtAiSearch
+            // 
+            txtAiSearch.BackColor = Color.Transparent;
+            txtAiSearch.BorderColor = Color.FromArgb(218, 223, 230);
+            txtAiSearch.BorderRadius = 8;
+            txtAiSearch.CustomizableEdges = customizableEdges26;
+            txtAiSearch.DefaultText = "";
+            txtAiSearch.Font = new Font("Segoe UI", 9.5F);
+            txtAiSearch.ForeColor = Color.FromArgb(31, 41, 55);
+            txtAiSearch.Location = new Point(10, 365);
+            txtAiSearch.Margin = new Padding(3, 4, 3, 4);
+            txtAiSearch.Name = "txtAiSearch";
+            txtAiSearch.PlaceholderText = "Nhập câu hỏi tại đây... (Ấn Enter)";
+            txtAiSearch.SelectedText = "";
+            txtAiSearch.ShadowDecoration.CustomizableEdges = customizableEdges27;
+            txtAiSearch.Size = new Size(324, 40);
+            txtAiSearch.TabIndex = 2;
+            txtAiSearch.KeyDown += txtAiSearch_KeyDown;
+            // 
             // f_main
             // 
             AutoScaleDimensions = new SizeF(120F, 120F);
             AutoScaleMode = AutoScaleMode.Dpi;
             BackColor = Color.FromArgb(243, 244, 246);
             ClientSize = new Size(1128, 600);
+            Controls.Add(pnlAiChatBox);
+            Controls.Add(btnToggleAiChat);
             Controls.Add(pnlContainer);
             Controls.Add(pnlNavigation);
             Controls.Add(pnlStatusBar);
@@ -498,6 +641,10 @@
             flowMenu.ResumeLayout(false);
             pnlStatusBar.ResumeLayout(false);
             pnlStatusBar.PerformLayout();
+            pnlAiChatBox.ResumeLayout(false);
+            pnlAiChatBox.PerformLayout();
+            pnlAiHeader.ResumeLayout(false);
+            pnlAiHeader.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -527,5 +674,15 @@
         private Button btnScrollRight;
         private System.Windows.Forms.ContextMenuStrip ctxNotificationMenu;
         private Panel pnlinfor;
+
+        // HỆ THỐNG BIẾN THÀNH PHẦN AI NÂNG CẤP KHUNG LỊCH SỬ CHAT
+        private Guna.UI2.WinForms.Guna2Panel pnlAiChatBox;
+        private Guna.UI2.WinForms.Guna2Panel pnlAiHeader;
+        private System.Windows.Forms.Label lblAiTitle;
+        private Guna.UI2.WinForms.Guna2CircleButton btnCloseAiChat;
+        private System.Windows.Forms.FlowLayoutPanel flowChatHistory; // Biến mấu chốt chứa bong bóng chat cuộn xem lịch sử
+        private Guna.UI2.WinForms.Guna2CircleButton btnToggleAiChat;
+        private Guna.UI2.WinForms.Guna2TextBox txtAiSearch;
+        private System.Windows.Forms.Label lblAiStatus;
     }
 }

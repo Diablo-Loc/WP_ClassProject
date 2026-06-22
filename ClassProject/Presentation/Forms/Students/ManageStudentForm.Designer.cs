@@ -22,8 +22,8 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
@@ -38,24 +38,27 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges31 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges32 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges33 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges34 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges23 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges31 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges32 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges25 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges26 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges27 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             pnlTopNavbar = new Guna.UI2.WinForms.Guna2Panel();
             lblTitle = new Label();
             pnlSidebar = new Guna.UI2.WinForms.Guna2Panel();
+            btnDelete = new Guna.UI2.WinForms.Guna2Button();
             btnGenerateAccounts = new Guna.UI2.WinForms.Guna2Button();
             btnExportPDF = new Guna.UI2.WinForms.Guna2Button();
             btnExportExcel = new Guna.UI2.WinForms.Guna2Button();
@@ -91,11 +94,11 @@
             btnRefresh.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnRefresh.ForeColor = Color.FromArgb(108, 117, 125);
             btnRefresh.HoverState.FillColor = Color.FromArgb(248, 249, 250);
-            btnRefresh.Location = new Point(16, 423);
-            btnRefresh.Margin = new Padding(5, 4, 5, 4);
+            btnRefresh.Location = new Point(0, 293);
+            btnRefresh.Margin = new Padding(4, 3, 4, 3);
             btnRefresh.Name = "btnRefresh";
             btnRefresh.ShadowDecoration.CustomizableEdges = customizableEdges2;
-            btnRefresh.Size = new Size(262, 69);
+            btnRefresh.Size = new Size(257, 39);
             btnRefresh.TabIndex = 5;
             btnRefresh.Text = "🔄  Làm mới";
             btnRefresh.TextAlign = HorizontalAlignment.Left;
@@ -108,10 +111,10 @@
             pnlTopNavbar.CustomizableEdges = customizableEdges3;
             pnlTopNavbar.Dock = DockStyle.Top;
             pnlTopNavbar.Location = new Point(0, 0);
-            pnlTopNavbar.Margin = new Padding(5, 4, 5, 4);
+            pnlTopNavbar.Margin = new Padding(4, 3, 4, 3);
             pnlTopNavbar.Name = "pnlTopNavbar";
             pnlTopNavbar.ShadowDecoration.CustomizableEdges = customizableEdges4;
-            pnlTopNavbar.Size = new Size(1686, 100);
+            pnlTopNavbar.Size = new Size(1475, 75);
             pnlTopNavbar.TabIndex = 0;
             // 
             // lblTitle
@@ -119,16 +122,17 @@
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(33, 37, 41);
-            lblTitle.Location = new Point(313, 28);
-            lblTitle.Margin = new Padding(5, 0, 5, 0);
+            lblTitle.Location = new Point(274, 21);
+            lblTitle.Margin = new Padding(4, 0, 4, 0);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(319, 37);
+            lblTitle.Size = new Size(258, 30);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "DANH SÁCH SINH VIÊN";
             // 
             // pnlSidebar
             // 
             pnlSidebar.BackColor = Color.White;
+            pnlSidebar.Controls.Add(btnDelete);
             pnlSidebar.Controls.Add(btnGenerateAccounts);
             pnlSidebar.Controls.Add(btnExportPDF);
             pnlSidebar.Controls.Add(btnRefresh);
@@ -137,28 +141,46 @@
             pnlSidebar.Controls.Add(btnInsert);
             pnlSidebar.Controls.Add(btnActiveTab);
             pnlSidebar.Controls.Add(pnlTotalCard);
-            pnlSidebar.CustomizableEdges = customizableEdges19;
+            pnlSidebar.CustomizableEdges = customizableEdges21;
             pnlSidebar.Dock = DockStyle.Left;
-            pnlSidebar.Location = new Point(0, 100);
-            pnlSidebar.Margin = new Padding(5, 4, 5, 4);
+            pnlSidebar.Location = new Point(0, 75);
+            pnlSidebar.Margin = new Padding(4, 3, 4, 3);
             pnlSidebar.Name = "pnlSidebar";
-            pnlSidebar.ShadowDecoration.CustomizableEdges = customizableEdges20;
-            pnlSidebar.Size = new Size(294, 1071);
+            pnlSidebar.ShadowDecoration.CustomizableEdges = customizableEdges22;
+            pnlSidebar.Size = new Size(257, 721);
             pnlSidebar.TabIndex = 1;
+            // 
+            // btnDelete
+            // 
+            btnDelete.BorderRadius = 8;
+            btnDelete.CustomizableEdges = customizableEdges5;
+            btnDelete.FillColor = Color.Transparent;
+            btnDelete.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnDelete.ForeColor = Color.FromArgb(108, 117, 125);
+            btnDelete.HoverState.FillColor = Color.FromArgb(248, 249, 250);
+            btnDelete.Location = new Point(0, 110);
+            btnDelete.Margin = new Padding(4, 3, 4, 3);
+            btnDelete.Name = "btnDelete";
+            btnDelete.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            btnDelete.Size = new Size(253, 42);
+            btnDelete.TabIndex = 8;
+            btnDelete.Text = "❌  Xóa sinh viên";
+            btnDelete.TextAlign = HorizontalAlignment.Left;
+            btnDelete.Click += btnDelete_Click;
             // 
             // btnGenerateAccounts
             // 
             btnGenerateAccounts.BorderRadius = 8;
-            btnGenerateAccounts.CustomizableEdges = customizableEdges5;
+            btnGenerateAccounts.CustomizableEdges = customizableEdges7;
             btnGenerateAccounts.FillColor = Color.Transparent;
             btnGenerateAccounts.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnGenerateAccounts.ForeColor = Color.FromArgb(108, 117, 125);
             btnGenerateAccounts.HoverState.FillColor = Color.FromArgb(248, 249, 250);
-            btnGenerateAccounts.Location = new Point(16, 501);
-            btnGenerateAccounts.Margin = new Padding(5, 4, 5, 4);
+            btnGenerateAccounts.Location = new Point(0, 327);
+            btnGenerateAccounts.Margin = new Padding(4, 3, 4, 3);
             btnGenerateAccounts.Name = "btnGenerateAccounts";
-            btnGenerateAccounts.ShadowDecoration.CustomizableEdges = customizableEdges6;
-            btnGenerateAccounts.Size = new Size(262, 69);
+            btnGenerateAccounts.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            btnGenerateAccounts.Size = new Size(229, 52);
             btnGenerateAccounts.TabIndex = 7;
             btnGenerateAccounts.Text = "➕  Tạo tài khoản";
             btnGenerateAccounts.TextAlign = HorizontalAlignment.Left;
@@ -167,16 +189,16 @@
             // btnExportPDF
             // 
             btnExportPDF.BorderRadius = 8;
-            btnExportPDF.CustomizableEdges = customizableEdges7;
+            btnExportPDF.CustomizableEdges = customizableEdges9;
             btnExportPDF.FillColor = Color.Transparent;
             btnExportPDF.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnExportPDF.ForeColor = Color.FromArgb(108, 117, 125);
             btnExportPDF.HoverState.FillColor = Color.FromArgb(248, 249, 250);
-            btnExportPDF.Location = new Point(16, 345);
-            btnExportPDF.Margin = new Padding(5, 4, 5, 4);
+            btnExportPDF.Location = new Point(0, 246);
+            btnExportPDF.Margin = new Padding(4, 3, 4, 3);
             btnExportPDF.Name = "btnExportPDF";
-            btnExportPDF.ShadowDecoration.CustomizableEdges = customizableEdges8;
-            btnExportPDF.Size = new Size(262, 69);
+            btnExportPDF.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            btnExportPDF.Size = new Size(253, 41);
             btnExportPDF.TabIndex = 6;
             btnExportPDF.Text = "📤 Export PDF";
             btnExportPDF.TextAlign = HorizontalAlignment.Left;
@@ -185,16 +207,16 @@
             // btnExportExcel
             // 
             btnExportExcel.BorderRadius = 8;
-            btnExportExcel.CustomizableEdges = customizableEdges9;
+            btnExportExcel.CustomizableEdges = customizableEdges11;
             btnExportExcel.FillColor = Color.Transparent;
             btnExportExcel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnExportExcel.ForeColor = Color.FromArgb(108, 117, 125);
             btnExportExcel.HoverState.FillColor = Color.FromArgb(248, 249, 250);
-            btnExportExcel.Location = new Point(16, 269);
-            btnExportExcel.Margin = new Padding(5, 4, 5, 4);
+            btnExportExcel.Location = new Point(0, 199);
+            btnExportExcel.Margin = new Padding(4, 3, 4, 3);
             btnExportExcel.Name = "btnExportExcel";
-            btnExportExcel.ShadowDecoration.CustomizableEdges = customizableEdges10;
-            btnExportExcel.Size = new Size(262, 69);
+            btnExportExcel.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            btnExportExcel.Size = new Size(249, 41);
             btnExportExcel.TabIndex = 4;
             btnExportExcel.Text = "📤  Export Excel";
             btnExportExcel.TextAlign = HorizontalAlignment.Left;
@@ -203,16 +225,16 @@
             // btnImportExcel
             // 
             btnImportExcel.BorderRadius = 8;
-            btnImportExcel.CustomizableEdges = customizableEdges11;
+            btnImportExcel.CustomizableEdges = customizableEdges13;
             btnImportExcel.FillColor = Color.Transparent;
             btnImportExcel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnImportExcel.ForeColor = Color.FromArgb(108, 117, 125);
             btnImportExcel.HoverState.FillColor = Color.FromArgb(248, 249, 250);
-            btnImportExcel.Location = new Point(16, 184);
-            btnImportExcel.Margin = new Padding(5, 4, 5, 4);
+            btnImportExcel.Location = new Point(0, 158);
+            btnImportExcel.Margin = new Padding(4, 3, 4, 3);
             btnImportExcel.Name = "btnImportExcel";
-            btnImportExcel.ShadowDecoration.CustomizableEdges = customizableEdges12;
-            btnImportExcel.Size = new Size(262, 69);
+            btnImportExcel.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            btnImportExcel.Size = new Size(253, 35);
             btnImportExcel.TabIndex = 3;
             btnImportExcel.Text = "📥  Import Excel";
             btnImportExcel.TextAlign = HorizontalAlignment.Left;
@@ -221,16 +243,16 @@
             // btnInsert
             // 
             btnInsert.BorderRadius = 8;
-            btnInsert.CustomizableEdges = customizableEdges13;
+            btnInsert.CustomizableEdges = customizableEdges15;
             btnInsert.FillColor = Color.Transparent;
             btnInsert.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnInsert.ForeColor = Color.FromArgb(108, 117, 125);
             btnInsert.HoverState.FillColor = Color.FromArgb(248, 249, 250);
-            btnInsert.Location = new Point(16, 100);
-            btnInsert.Margin = new Padding(5, 4, 5, 4);
+            btnInsert.Location = new Point(0, 61);
+            btnInsert.Margin = new Padding(4, 3, 4, 3);
             btnInsert.Name = "btnInsert";
-            btnInsert.ShadowDecoration.CustomizableEdges = customizableEdges14;
-            btnInsert.Size = new Size(262, 69);
+            btnInsert.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            btnInsert.Size = new Size(253, 43);
             btnInsert.TabIndex = 2;
             btnInsert.Text = "➕  Thêm sinh viên";
             btnInsert.TextAlign = HorizontalAlignment.Left;
@@ -239,15 +261,15 @@
             // btnActiveTab
             // 
             btnActiveTab.BorderRadius = 8;
-            btnActiveTab.CustomizableEdges = customizableEdges15;
+            btnActiveTab.CustomizableEdges = customizableEdges17;
             btnActiveTab.FillColor = Color.FromArgb(230, 242, 255);
             btnActiveTab.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnActiveTab.ForeColor = Color.FromArgb(13, 110, 253);
-            btnActiveTab.Location = new Point(16, 16);
-            btnActiveTab.Margin = new Padding(5, 4, 5, 4);
+            btnActiveTab.Location = new Point(14, 12);
+            btnActiveTab.Margin = new Padding(4, 3, 4, 3);
             btnActiveTab.Name = "btnActiveTab";
-            btnActiveTab.ShadowDecoration.CustomizableEdges = customizableEdges16;
-            btnActiveTab.Size = new Size(262, 69);
+            btnActiveTab.ShadowDecoration.CustomizableEdges = customizableEdges18;
+            btnActiveTab.Size = new Size(229, 52);
             btnActiveTab.TabIndex = 1;
             btnActiveTab.Text = "👥  Danh sách sinh viên";
             btnActiveTab.TextAlign = HorizontalAlignment.Left;
@@ -258,13 +280,13 @@
             pnlTotalCard.BorderRadius = 12;
             pnlTotalCard.Controls.Add(lblTotalCount);
             pnlTotalCard.Controls.Add(lblTotalTitle);
-            pnlTotalCard.CustomizableEdges = customizableEdges17;
+            pnlTotalCard.CustomizableEdges = customizableEdges19;
             pnlTotalCard.FillColor = Color.FromArgb(51, 122, 255);
-            pnlTotalCard.Location = new Point(16, 883);
-            pnlTotalCard.Margin = new Padding(5, 4, 5, 4);
+            pnlTotalCard.Location = new Point(14, 580);
+            pnlTotalCard.Margin = new Padding(4, 3, 4, 3);
             pnlTotalCard.Name = "pnlTotalCard";
-            pnlTotalCard.ShadowDecoration.CustomizableEdges = customizableEdges18;
-            pnlTotalCard.Size = new Size(262, 169);
+            pnlTotalCard.ShadowDecoration.CustomizableEdges = customizableEdges20;
+            pnlTotalCard.Size = new Size(229, 127);
             pnlTotalCard.TabIndex = 0;
             // 
             // lblTotalCount
@@ -273,10 +295,10 @@
             lblTotalCount.BackColor = Color.Transparent;
             lblTotalCount.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
             lblTotalCount.ForeColor = Color.White;
-            lblTotalCount.Location = new Point(18, 47);
-            lblTotalCount.Margin = new Padding(5, 0, 5, 0);
+            lblTotalCount.Location = new Point(16, 35);
+            lblTotalCount.Margin = new Padding(4, 0, 4, 0);
             lblTotalCount.Name = "lblTotalCount";
-            lblTotalCount.Size = new Size(46, 54);
+            lblTotalCount.Size = new Size(38, 45);
             lblTotalCount.TabIndex = 1;
             lblTotalCount.Text = "0";
             // 
@@ -286,10 +308,10 @@
             lblTotalTitle.BackColor = Color.Transparent;
             lblTotalTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblTotalTitle.ForeColor = Color.FromArgb(220, 235, 255);
-            lblTotalTitle.Location = new Point(21, 19);
-            lblTotalTitle.Margin = new Padding(5, 0, 5, 0);
+            lblTotalTitle.Location = new Point(18, 14);
+            lblTotalTitle.Margin = new Padding(4, 0, 4, 0);
             lblTotalTitle.Name = "lblTotalTitle";
-            lblTotalTitle.Size = new Size(131, 20);
+            lblTotalTitle.Size = new Size(102, 15);
             lblTotalTitle.TabIndex = 0;
             lblTotalTitle.Text = "Tổng số sinh viên";
             // 
@@ -299,14 +321,14 @@
             pnlMainContainer.Controls.Add(dgvStudents);
             pnlMainContainer.Controls.Add(pnlPagination);
             pnlMainContainer.Controls.Add(pnlFilterBar);
-            pnlMainContainer.CustomizableEdges = customizableEdges31;
+            pnlMainContainer.CustomizableEdges = customizableEdges33;
             pnlMainContainer.Dock = DockStyle.Fill;
-            pnlMainContainer.Location = new Point(294, 100);
-            pnlMainContainer.Margin = new Padding(5, 4, 5, 4);
+            pnlMainContainer.Location = new Point(257, 75);
+            pnlMainContainer.Margin = new Padding(4, 3, 4, 3);
             pnlMainContainer.Name = "pnlMainContainer";
-            pnlMainContainer.Padding = new Padding(26, 31, 26, 31);
-            pnlMainContainer.ShadowDecoration.CustomizableEdges = customizableEdges32;
-            pnlMainContainer.Size = new Size(1392, 1071);
+            pnlMainContainer.Padding = new Padding(23);
+            pnlMainContainer.ShadowDecoration.CustomizableEdges = customizableEdges34;
+            pnlMainContainer.Size = new Size(1218, 721);
             pnlMainContainer.TabIndex = 2;
             // 
             // dgvStudents
@@ -334,33 +356,24 @@
             dgvStudents.DefaultCellStyle = dataGridViewCellStyle3;
             dgvStudents.Dock = DockStyle.Fill;
             dgvStudents.GridColor = Color.FromArgb(242, 245, 250);
-            dgvStudents.Location = new Point(26, 123);
-            dgvStudents.Margin = new Padding(5, 4, 5, 4);
+            dgvStudents.Location = new Point(23, 92);
+            dgvStudents.Margin = new Padding(4, 3, 4, 3);
             dgvStudents.Name = "dgvStudents";
             dgvStudents.ReadOnly = true;
             dgvStudents.RowHeadersVisible = false;
             dgvStudents.RowHeadersWidth = 51;
             dgvStudents.RowTemplate.Height = 60;
-            dgvStudents.Size = new Size(1340, 840);
+            dgvStudents.Size = new Size(1172, 548);
             dgvStudents.TabIndex = 1;
             dgvStudents.ThemeStyle.AlternatingRowsStyle.BackColor = Color.White;
-            dgvStudents.ThemeStyle.AlternatingRowsStyle.Font = null;
-            dgvStudents.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.Empty;
-            dgvStudents.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = Color.Empty;
-            dgvStudents.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = Color.Empty;
-            dgvStudents.ThemeStyle.BackColor = Color.White;
             dgvStudents.ThemeStyle.GridColor = Color.FromArgb(242, 245, 250);
             dgvStudents.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(242, 245, 250);
-            dgvStudents.ThemeStyle.HeaderStyle.BorderStyle = DataGridViewHeaderBorderStyle.None;
             dgvStudents.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             dgvStudents.ThemeStyle.HeaderStyle.ForeColor = Color.FromArgb(64, 64, 64);
             dgvStudents.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dgvStudents.ThemeStyle.HeaderStyle.Height = 45;
             dgvStudents.ThemeStyle.ReadOnly = true;
-            dgvStudents.ThemeStyle.RowsStyle.BackColor = Color.White;
-            dgvStudents.ThemeStyle.RowsStyle.BorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             dgvStudents.ThemeStyle.RowsStyle.Font = new Font("Segoe UI", 9.5F);
-            dgvStudents.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(71, 69, 94);
             dgvStudents.ThemeStyle.RowsStyle.Height = 60;
             dgvStudents.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(230, 242, 255);
             dgvStudents.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(13, 110, 253);
@@ -370,13 +383,13 @@
             // pnlPagination
             // 
             pnlPagination.Controls.Add(lblPaginationInfo);
-            pnlPagination.CustomizableEdges = customizableEdges21;
+            pnlPagination.CustomizableEdges = customizableEdges23;
             pnlPagination.Dock = DockStyle.Bottom;
-            pnlPagination.Location = new Point(26, 963);
-            pnlPagination.Margin = new Padding(5, 4, 5, 4);
+            pnlPagination.Location = new Point(23, 640);
+            pnlPagination.Margin = new Padding(4, 3, 4, 3);
             pnlPagination.Name = "pnlPagination";
-            pnlPagination.ShadowDecoration.CustomizableEdges = customizableEdges22;
-            pnlPagination.Size = new Size(1340, 77);
+            pnlPagination.ShadowDecoration.CustomizableEdges = customizableEdges24;
+            pnlPagination.Size = new Size(1172, 58);
             pnlPagination.TabIndex = 2;
             // 
             // lblPaginationInfo
@@ -384,10 +397,10 @@
             lblPaginationInfo.AutoSize = true;
             lblPaginationInfo.Font = new Font("Segoe UI", 9.5F);
             lblPaginationInfo.ForeColor = Color.Gray;
-            lblPaginationInfo.Location = new Point(5, 27);
-            lblPaginationInfo.Margin = new Padding(5, 0, 5, 0);
+            lblPaginationInfo.Location = new Point(4, 20);
+            lblPaginationInfo.Margin = new Padding(4, 0, 4, 0);
             lblPaginationInfo.Name = "lblPaginationInfo";
-            lblPaginationInfo.Size = new Size(171, 21);
+            lblPaginationInfo.Size = new Size(142, 17);
             lblPaginationInfo.TabIndex = 0;
             lblPaginationInfo.Text = "Hiển thị tất cả sinh viên";
             // 
@@ -396,13 +409,13 @@
             pnlFilterBar.Controls.Add(cbSort);
             pnlFilterBar.Controls.Add(cboFilterGender);
             pnlFilterBar.Controls.Add(txtSearch);
-            pnlFilterBar.CustomizableEdges = customizableEdges29;
+            pnlFilterBar.CustomizableEdges = customizableEdges31;
             pnlFilterBar.Dock = DockStyle.Top;
-            pnlFilterBar.Location = new Point(26, 31);
-            pnlFilterBar.Margin = new Padding(5, 4, 5, 4);
+            pnlFilterBar.Location = new Point(23, 23);
+            pnlFilterBar.Margin = new Padding(4, 3, 4, 3);
             pnlFilterBar.Name = "pnlFilterBar";
-            pnlFilterBar.ShadowDecoration.CustomizableEdges = customizableEdges30;
-            pnlFilterBar.Size = new Size(1340, 92);
+            pnlFilterBar.ShadowDecoration.CustomizableEdges = customizableEdges32;
+            pnlFilterBar.Size = new Size(1172, 69);
             pnlFilterBar.TabIndex = 0;
             // 
             // cbSort
@@ -410,7 +423,7 @@
             cbSort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cbSort.BackColor = Color.Transparent;
             cbSort.BorderRadius = 8;
-            cbSort.CustomizableEdges = customizableEdges23;
+            cbSort.CustomizableEdges = customizableEdges25;
             cbSort.DrawMode = DrawMode.OwnerDrawFixed;
             cbSort.DropDownStyle = ComboBoxStyle.DropDownList;
             cbSort.FocusedColor = Color.FromArgb(94, 148, 255);
@@ -419,11 +432,11 @@
             cbSort.ForeColor = Color.FromArgb(68, 88, 112);
             cbSort.ItemHeight = 30;
             cbSort.Items.AddRange(new object[] { "Sắp xếp theo: Mặc định", "Tên sinh viên", "MSSV" });
-            cbSort.Location = new Point(1048, 16);
-            cbSort.Margin = new Padding(5, 4, 5, 4);
+            cbSort.Location = new Point(917, 12);
+            cbSort.Margin = new Padding(4, 3, 4, 3);
             cbSort.Name = "cbSort";
-            cbSort.ShadowDecoration.CustomizableEdges = customizableEdges24;
-            cbSort.Size = new Size(292, 36);
+            cbSort.ShadowDecoration.CustomizableEdges = customizableEdges26;
+            cbSort.Size = new Size(256, 36);
             cbSort.StartIndex = 0;
             cbSort.TabIndex = 2;
             cbSort.SelectedIndexChanged += cbSort_SelectedIndexChanged;
@@ -433,7 +446,7 @@
             cboFilterGender.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cboFilterGender.BackColor = Color.Transparent;
             cboFilterGender.BorderRadius = 8;
-            cboFilterGender.CustomizableEdges = customizableEdges25;
+            cboFilterGender.CustomizableEdges = customizableEdges27;
             cboFilterGender.DrawMode = DrawMode.OwnerDrawFixed;
             cboFilterGender.DropDownStyle = ComboBoxStyle.DropDownList;
             cboFilterGender.FocusedColor = Color.FromArgb(94, 148, 255);
@@ -442,11 +455,11 @@
             cboFilterGender.ForeColor = Color.FromArgb(68, 88, 112);
             cboFilterGender.ItemHeight = 30;
             cboFilterGender.Items.AddRange(new object[] { "Tất cả giới tính", "Nam", "Nữ" });
-            cboFilterGender.Location = new Point(786, 16);
-            cboFilterGender.Margin = new Padding(5, 4, 5, 4);
+            cboFilterGender.Location = new Point(688, 12);
+            cboFilterGender.Margin = new Padding(4, 3, 4, 3);
             cboFilterGender.Name = "cboFilterGender";
-            cboFilterGender.ShadowDecoration.CustomizableEdges = customizableEdges26;
-            cboFilterGender.Size = new Size(238, 36);
+            cboFilterGender.ShadowDecoration.CustomizableEdges = customizableEdges28;
+            cboFilterGender.Size = new Size(209, 36);
             cboFilterGender.StartIndex = 0;
             cboFilterGender.TabIndex = 1;
             cboFilterGender.SelectedIndexChanged += cboFilterGender_SelectedIndexChanged;
@@ -455,7 +468,7 @@
             // 
             txtSearch.BorderRadius = 8;
             txtSearch.Cursor = Cursors.IBeam;
-            txtSearch.CustomizableEdges = customizableEdges27;
+            txtSearch.CustomizableEdges = customizableEdges29;
             txtSearch.DefaultText = "";
             txtSearch.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
             txtSearch.DisabledState.FillColor = Color.FromArgb(226, 226, 226);
@@ -464,26 +477,26 @@
             txtSearch.FocusedState.BorderColor = Color.FromArgb(94, 148, 255);
             txtSearch.Font = new Font("Segoe UI", 10F);
             txtSearch.HoverState.BorderColor = Color.FromArgb(94, 148, 255);
-            txtSearch.Location = new Point(0, 16);
-            txtSearch.Margin = new Padding(5, 4, 5, 4);
+            txtSearch.Location = new Point(0, 12);
+            txtSearch.Margin = new Padding(4, 3, 4, 3);
             txtSearch.Name = "txtSearch";
             txtSearch.PlaceholderText = "Nhập mã SV, họ hoặc tên để tìm kiếm...";
             txtSearch.SelectedText = "";
-            txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges28;
-            txtSearch.Size = new Size(506, 56);
+            txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges30;
+            txtSearch.Size = new Size(443, 42);
             txtSearch.TabIndex = 0;
             txtSearch.TextChanged += txtSearch_TextChanged;
             // 
             // ManageStudentForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1686, 1171);
+            ClientSize = new Size(1475, 796);
             Controls.Add(pnlMainContainer);
             Controls.Add(pnlSidebar);
             Controls.Add(pnlTopNavbar);
-            Margin = new Padding(5, 4, 5, 4);
-            MinimumSize = new Size(1360, 1084);
+            Margin = new Padding(4, 3, 4, 3);
+            MinimumSize = new Size(1192, 782);
             Name = "ManageStudentForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Hệ thống quản lý UTEID";
@@ -525,5 +538,6 @@
         private System.Windows.Forms.Label lblPaginationInfo;
         private Guna.UI2.WinForms.Guna2Button btnExportPDF;
         private Guna.UI2.WinForms.Guna2Button btnGenerateAccounts;
+        private Guna.UI2.WinForms.Guna2Button btnDelete;
     }
 }

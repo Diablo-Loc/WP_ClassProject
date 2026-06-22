@@ -1,6 +1,6 @@
 ﻿using Guna.UI2.WinForms;
 
-namespace ClassProject.Presentation.Forms.Course
+namespace ClassProject.Presentation.Forms.Score
 {
     partial class ManageScoreForm
     {
@@ -58,31 +58,27 @@ namespace ClassProject.Presentation.Forms.Course
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges26 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges27 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges37 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges38 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges31 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges32 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges41 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges42 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges33 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges34 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges35 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges36 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges37 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges38 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges39 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges40 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges41 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges42 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges43 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges44 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges45 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges46 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges47 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges48 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges49 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges50 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             lblMonHoc = new Label();
             lblSinhVien = new Label();
             lblTitle = new Label();
@@ -108,10 +104,8 @@ namespace ClassProject.Presentation.Forms.Course
             btnDeleteScore = new Guna2Button();
             btnClear = new Guna2Button();
             btnExport = new Guna2Button();
-            btnPrint = new Guna2Button();
             lblDanhSachDiem = new Label();
             dgvScores = new Guna2DataGridView();
-            btnTuyChon = new Guna2Button();
             guna2Panel2 = new Guna2Panel();
             pnlDiemTBToanTruong = new Guna2Panel();
             label5 = new Label();
@@ -543,33 +537,13 @@ namespace ClassProject.Presentation.Forms.Course
             btnExport.FillColor = Color.White;
             btnExport.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnExport.ForeColor = Color.Black;
-            btnExport.Location = new Point(1111, 600);
+            btnExport.Location = new Point(1257, 600);
             btnExport.Name = "btnExport";
             btnExport.ShadowDecoration.CustomizableEdges = customizableEdges28;
             btnExport.Size = new Size(103, 44);
             btnExport.TabIndex = 35;
             btnExport.Text = "Export";
             btnExport.Click += btnExport_Click;
-            // 
-            // btnPrint
-            // 
-            btnPrint.BorderColor = Color.FromArgb(111, 66, 193);
-            btnPrint.BorderRadius = 6;
-            btnPrint.CustomizableEdges = customizableEdges29;
-            btnPrint.DisabledState.BorderColor = Color.DarkGray;
-            btnPrint.DisabledState.CustomBorderColor = Color.DarkGray;
-            btnPrint.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
-            btnPrint.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
-            btnPrint.FillColor = Color.White;
-            btnPrint.Font = new Font("Segoe UI", 9F);
-            btnPrint.ForeColor = Color.FromArgb(111, 66, 193);
-            btnPrint.Location = new Point(511, 561);
-            btnPrint.Name = "btnPrint";
-            btnPrint.ShadowDecoration.CustomizableEdges = customizableEdges30;
-            btnPrint.Size = new Size(103, 44);
-            btnPrint.TabIndex = 36;
-            btnPrint.Text = "Print";
-            btnPrint.Click += btnPrint_Click;
             // 
             // lblDanhSachDiem
             // 
@@ -637,26 +611,6 @@ namespace ClassProject.Presentation.Forms.Course
             dgvScores.ThemeStyle.RowsStyle.SelectionForeColor = Color.Black;
             dgvScores.CellClick += dgvScores_CellClick;
             // 
-            // btnTuyChon
-            // 
-            btnTuyChon.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnTuyChon.BorderColor = Color.FromArgb(108, 117, 125);
-            btnTuyChon.BorderRadius = 6;
-            btnTuyChon.CustomizableEdges = customizableEdges31;
-            btnTuyChon.DisabledState.BorderColor = Color.DarkGray;
-            btnTuyChon.DisabledState.CustomBorderColor = Color.DarkGray;
-            btnTuyChon.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
-            btnTuyChon.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
-            btnTuyChon.FillColor = Color.White;
-            btnTuyChon.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnTuyChon.ForeColor = Color.Black;
-            btnTuyChon.Location = new Point(1231, 600);
-            btnTuyChon.Name = "btnTuyChon";
-            btnTuyChon.ShadowDecoration.CustomizableEdges = customizableEdges32;
-            btnTuyChon.Size = new Size(129, 44);
-            btnTuyChon.TabIndex = 44;
-            btnTuyChon.Text = "Tùy Chọn";
-            // 
             // guna2Panel2
             // 
             guna2Panel2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -668,11 +622,11 @@ namespace ClassProject.Presentation.Forms.Course
             guna2Panel2.Controls.Add(pnlTongSinhVien);
             guna2Panel2.Controls.Add(lblThongTinNhanh);
             guna2Panel2.CustomBorderColor = Color.FromArgb(220, 225, 235);
-            guna2Panel2.CustomizableEdges = customizableEdges41;
+            guna2Panel2.CustomizableEdges = customizableEdges37;
             guna2Panel2.FillColor = SystemColors.InactiveBorder;
             guna2Panel2.Location = new Point(701, 156);
             guna2Panel2.Name = "guna2Panel2";
-            guna2Panel2.ShadowDecoration.CustomizableEdges = customizableEdges42;
+            guna2Panel2.ShadowDecoration.CustomizableEdges = customizableEdges38;
             guna2Panel2.Size = new Size(659, 380);
             guna2Panel2.TabIndex = 45;
             // 
@@ -682,12 +636,12 @@ namespace ClassProject.Presentation.Forms.Course
             pnlDiemTBToanTruong.BorderRadius = 10;
             pnlDiemTBToanTruong.Controls.Add(label5);
             pnlDiemTBToanTruong.Controls.Add(lblAvgScore);
-            pnlDiemTBToanTruong.CustomizableEdges = customizableEdges33;
+            pnlDiemTBToanTruong.CustomizableEdges = customizableEdges29;
             pnlDiemTBToanTruong.FillColor = Color.White;
             pnlDiemTBToanTruong.Location = new Point(343, 219);
             pnlDiemTBToanTruong.Name = "pnlDiemTBToanTruong";
             pnlDiemTBToanTruong.ShadowDecoration.Color = SystemColors.ScrollBar;
-            pnlDiemTBToanTruong.ShadowDecoration.CustomizableEdges = customizableEdges34;
+            pnlDiemTBToanTruong.ShadowDecoration.CustomizableEdges = customizableEdges30;
             pnlDiemTBToanTruong.ShadowDecoration.Enabled = true;
             pnlDiemTBToanTruong.Size = new Size(271, 152);
             pnlDiemTBToanTruong.TabIndex = 45;
@@ -716,12 +670,12 @@ namespace ClassProject.Presentation.Forms.Course
             pnlTongDiemDaNhap.BorderRadius = 10;
             pnlTongDiemDaNhap.Controls.Add(label4);
             pnlTongDiemDaNhap.Controls.Add(lblTotalScores);
-            pnlTongDiemDaNhap.CustomizableEdges = customizableEdges35;
+            pnlTongDiemDaNhap.CustomizableEdges = customizableEdges31;
             pnlTongDiemDaNhap.FillColor = Color.White;
             pnlTongDiemDaNhap.Location = new Point(43, 222);
             pnlTongDiemDaNhap.Name = "pnlTongDiemDaNhap";
             pnlTongDiemDaNhap.ShadowDecoration.Color = SystemColors.ScrollBar;
-            pnlTongDiemDaNhap.ShadowDecoration.CustomizableEdges = customizableEdges36;
+            pnlTongDiemDaNhap.ShadowDecoration.CustomizableEdges = customizableEdges32;
             pnlTongDiemDaNhap.ShadowDecoration.Enabled = true;
             pnlTongDiemDaNhap.Size = new Size(270, 149);
             pnlTongDiemDaNhap.TabIndex = 44;
@@ -750,12 +704,12 @@ namespace ClassProject.Presentation.Forms.Course
             pnlTongMonHoc.BorderRadius = 10;
             pnlTongMonHoc.Controls.Add(label3);
             pnlTongMonHoc.Controls.Add(lblTotalCourses);
-            pnlTongMonHoc.CustomizableEdges = customizableEdges37;
+            pnlTongMonHoc.CustomizableEdges = customizableEdges33;
             pnlTongMonHoc.FillColor = Color.White;
             pnlTongMonHoc.Location = new Point(343, 59);
             pnlTongMonHoc.Name = "pnlTongMonHoc";
             pnlTongMonHoc.ShadowDecoration.Color = SystemColors.ScrollBar;
-            pnlTongMonHoc.ShadowDecoration.CustomizableEdges = customizableEdges38;
+            pnlTongMonHoc.ShadowDecoration.CustomizableEdges = customizableEdges34;
             pnlTongMonHoc.ShadowDecoration.Enabled = true;
             pnlTongMonHoc.Size = new Size(271, 154);
             pnlTongMonHoc.TabIndex = 44;
@@ -784,12 +738,12 @@ namespace ClassProject.Presentation.Forms.Course
             pnlTongSinhVien.BorderRadius = 10;
             pnlTongSinhVien.Controls.Add(label2);
             pnlTongSinhVien.Controls.Add(lblTotalStudents);
-            pnlTongSinhVien.CustomizableEdges = customizableEdges39;
+            pnlTongSinhVien.CustomizableEdges = customizableEdges35;
             pnlTongSinhVien.FillColor = Color.White;
             pnlTongSinhVien.Location = new Point(43, 59);
             pnlTongSinhVien.Name = "pnlTongSinhVien";
             pnlTongSinhVien.ShadowDecoration.Color = SystemColors.ScrollBar;
-            pnlTongSinhVien.ShadowDecoration.CustomizableEdges = customizableEdges40;
+            pnlTongSinhVien.ShadowDecoration.CustomizableEdges = customizableEdges36;
             pnlTongSinhVien.ShadowDecoration.Enabled = true;
             pnlTongSinhVien.Size = new Size(270, 154);
             pnlTongSinhVien.TabIndex = 43;
@@ -827,7 +781,7 @@ namespace ClassProject.Presentation.Forms.Course
             // 
             txtSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtSearch.BorderRadius = 8;
-            txtSearch.CustomizableEdges = customizableEdges43;
+            txtSearch.CustomizableEdges = customizableEdges39;
             txtSearch.DefaultText = "";
             txtSearch.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
             txtSearch.DisabledState.FillColor = Color.FromArgb(226, 226, 226);
@@ -842,7 +796,7 @@ namespace ClassProject.Presentation.Forms.Course
             txtSearch.PlaceholderForeColor = Color.FromArgb(170, 180, 190);
             txtSearch.PlaceholderText = "Tìm kiếm sinh viên (MSSV, Họ tên)...";
             txtSearch.SelectedText = "";
-            txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges44;
+            txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges40;
             txtSearch.Size = new Size(657, 55);
             txtSearch.TabIndex = 46;
             txtSearch.TextChanged += txtSearch_TextChanged;
@@ -864,7 +818,7 @@ namespace ClassProject.Presentation.Forms.Course
             cboHocKy.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cboHocKy.BackColor = Color.Transparent;
             cboHocKy.BorderRadius = 8;
-            cboHocKy.CustomizableEdges = customizableEdges45;
+            cboHocKy.CustomizableEdges = customizableEdges41;
             cboHocKy.DrawMode = DrawMode.OwnerDrawFixed;
             cboHocKy.DropDownStyle = ComboBoxStyle.DropDownList;
             cboHocKy.FocusedColor = Color.FromArgb(26, 115, 232);
@@ -874,7 +828,7 @@ namespace ClassProject.Presentation.Forms.Course
             cboHocKy.ItemHeight = 30;
             cboHocKy.Location = new Point(718, 105);
             cboHocKy.Name = "cboHocKy";
-            cboHocKy.ShadowDecoration.CustomizableEdges = customizableEdges46;
+            cboHocKy.ShadowDecoration.CustomizableEdges = customizableEdges42;
             cboHocKy.Size = new Size(223, 36);
             cboHocKy.TabIndex = 47;
             // 
@@ -883,7 +837,7 @@ namespace ClassProject.Presentation.Forms.Course
             cboNamHoc.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cboNamHoc.BackColor = Color.Transparent;
             cboNamHoc.BorderRadius = 8;
-            cboNamHoc.CustomizableEdges = customizableEdges47;
+            cboNamHoc.CustomizableEdges = customizableEdges43;
             cboNamHoc.DrawMode = DrawMode.OwnerDrawFixed;
             cboNamHoc.DropDownStyle = ComboBoxStyle.DropDownList;
             cboNamHoc.FocusedColor = Color.FromArgb(26, 115, 232);
@@ -893,7 +847,7 @@ namespace ClassProject.Presentation.Forms.Course
             cboNamHoc.ItemHeight = 30;
             cboNamHoc.Location = new Point(991, 105);
             cboNamHoc.Name = "cboNamHoc";
-            cboNamHoc.ShadowDecoration.CustomizableEdges = customizableEdges48;
+            cboNamHoc.ShadowDecoration.CustomizableEdges = customizableEdges44;
             cboNamHoc.Size = new Size(223, 36);
             cboNamHoc.TabIndex = 49;
             // 
@@ -923,7 +877,7 @@ namespace ClassProject.Presentation.Forms.Course
             txtLamMoi.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             txtLamMoi.BorderColor = Color.FromArgb(111, 66, 193);
             txtLamMoi.BorderRadius = 6;
-            txtLamMoi.CustomizableEdges = customizableEdges49;
+            txtLamMoi.CustomizableEdges = customizableEdges45;
             txtLamMoi.DisabledState.BorderColor = Color.DarkGray;
             txtLamMoi.DisabledState.CustomBorderColor = Color.DarkGray;
             txtLamMoi.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
@@ -933,7 +887,7 @@ namespace ClassProject.Presentation.Forms.Course
             txtLamMoi.ForeColor = Color.White;
             txtLamMoi.Location = new Point(1257, 97);
             txtLamMoi.Name = "txtLamMoi";
-            txtLamMoi.ShadowDecoration.CustomizableEdges = customizableEdges50;
+            txtLamMoi.ShadowDecoration.CustomizableEdges = customizableEdges46;
             txtLamMoi.Size = new Size(103, 44);
             txtLamMoi.TabIndex = 48;
             txtLamMoi.Text = "Làm mới";
@@ -951,10 +905,8 @@ namespace ClassProject.Presentation.Forms.Course
             Controls.Add(lblHocky);
             Controls.Add(txtSearch);
             Controls.Add(guna2Panel2);
-            Controls.Add(btnTuyChon);
             Controls.Add(dgvScores);
             Controls.Add(lblDanhSachDiem);
-            Controls.Add(btnPrint);
             Controls.Add(btnExport);
             Controls.Add(btnClear);
             Controls.Add(btnDeleteScore);
@@ -1014,10 +966,8 @@ namespace ClassProject.Presentation.Forms.Course
         private Guna.UI2.WinForms.Guna2Button btnDeleteScore;
         private Guna.UI2.WinForms.Guna2Button btnClear;
         private Guna.UI2.WinForms.Guna2Button btnExport;
-        private Guna.UI2.WinForms.Guna2Button btnPrint;
         private Label lblDanhSachDiem;
         private Guna.UI2.WinForms.Guna2DataGridView dgvScores;
-        private Guna2Button btnTuyChon;
         private Guna2Panel guna2Panel2;
         private Guna2Panel pnlDiemTBToanTruong;
         private Guna2Panel pnlTongDiemDaNhap;

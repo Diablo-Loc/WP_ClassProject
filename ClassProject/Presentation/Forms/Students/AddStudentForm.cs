@@ -1,5 +1,7 @@
 ﻿using ClassProject.DataAccess.Entities;
 using ClassProject.DataAccess.Repositories.Implementations;
+using ClassProject.Presentation.Forms.Auth;
+using ClassProject.Services;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
@@ -18,6 +20,7 @@ namespace ClassProject
         private readonly StudentRepository studentRepo;
         private readonly MajorRepository majorRepo;
         private readonly ClassRoomRepository classroomRepo;
+        private VoiceRecognitionService _voiceService;
 
         private bool isDataLoading = false;
         private bool isSaving = false;
@@ -29,6 +32,7 @@ namespace ClassProject
         public AddStudentForm(string mssv)
         {
             InitializeComponent();
+            InitializeVoiceService();
             targetMssv = mssv;
             studentRepo = new StudentRepository();
             majorRepo = new MajorRepository();
@@ -508,6 +512,143 @@ namespace ClassProject
             if (result == DialogResult.Yes)
             {
                 ClearAllFields();
+            }
+        }
+        private void InitializeVoiceService()
+        {
+            try
+            {
+                _voiceService = new VoiceRecognitionService();
+
+                // Đăng ký nhận kết quả trả về từ Service
+                _voiceService.OnStudentDataParsed += VoiceService_OnStudentDataParsed;
+
+                // Đăng ký nhận thay đổi trạng thái UI (màu sắc nút, chữ trên nút)
+                _voiceService.OnListeningStatusChanged += VoiceService_OnListeningStatusChanged;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"{ex.Message}\n(Hệ thống vẫn hoạt động bằng cách nhập liệu thủ công bình thường)", "Thông báo thiết bị");
+            }
+        }
+
+        private void btnVoiceInput_Click(object sender, EventArgs e)
+        {
+            if (_voiceService == null || !_voiceService.IsRecognizerAvailable())
+            {
+                MessageBox.Show("Máy tính của bạn chưa cài đặt tính năng Speech Recognition của Windows hoặc thiếu thiết bị thu âm (Mic).\n\nVui lòng nhập liệu bằng tay!", "Thông báo hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            _voiceService.ToggleListening();
+        }
+
+        private void VoiceService_OnListeningStatusChanged(bool isListening)
+        {
+            // Cập nhật trạng thái hiển thị của Guna2Button theo chuẩn thiết kế đẹp
+            if (isListening)
+            {
+                btnVoiceInput.Text = "🛑 Đang nghe... Hãy nói";
+                btnVoiceInput.FillColor = System.Drawing.Color.FromArgb(253, 237, 237); // Màu đỏ nhạt sang trọng
+                btnVoiceInput.ForeColor = System.Drawing.Color.FromArgb(220, 53, 69);  // Chữ đỏ đậm
+            }
+            else
+            {
+                btnVoiceInput.Text = "🎙️ Nhập giọng nói";
+                btnVoiceInput.FillColor = System.Drawing.Color.Transparent;              // Trả về trong suốt
+                btnVoiceInput.ForeColor = System.Drawing.Color.FromArgb(40, 167, 69);  // Chữ xanh lá cũ
+            }
+        }
+
+        private void VoiceService_OnStudentDataParsed(string hoTen, string mssv)
+        {
+            // Đổ dữ liệu xịn nhận từ Service vào TextBox trên UI
+            if (!string.IsNullOrEmpty(hoTen))
+            {
+                hoTen = hoTen.Trim();
+                int lastSpaceIndex = hoTen.LastIndexOf(' ');
+
+                if (lastSpaceIndex != -1)
+                {
+                    // Lấy phần "Nguyễn Văn"
+                    txtLastName.Text = hoTen.Substring(0, lastSpaceIndex).Trim();
+                    // Lấy phần "A"
+                    txtFirstName.Text = hoTen.Substring(lastSpaceIndex + 1).Trim();
+                }
+                else
+                {
+                    // Nếu người dùng chỉ nói đúng 1 từ (Ví dụ: "An")
+                    txtLastName.Text = string.Empty;
+                    txtFirstName.Text = hoTen;
+                }
+            }
+            if (!string.IsNullOrEmpty(mssv)) txtMSSV.Text = mssv;
+        }
+
+        // Giải phóng tài nguyên hệ thống khi đóng Form
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            _voiceService?.Dispose();
+        }
+
+        private void btnScanFullInfo_Click(object sender, EventArgs e)
+        {
+            // Gọi Form quét thẻ với chế độ FullInfo lấy đầy đủ thông tin
+            using (var scannerForm = new CardScannerForm(ScannerMode.FullInfo))
+            {
+                if (scannerForm.ShowDialog() == DialogResult.OK)
+                {
+                    // 1. Điền MSSV bóc tách được từ Azure OCR
+                    if (!string.IsNullOrEmpty(scannerForm.DetectedMSSV))
+                    {
+                        txtMSSV.Text = scannerForm.DetectedMSSV;
+                    }
+
+                    // 2. Điền Họ và Tên (Tách chuỗi dựa trên scannerForm.DetectedName)
+                    string fullOcrName = scannerForm.DetectedName;
+                    if (!string.IsNullOrEmpty(fullOcrName))
+                    {
+                        fullOcrName = fullOcrName.Trim();
+                        int lastSpaceIndex = fullOcrName.LastIndexOf(' ');
+
+                        if (lastSpaceIndex != -1)
+                        {
+                            // Lấy phần Họ đệm (Ví dụ: "Nguyễn Văn")
+                            txtLastName.Text = fullOcrName.Substring(0, lastSpaceIndex).Trim();
+                            // Lấy phần Tên chính (Ví dụ: "An")
+                            txtFirstName.Text = fullOcrName.Substring(lastSpaceIndex + 1).Trim();
+                        }
+                        else
+                        {
+                            // Trường hợp đặc biệt nếu tên chỉ có duy nhất 1 từ
+                            txtLastName.Text = string.Empty;
+                            txtFirstName.Text = fullOcrName;
+                        }
+                    }
+
+                    // 3. Xử lý và điền Ngày sinh vào DateTimePicker an toàn
+                    string ocrDob = scannerForm.DetectedDOB; // Chuỗi định dạng dd/MM/yyyy từ Azure
+                    if (!string.IsNullOrEmpty(ocrDob))
+                    {
+                        if (DateTime.TryParseExact(ocrDob, "dd/MM/yyyy",
+                                                   System.Globalization.CultureInfo.InvariantCulture,
+                                                   System.Globalization.DateTimeStyles.None,
+                                                   out DateTime parsedDate))
+                        {
+                            // Kiểm tra xem ngày sinh nằm trong phạm vi cho phép của DateTimePicker không
+                            if (parsedDate >= dtpDateOfBirth.MinDate && parsedDate <= dtpDateOfBirth.MaxDate)
+                            {
+                                dtpDateOfBirth.Value = parsedDate;
+                            }
+                        }
+                        else
+                        {
+                            // Dự phòng nếu định dạng ngày từ Azure trả về cấu trúc khác chuẩn dd/MM/yyyy
+                            try { dtpDateOfBirth.Text = ocrDob; } catch { }
+                        }
+                    }
+                }
             }
         }
     }

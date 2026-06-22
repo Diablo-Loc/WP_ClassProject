@@ -622,5 +622,46 @@ namespace ClassProject.DataAccess.Repositories.Implementations
 
             return false;
         }
+        public DataTable SearchStudentsByCourseSection(string keyword, string gender, string teacherId)
+        {
+            DataTable table = new DataTable();
+
+            // Sử dụng mệnh đề logic kiểm tra @Gender = 'All' để tự động bỏ qua điều kiện lọc giới tính
+            string query = @"
+        SELECT DISTINCT 
+            s.Id, s.UserId, s.MSSV, s.FirstName, s.LastName, s.DateOfBirth, 
+            s.Gender, s.Phone, s.Address, s.Hometown, s.Email,
+            c.TenLop AS ClassName, m.TenNganh AS MajorName
+        FROM dbo.Students s
+        INNER JOIN dbo.DKMH dk ON s.MSSV = dk.MSSV
+        INNER JOIN dbo.CourseSection cs ON dk.MaLopHP = cs.MaLopHP
+        LEFT JOIN dbo.Classroom c ON s.MaLop = c.MaLop
+        LEFT JOIN dbo.Major m ON s.MaNganh = m.MaNganh
+        WHERE cs.MSGV = @MSGV
+          AND (@Key = '' OR s.MSSV LIKE @Key 
+                         OR (s.LastName + ' ' + s.FirstName) LIKE @Key 
+                         OR (s.FirstName + ' ' + s.LastName) LIKE @Key)
+          -- Nếu gender là 'All' thì hiển thị hết, ngược lại mới so sánh chính xác cột Gender
+          AND (@Gender = 'All' OR s.Gender = @Gender)
+        ORDER BY s.MSSV ASC";
+
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    string cleanKey = (keyword ?? "").Trim();
+
+                    cmd.Parameters.AddWithValue("@MSGV", (teacherId ?? "").Trim());
+                    cmd.Parameters.AddWithValue("@Key", cleanKey == "" ? "" : "%" + cleanKey + "%");
+                    cmd.Parameters.AddWithValue("@Gender", gender.Trim()); // Nhận giá trị "All", "Nam" hoặc "Nữ"
+
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                    {
+                        adapter.Fill(table);
+                    }
+                }
+            }
+            return table;
+        }
     }
 }

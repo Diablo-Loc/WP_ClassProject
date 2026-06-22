@@ -3,16 +3,20 @@ using ClassProject.DataAccess.Db;
 using ClassProject.Presentation.Forms.Auth;
 using Microsoft.Data.SqlClient;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Security.Cryptography;
+using System.Configuration;
+using MimeKit;
+using MailKit.Net.Smtp;
 
 namespace ClassProject.Presentation.Forms
 {
@@ -24,131 +28,197 @@ namespace ClassProject.Presentation.Forms
         {
             InitializeComponent();
         }
+        private void RegisterForm_Load(object sender, EventArgs e)
+        {
+            // Thiết lập đổ bóng mờ xung quanh khung Card trắng giống Form Login
+            guna2ShadowForm1.SetShadowForm(this);
+        }
 
+        // Luồng xử lý chính: Đóng vai trò Controller điều hướng nghiệp vụ sạch sẽ (SOLID)
         private async void btnRegister_Click(object sender, EventArgs e)
         {
+            // 1. Kiểm tra đầu vào giao diện (Validation)
+            if (!ValidateFormInput()) return;
+
             string username = txtUsername.Text.Trim();
             string email = txtEmail.Text.Trim();
             string password = txtPassword.Text.Trim();
-            string confirmPassword = txtConfirm.Text.Trim();
+            int selectedRoleId = (cboPosition.SelectedItem?.ToString() == "Student") ? 1 : 2;
 
-            // 1. Kiểm tra đầu vào cơ bản (Validation)
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) ||
-                string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
+            // 2. Kiểm tra trùng lặp tài khoản sớm (Tránh spam gửi Mail vô ích)
+            if (IsAccountDuplicated(username, email)) return;
+
+            // 3. Kiểm tra Email rác qua API bất đồng bộ
+            if (await IsDisposableEmailActive(email)) return;
+
+            // 4. THỬ THÁCH XÁC THỰC OTP (Gọi form trung gian độc lập)
+            if (!await OvercomeOtpChallenge(email)) return;
+
+            // 5. GHI DỮ LIỆU XUỐNG DATABASE KHI ĐÃ VƯỢT QUA CÁC BƯỚC XÁC THỰC
+            ExecuteDatabaseRegistration(username, email, password, selectedRoleId);
+        }
+
+        #region Tầng Hàm Bổ Trợ & Xác Thực Giao Diện (Helpers & Validation)
+
+        private bool ValidateFormInput()
+        {
+            if (string.IsNullOrEmpty(txtUsername.Text) || string.IsNullOrEmpty(txtEmail.Text) ||
+                string.IsNullOrEmpty(txtPassword.Text) || string.IsNullOrEmpty(txtConfirm.Text))
             {
                 MessageBox.Show("Vui lòng điền đầy đủ thông tin!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                return false;
             }
 
-            // CHECKLIST: Chống lỗi NullReference bằng toán tử ?. và kiểm tra null an toàn
             if (cboPosition.SelectedItem == null)
             {
                 MessageBox.Show("Vui lòng chọn chức vụ (Student/HR)!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                return false;
             }
 
-            string selectedText = cboPosition.SelectedItem?.ToString() ?? "";
-            int selectedRoleId = (selectedText == "Student") ? 1 : 2;
-
+            string email = txtEmail.Text.Trim();
             if (!email.Contains("@") || !email.Contains("."))
             {
                 MessageBox.Show("Email không đúng định dạng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                return false;
             }
 
-            if (password != confirmPassword)
+            if (txtPassword.Text != txtConfirm.Text)
             {
                 MessageBox.Show("Mật khẩu xác nhận không khớp!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                return false;
             }
-            // CHỐT CHẶN KIỂM TRA ĐỘ MẠNH MẬT KHẨU BẰNG REGEX
-            // ^(?=.*[A-Z]) : Ít nhất 1 chữ cái viết hoa
-            // (?=.*\d)     : Ít nhất 1 chữ số
-            // (?=.*[\W_])  : Ít nhất 1 ký tự đặc biệt (như @, #, $, !, %,...)
-            // .{8,}        : Tổng chiều dài tối thiểu từ 8 ký tự trở lên
+
             string passwordPattern = @"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
-            if (!Regex.IsMatch(password, passwordPattern))
+            if (!Regex.IsMatch(txtPassword.Text, passwordPattern))
             {
                 MessageBox.Show("Mật khẩu không đủ độ an toàn!\n" +
                                 "Yêu cầu: Tối thiểu 8 ký tự, chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt.",
                                 "Mật khẩu yếu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                return false;
             }
 
+            return true;
+        }
+
+        private bool IsAccountDuplicated(string username, string email)
+        {
             try
             {
-                // Chuyển con trỏ chuột thành hình vòng xoay tải để người dùng biết hệ thống đang xử lý
+                using (SqlConnection conn = db.GetConnection())
+                {
+                    conn.Open();
+                    const string checkUserQuery = "SELECT COUNT(*) FROM dbo.Users WHERE Username = @username OR Email = @email";
+                    using (SqlCommand checkCmd = new SqlCommand(checkUserQuery, conn))
+                    {
+                        checkCmd.Parameters.AddWithValue("@username", username);
+                        checkCmd.Parameters.AddWithValue("@email", email);
+
+                        if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
+                        {
+                            MessageBox.Show("Username hoặc Email đã được sử dụng trên hệ thống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi kết nối kiểm tra trùng lặp tài khoản: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return true;
+            }
+            return false;
+        }
+
+        private async Task<bool> IsDisposableEmailActive(string email)
+        {
+            try
+            {
                 Cursor.Current = Cursors.WaitCursor;
-
-                // Gọi API bất đồng bộ (Có từ khóa await)
                 bool isDisposable = await IsDisposableEmail(email);
-
-                // Trả con trỏ chuột về bình thường
                 Cursor.Current = Cursors.Default;
 
                 if (isDisposable)
                 {
                     MessageBox.Show("Hệ thống phát hiện đây là Email tạm thời (Disposable Email) dùng để spam!\n" +
-                                    "Vui lòng sử dụng các dịch vụ Email chính thức (Gmail, Outlook, Mail Trường,...) để đăng ký tài khoản.",
+                                    "Vui lòng sử dụng các dịch vụ Email chính thức để đăng ký.",
                                     "Từ chối đăng ký", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                    return; // Chặn đứng luồng không cho chạy xuống lưu DB
+                    return true;
                 }
             }
             catch
             {
                 Cursor.Current = Cursors.Default;
             }
-            // 2. Xử lý nghiệp vụ tương tác Cơ sở dữ liệu thông qua Transaction
+            return false;
+        }
+
+        #endregion
+
+        #region Luồng Nghiệp Vụ OTP (OTP Business Logic Flow)
+
+        // Kích hoạt thử thách OTP độc lập. Trả về true nếu User vượt qua thành công.
+        private async Task<bool> OvercomeOtpChallenge(string email)
+        {
+            // Sinh mã ngẫu nhiên bảo mật cao (Cryptographic Random)
+            string generatedOtp = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
+            DateTime otpExpireTime = DateTime.Now.AddMinutes(5);
+
+            // Gửi Email chứa OTP dạng Không đồng bộ (Async)
+            Cursor.Current = Cursors.WaitCursor;
+            bool isMailSent = await SendOtpEmailAsync(email, generatedOtp);
+            Cursor.Current = Cursors.Default;
+
+            if (!isMailSent)
+            {
+                MessageBox.Show("Không thể gửi mã xác thực tới Email của bạn. Vui lòng kiểm tra kết nối mạng!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            // Gọi Hộp thoại Form OTP được đóng gói chống brute-force
+            using (OtpVerificationForm otpForm = new OtpVerificationForm(generatedOtp, otpExpireTime))
+            {
+                if (otpForm.ShowDialog() == DialogResult.OK)
+                {
+                    return true; // Xác thực thành công hoàn toàn
+                }
+            }
+
+            // Người dùng chủ động hủy hoặc bị khóa form do nhập sai quá số lần
+            MessageBox.Show("Tiến trình đăng ký bị hủy do chưa hoàn thành xác thực mã OTP.", "Xác thực thất bại", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
+        #endregion
+
+        #region Tầng Kết Nối Dữ Liệu & API (Data Access & Infrastructure)
+
+        private void ExecuteDatabaseRegistration(string username, string email, string password, int selectedRoleId)
+        {
             try
             {
                 using (SqlConnection conn = db.GetConnection())
                 {
                     conn.Open();
-
                     using (SqlTransaction tx = conn.BeginTransaction())
                     {
                         try
                         {
-                            // CHẶNG A: Kiểm tra Username/Email đã tồn tại (CHECKLIST: Sử dụng SqlParameter chống SQL Injection)
-                            const string checkUserQuery = "SELECT COUNT(*) FROM dbo.Users WHERE Username = @username OR Email = @email";
-                            using (SqlCommand checkCmd = new SqlCommand(checkUserQuery, conn, tx))
-                            {
-                                checkCmd.Parameters.AddWithValue("@username", username);
-                                checkCmd.Parameters.AddWithValue("@email", email);
-
-                                if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
-                                {
-                                    MessageBox.Show("Username hoặc Email đã được sử dụng trên hệ thống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                    tx.Rollback(); // Phải Rollback rõ ràng trước khi đóng luồng hàm
-                                    return;
-                                }
-                            }
-
-                            // Trạng thái tài khoản bình thường là Status = 1. Tài khoản bị khóa mới là Status = 2.
-                            int validStatus = 0;  // Mặc định: 0 = Chờ duyệt đối với HR
-                            int statusValue = 1;  // Mặc định: 1 = Trạng thái hoạt động bình thường (Active)
+                            int validStatus = 0;  // Mặc định: 0 = Chờ duyệt đối với tài khoản mới
+                            int statusValue = 1;  // Mặc định: 1 = Active
                             int? targetStudentId = null;
 
-                            // CHẶNG B: Nếu chọn chức vụ là Sinh viên -> Xác thực chéo với danh sách hồ sơ gốc
+                            // Nếu đăng ký với vai trò Sinh viên -> Tiến hành đối chiếu hồ sơ gốc
                             if (selectedRoleId == 1)
                             {
-                                string checkStudentQuery =
-                                    "SELECT Id, UserId FROM dbo.Students WHERE Email = @email";
-
+                                string checkStudentQuery = "SELECT Id, UserId FROM dbo.Students WHERE Email = @email";
                                 using (SqlCommand cmd = new SqlCommand(checkStudentQuery, conn, tx))
                                 {
                                     cmd.Parameters.AddWithValue("@email", email);
-
                                     using (SqlDataReader reader = cmd.ExecuteReader())
                                     {
                                         if (!reader.Read())
                                         {
-                                            MessageBox.Show(
-                                                "Email này chưa tồn tại trong danh sách sinh viên của trường!",
-                                                "Đăng ký thất bại",
-                                                MessageBoxButtons.OK,
-                                                MessageBoxIcon.Error);
-
+                                            MessageBox.Show("Email này chưa tồn tại trong danh sách sinh viên ban đầu của trường!", "Đăng ký thất bại", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                             reader.Close();
                                             tx.Rollback();
                                             return;
@@ -156,26 +226,17 @@ namespace ClassProject.Presentation.Forms
 
                                         if (reader["UserId"] != DBNull.Value)
                                         {
-                                            MessageBox.Show(
-                                                "Sinh viên này đã có tài khoản hệ thống!",
-                                                "Thông báo",
-                                                MessageBoxButtons.OK,
-                                                MessageBoxIcon.Warning);
-
+                                            MessageBox.Show("Hồ sơ sinh viên này đã được liên kết với một tài khoản khác!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                             reader.Close();
                                             tx.Rollback();
                                             return;
                                         }
-
                                         targetStudentId = Convert.ToInt32(reader["Id"]);
                                     }
                                 }
-                                //chờ admin duyệt.
-                                validStatus = 0;
-                                statusValue = 1;
                             }
 
-                            // CHẶNG C: Thực hiện tạo mới tài khoản vào bảng Users
+                            // Thực hiện lưu tài khoản mới vào bảng Users
                             string insertUserQuery = "INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid, Status) " +
                                                      "OUTPUT INSERTED.Id " +
                                                      "VALUES (@username, @email, @password, @roleId, @valid, @status)";
@@ -185,7 +246,6 @@ namespace ClassProject.Presentation.Forms
                             {
                                 insertCmd.Parameters.AddWithValue("@username", username);
                                 insertCmd.Parameters.AddWithValue("@email", email);
-                                // Mã hóa bảo mật mật khẩu bằng thư viện BCrypt theo yêu cầu kiến trúc hệ thống
                                 insertCmd.Parameters.AddWithValue("@password", BCrypt.Net.BCrypt.HashPassword(password));
                                 insertCmd.Parameters.AddWithValue("@roleId", selectedRoleId);
                                 insertCmd.Parameters.AddWithValue("@valid", validStatus);
@@ -194,7 +254,7 @@ namespace ClassProject.Presentation.Forms
                                 newUserId = (int)insertCmd.ExecuteScalar();
                             }
 
-                            // CHẶNG D: Liên kết ID tài khoản Users vừa sinh ngược lại vào bảng danh sách Sinh viên
+                            // Cập nhật ngược lại cột kết nối UserId bên bảng Sinh Viên
                             if (selectedRoleId == 1 && targetStudentId.HasValue)
                             {
                                 string updateStudentQuery = "UPDATE dbo.Students SET UserId = @userId WHERE Id = @studentId";
@@ -206,72 +266,100 @@ namespace ClassProject.Presentation.Forms
                                 }
                             }
 
-                            // Cam kết thực thi và lưu toàn bộ tiến trình vào Database một cách an toàn toàn vẹn dữ liệu
                             tx.Commit();
 
-                            // Hiển thị thông báo phản hồi tương ứng theo nhóm chức vụ
-                            if (selectedRoleId == 1)
-                            {
-                                MessageBox.Show(
-                                    "Đăng ký tài khoản Sinh viên thành công!\nVui lòng chờ Admin phê duyệt trước khi đăng nhập.",
-                                    "Chờ phê duyệt",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information);
-                            }
-                            else
-                            {
-                                MessageBox.Show(
-                                    "Đăng ký tài khoản HR thành công!\nVui lòng chờ Admin phê duyệt trước khi đăng nhập.",
-                                    "Chờ phê duyệt",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information);
-                            }
+                            MessageBox.Show("Đăng ký tài khoản thành công!\nVui lòng chờ Ban giám hiệu hoặc Ban quản trị duyệt trước khi đăng nhập.",
+                                            "Đăng ký hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                             this.Close();
                         }
                         catch (Exception ex)
                         {
-                            tx.Rollback(); // Hoàn tác toàn bộ thay đổi nếu phát sinh bất kỳ lỗi dữ liệu nào
-
-                            // CHECKLIST: Ghi log hệ thống rõ ràng để phục vụ việc Debug, chống nuốt Exception thô
-                            System.Diagnostics.Debug.WriteLine($"[Error - Register Inner Flow]: {ex.Message}");
-                            MessageBox.Show("Có lỗi xảy ra trong quá trình xử lý lưu trữ dữ liệu: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            tx.Rollback();
+                            System.Diagnostics.Debug.WriteLine($"[Error - Register Transaction Inner]: {ex.Message}");
+                            MessageBox.Show("Có lỗi dữ liệu phát sinh trong quá trình lưu trữ: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                // CHECKLIST: Ghi log lỗi kết nối tầng ngoài
-                System.Diagnostics.Debug.WriteLine($"[Error - Database Connection]: {ex.Message}");
-                MessageBox.Show("Không thể thiết lập kết nối đến Cơ sở dữ liệu: " + ex.Message, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"[Error - DB Connection Fault]: {ex.Message}");
+                MessageBox.Show("Không thể thiết lập kết nối đến Cơ sở dữ liệu để tạo tài khoản: " + ex.Message, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void lblBacktoLogin_Click(object sender, EventArgs e)
+        private async Task<bool> SendOtpEmailAsync(string targetEmail, string otpCode)
         {
-            this.Close();
+            try
+            {
+                // Lấy thông tin cấu hình từ App.config để đảm bảo đồng bộ toàn hệ thống
+                string smtpEmail = ConfigurationManager.AppSettings["SenderEmail"];
+                string smtpPassword = ConfigurationManager.AppSettings["AppPassword"];
+
+                if (string.IsNullOrEmpty(smtpEmail) || string.IsNullOrEmpty(smtpPassword) || smtpEmail.Contains("your-email"))
+                {
+                    System.Diagnostics.Debug.WriteLine("[SMTP Error]: Chưa cấu hình Email gửi trong App.config!");
+                    return false;
+                }
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Hệ Thống Quản Lý Trường Học", smtpEmail));
+                message.To.Add(new MailboxAddress("", targetEmail));
+                message.Subject = "Mã Xác Thực Đăng Ký Tài Khoản Mới";
+
+                var bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = $@"
+                <div style='font-family: Segoe UI, Arial, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;'>
+                    <div style='background-color: #0f172a; color: white; padding: 20px; text-align: center;'>
+                        <h2 style='margin: 0; font-size: 20px; letter-spacing: 1px;'>XÁC THỰC AN TOÀN</h2>
+                    </div>
+                    <div style='padding: 24px; background-color: white; color: #334155;'>
+                        <p>Xin chào,</p>
+                        <p>Bạn đang thực hiện đăng ký tài khoản trên hệ thống quản lý. Dưới đây là mã OTP xác thực của bạn:</p>
+                        <div style='background-color: #f1f5f9; border-radius: 6px; padding: 15px; text-align: center; margin: 20px 0;'>
+                            <span style='font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #0f172a;'>{otpCode}</span>
+                        </div>
+                        <p style='color: #e11d48; font-size: 13px; font-style: italic;'>* Mã xác thực này có hiệu lực trong vòng 5 phút và chỉ sử dụng được 1 lần duy nhất.</p>
+                    </div>
+                </div>"
+                };
+
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    // Tăng timeout lên 8 giây phòng trường hợp mạng phản hồi chậm
+                    client.Timeout = 8000;
+                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync(smtpEmail, smtpPassword);
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Ghi log chi tiết ra cửa sổ Output để bạn dễ debug xem thực tế lỗi gì (Sai mật khẩu, hay nghẽn cổng)
+                System.Diagnostics.Debug.WriteLine($"[SMTP Mail Error Detail]: {ex.ToString()}");
+                return false;
+            }
         }
 
-        // Hàm gọi API kiểm tra xem Email có phải là email rác/tạm thời hay không
         private async Task<bool> IsDisposableEmail(string email)
         {
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    // Thiết lập Timeout 4 giây để nếu mạng quá yếu thì tự ngắt, không bắt User đợi lâu
                     client.Timeout = TimeSpan.FromSeconds(4);
-
-                    // API endpoint miễn phí từ Kickbox (không cần tạo tài khoản, không cần API Key)
                     string url = $"https://open.kickbox.com/v1/disposable/{Uri.EscapeDataString(email)}";
 
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (response.IsSuccessStatusCode)
                     {
                         string jsonResult = await response.Content.ReadAsStringAsync();
-
-                        // Phân tích kết quả JSON trả về. Định dạng API: {"disposable": true} hoặc {"disposable": false}
                         using (JsonDocument doc = JsonDocument.Parse(jsonResult))
                         {
                             if (doc.RootElement.TryGetProperty("disposable", out JsonElement disposableProp))
@@ -284,28 +372,32 @@ namespace ClassProject.Presentation.Forms
             }
             catch (Exception ex)
             {
-                // Nếu có lỗi mạng hoặc sập API, ghi log debug và trả về false (cho qua) để không chặn người dùng thật
                 System.Diagnostics.Debug.WriteLine($"[API Error - Disposable Check Fail]: {ex.Message}");
             }
             return false;
         }
 
+        #endregion
+
+        #region Các Tác Vụ Giao Diện Khác (UI Form Control Actions)
+
+        private void lblBacktoLogin_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
         private void btnOpenScanner_Click(object sender, EventArgs e)
         {
-            // Khởi tạo Form quét riêng biệt dưới dạng một Hộp thoại (Dialog)
-            using (CardScannerForm scannerForm = new CardScannerForm())
+            using (CardScannerForm scannerForm = new CardScannerForm(ScannerMode.OnlyMSSV))
             {
-                // Hiển thị Form quét lên và chờ người dùng xử lý xong
                 if (scannerForm.ShowDialog() == DialogResult.OK)
                 {
-                    // Nếu người dùng bấm "Xác nhận và Điền" ở Form kia, lấy kết quả đổ vào txtUsername
                     string mssvResult = scannerForm.DetectedMSSV;
-
                     if (!string.IsNullOrEmpty(mssvResult))
                     {
                         txtUsername.Text = mssvResult;
 
-                        // Tiện tay chuyển luôn Combobox chức vụ sang "Student" cho họ vì họ vừa quét thẻ SV
+                        // Tự động chuyển Combobox chức vụ sang "Student" cho tiện lợi
                         if (cboPosition.Items.Contains("Student"))
                         {
                             cboPosition.SelectedItem = "Student";
@@ -314,5 +406,7 @@ namespace ClassProject.Presentation.Forms
                 }
             }
         }
+
+        #endregion
     }
 }

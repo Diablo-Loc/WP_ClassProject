@@ -58,6 +58,8 @@ namespace ClassProject
             // BỔ SUNG: Biến hứng Email từ DB phục vụ UserSession
             string email = string.Empty;
             string fullName = string.Empty;
+            string teacherId = string.Empty;
+            string mssv = string.Empty;
 
             using (SqlConnection conn = _db.GetConnection())
             {
@@ -73,7 +75,10 @@ namespace ClassProject
                             ISNULL(u.Status, 0) AS Status, 
                             ISNULL(u.FailedAttempts, 0) AS FailedAttempts, 
                             u.LockoutEnd,
-                            -- Ghép Họ + Tên dựa theo RoleId thực tế trong DB của bạn
+                            -- LẤY THÊM MÃ VẬT LÝ Ở ĐÂY
+                            ISNULL(t.MSGV, '') AS TeacherId,
+                            ISNULL(s.MSSV, '') AS StudentMssv,
+                            -- Ghép Họ + Tên dựa theo RoleId thực tế
                             CASE 
                                 WHEN u.RoleId = 1 THEN ISNULL(s.LastName + ' ' + s.FirstName, '')
                                 WHEN u.RoleId = 2 THEN ISNULL(t.LastName + ' ' + t.FirstName, '')
@@ -100,8 +105,11 @@ namespace ClassProject
                                 valid = Convert.ToInt32(reader["Valid"]);
                                 status = Convert.ToInt32(reader["Status"]);
                                 failedAttempts = Convert.ToInt32(reader["FailedAttempts"]);
+
                                 email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : string.Empty;
                                 fullName = reader["FullName"] != DBNull.Value ? reader["FullName"].ToString() : string.Empty;
+                                teacherId = reader["TeacherId"] != DBNull.Value ? reader["TeacherId"].ToString() : string.Empty;
+                                mssv = reader["StudentMssv"] != DBNull.Value ? reader["StudentMssv"].ToString() : string.Empty;
 
                                 if (reader["LockoutEnd"] != DBNull.Value)
                                 {
@@ -179,7 +187,7 @@ namespace ClassProject
                         // Do mới đăng nhập nên ta để trống mssv và teacherId để form Main đồng bộ sau
                         // KIỂM TOÁN NGẦM: Đăng nhập thành công, AI quét quy tắc "Giờ lạ"
                         _securityService.ProcessSecurityAudit(username, isSuccess: true, method: "PASSWORD", userEmail: email);
-                        UserSession.Initialize(userId, username, roleId, email, fullName, "", "");
+                        UserSession.Initialize(userId, username, roleId, email, fullName, mssv, teacherId);
 
                         // Xử lý Remember Me (DPAPI Bảo mật)
                         if (chkRememberMe.Checked)
@@ -374,5 +382,19 @@ namespace ClassProject
                 this.Show();
             }
         }
+        private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkShowPassword.Checked)
+            {
+                txtPassword.PasswordChar = '\0'; // Hiện rõ chữ mật khẩu
+                chkShowPassword.Text = "Ẩn";     // Đổi chữ hiển thị thành "Ẩn" (hoặc "🙈")
+            }
+            else
+            {
+                txtPassword.PasswordChar = '●'; // Ẩn mật khẩu lại thành dấu chấm
+                chkShowPassword.Text = "Hiện";   // Đổi chữ hiển thị thành "Hiện" (hoặc "👁")
+            }
+        }
+
     }
 }

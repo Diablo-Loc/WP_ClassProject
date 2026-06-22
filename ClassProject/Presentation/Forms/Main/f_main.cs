@@ -1,8 +1,12 @@
-﻿using ClassProject.DataAccess.Db;
+﻿using ClassProject.Business.Services;
+using ClassProject.DataAccess.Db;
 using ClassProject.DataAccess.Entities;
 using ClassProject.DataAccess.Repositories.Implementations;
 using ClassProject.Presentation.Forms.Admin;
+using ClassProject.Presentation.Forms.Analytics;
+using ClassProject.Presentation.Forms.Auth;
 using ClassProject.Presentation.Forms.Course;
+using ClassProject.Presentation.Forms.Score;
 using ClassProject.Presentation.Forms.Students;
 using Guna.UI2.WinForms;
 using Microsoft.Data.SqlClient;
@@ -11,7 +15,7 @@ using System.Data;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using ClassProject.Presentation.Forms.Auth;
+
 
 namespace ClassProject.Presentation.Forms.Main
 {
@@ -22,6 +26,8 @@ namespace ClassProject.Presentation.Forms.Main
         private readonly StudentRepository _studentRepo;
         private bool _hasNewNotifications = false;
         private bool isDarkMode = false;
+        private readonly AiChatService _aiService = new AiChatService();
+
         // Bảng màu cho Chế độ Sáng (Light Mode)
         private readonly Color LightBgColor = Color.FromArgb(246, 248, 251); // Màu nền tổng xám nhạt hiện đại của bạn
         private readonly Color LightHeaderColor = Color.White;
@@ -360,9 +366,9 @@ namespace ClassProject.Presentation.Forms.Main
             {
                 // Giảng viên: Tập trung hoàn toàn vào lớp phụ trách và nghiệp vụ giảng dạy
                 flowMenu.Controls.Add(CreateMenuButton("Thông tin cá nhân", Profile_Click));
-                flowMenu.Controls.Add(CreateMenuButton("Lớp học phần của tôi", CourseSection1_Click)); // Tái sử dụng form, tự lọc theo mã GV
-                flowMenu.Controls.Add(CreateMenuButton("Sinh viên lớp tôi phụ trách", Student1_Click)); // Tái sử dụng form, tự lọc danh sách sinh viên học lớp phần của GV
-                flowMenu.Controls.Add(CreateMenuButton("Nhập & Sửa điểm số", Score1_Click));         // Tái sử dụng form, khóa chỉ cho sửa lớp mình dạy
+                flowMenu.Controls.Add(CreateMenuButton("Lớp học phần của tôi", CourseSection_Click)); // Tái sử dụng form, tự lọc theo mã GV
+                flowMenu.Controls.Add(CreateMenuButton("Sinh viên lớp tôi phụ trách", Student_Click)); // Tái sử dụng form, tự lọc danh sách sinh viên học lớp phần của GV
+                flowMenu.Controls.Add(CreateMenuButton("Nhập & Sửa điểm số", Score_Click));         // Tái sử dụng form, khóa chỉ cho sửa lớp mình dạy
             }
             else if (UserSession.IsStudent)
             {
@@ -385,7 +391,39 @@ namespace ClassProject.Presentation.Forms.Main
 
         #region Menu Click Route Events (Định tuyến sự kiện sạch)
 
-        private void Dashboard_Click(object sender, EventArgs e) => OpenChildForm(new DashBoardForm());
+        private void Dashboard_Click(object sender, EventArgs e)
+        {
+            // 1. Lấy chuỗi kết nối an toàn từ My_DB mà bạn đã khai báo ở đầu Main Form
+            // (Giúp tái sử dụng kết nối, tránh hardcode chuỗi string)
+            string connString = _db.GetConnection().ConnectionString;
+
+            // 2. Định tuyến theo vai trò (Role-based Routing) và tiêm phụ thuộc (Dependency Injection)
+            if (UserSession.IsStudent)
+            {
+                // Khởi tạo các nguyên liệu chuyên biệt cho Dashboard Sinh viên
+                var dashboardRepo = new DashboardRepository(connString);
+                var requestRepo = new RequestRepository(connString);
+                var registerRepo = new RegisterRepository();
+
+                // Mở Form StudentDashboardForm mới tinh đã dọn dẹp sạch layer
+                OpenChildForm(new StudentDashboardForm(dashboardRepo, registerRepo, requestRepo));
+            }
+            else if (UserSession.IsAdmin || UserSession.IsStaff)
+            {
+                // Đối với Admin hoặc Giáo vụ, mở màn hình Dashboard tổng quan toàn trường
+                var dashboardRepo = new DashboardRepository(connString);
+
+                // Giả sử DashBoardForm tổng của bạn nhận vào dashboardRepo tổng quan:
+                OpenChildForm(new DashBoardForm());
+            }
+            else if (UserSession.IsTeacher)
+            {
+                string maGV = UserSession.TeacherId;
+
+                // Truyền mã này vào trong ngoặc khi khởi tạo Form con
+                OpenChildForm(new TeacherDashBoardForm(maGV));
+            }
+        }
         private void Account_Click(object sender, EventArgs e) => OpenChildForm(new AccountManageForm());
         private void Staff_Click(object sender, EventArgs e) => OpenChildForm(new ManageStaffForm());
         private void Teacher_Click(object sender, EventArgs e) => OpenChildForm(new ManageTeacherForm());
@@ -395,7 +433,15 @@ namespace ClassProject.Presentation.Forms.Main
         private void Course_Click(object sender, EventArgs e) => OpenChildForm(new ManageCourseForm());
         private void CourseSection_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new ManageCourseSectionForm());
+            if (!UserSession.IsLoggedIn || (!UserSession.IsAdmin && !UserSession.IsStaff && !UserSession.IsTeacher))
+            {
+                MessageBox.Show("Bạn không có quyền truy cập vào chức năng quản lý lớp học phần!",
+                                "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            var frm = new ManageCourseSectionForm();
+            frm.FormClosed += (s, args) => frm.Dispose();
+            OpenChildForm(frm);
         }
         private void Score_Click(object sender, EventArgs e)
         {
@@ -508,20 +554,6 @@ namespace ClassProject.Presentation.Forms.Main
                 UserSession.Clear();
                 this.Close();
             }
-        }
-        private void CourseSection1_Click(object sender, EventArgs e)
-        {
-            // Truyền Mã giảng viên đang đăng nhập vào Form Lớp học phần
-            //string currentTeacherId = UserSession.CurrentUserID;
-            //var form = new InstructorClassScheduleForm(currentTeacherId);
-            //OpenChildForm(form); // Hàm helper để nhúng Form con vào Panel chính
-        }
-        private void Student1_Click(object sender, EventArgs e)
-        {
-            // Truyền Mã lớp của giảng viên đang đăng nhập vào Form Lớp học phần
-            //...
-            //var rosterForm = new ClassRosterForm(selectedMaLopHP);
-            //OpenChildForm(form); // Hàm helper để nhúng Form con vào Panel chính
         }
         private void Score1_Click(object sender, EventArgs e)
         {
@@ -855,16 +887,241 @@ namespace ClassProject.Presentation.Forms.Main
         // THÀNH PHẦN AI AUTOLOGOUT: ĐÁNH CHẶN TƯƠNG TÁC ĐỂ GIA HẠN PHIÊN
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            // Bất kỳ hành vi nhấn phím nào trên phần mềm cũng tính là đang hoạt động -> Reset bộ đếm 30 phút
             UserSession.RefreshActivity();
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            // Bất kỳ hành vi di chuột nào trên Form chính cũng tính là đang hoạt động
             base.OnMouseMove(e);
             UserSession.RefreshActivity();
+        }
+
+        // --- ĐIỀU KHIỂN WIDGET CHAT ---
+        private void btnToggleAiChat_Click(object sender, EventArgs e)
+        {
+            bool isVisible = !pnlAiChatBox.Visible;
+            pnlAiChatBox.Visible = isVisible;
+            lblAiStatus.Visible = isVisible;
+
+            if (isVisible)
+            {
+                txtAiSearch.Focus();
+                pnlAiChatBox.BringToFront();
+                btnToggleAiChat.BringToFront();
+                lblAiStatus.BringToFront();
+            }
+        }
+
+        private void btnCloseAiChat_Click(object sender, EventArgs e)
+        {
+            pnlAiChatBox.Visible = false;
+        }
+
+        // --- XỬ LÝ LỒNG GHÉP TIN NHẮN VÀ GỌI API (SỬA LỖI ĐƠ LUỒNG ĐIỀU HƯỚNG) --
+        private async void txtAiSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true; // Chặn tiếng bíp Windows
+
+                string userQuery = txtAiSearch.Text.Trim();
+                if (string.IsNullOrEmpty(userQuery)) return;
+
+                // 1. Đẩy câu hỏi người dùng lên UI trước
+                AddMessageToHistory("You", userQuery);
+
+                lblAiStatus.Text = "🤖 AI đang xử lý...";
+                lblAiStatus.ForeColor = Color.DimGray;
+
+                // Khóa tạm thời ô tìm kiếm để tránh nhấn Enter liên tục gây crash
+                txtAiSearch.Enabled = false;
+
+                try
+                {
+                    // BƯỚC 1: KIỂM TRA CÂU HỎI HỆ THỐNG CỐ ĐỊNH TRƯỚC (OTP, Mật khẩu...)
+                    string localResponse = _aiService.CheckLocalStaticResponse(userQuery);
+                    if (!string.IsNullOrEmpty(localResponse))
+                    {
+                        AddMessageToHistory("AI", localResponse);
+                        txtAiSearch.Clear();
+                        return;
+                    }
+
+                    // BƯỚC 2: KHÔNG TRÚNG CÁI NÀO BÊN TRÊN -> ĐẨY THẲNG LÊN CLOUD AI GEMINI
+                    string aiResponse = await _aiService.FetchAiResponseAsync(userQuery, false);
+
+                    // 1. Nếu là lệnh mở Form trống (Vẫn giữ nguyên câu 1 của bạn)
+                    if (aiResponse.Contains("OPEN_FORM:"))
+                    {
+                        int index = aiResponse.IndexOf("OPEN_FORM:");
+                        string targetFormName = aiResponse.Substring(index + "OPEN_FORM:".Length).Trim();
+                        AddMessageToHistory("AI", "🤖 Đang tiến hành điều hướng...");
+                        OpenFormByName(targetFormName);
+                    }
+                    // 2. AI RA LỆNH TRUY VẤN ĐỂ LẤY DỮ LIỆU PHÂN TÍCH (CÂU 2 THÔNG BÁO MA)
+                    else if (aiResponse.Contains("EXECUTE_SQL:"))
+                    {
+                        int index = aiResponse.IndexOf("EXECUTE_SQL:");
+                        string sqlQuery = aiResponse.Substring(index + "EXECUTE_SQL:".Length).Trim();
+
+                        // Bước A: Âm thầm chạy SQL dưới nền để lấy dữ liệu thô dạng Text/JSON
+                        string dataResultText = ExecuteSqlToText(sqlQuery);
+
+                        // Bước B: Gửi dữ liệu thô này ngược lại cho AI để nó tự "đọc hiểu" và viết thông báo
+                        string finalPrompt = $"Người dùng hỏi: '{userQuery}'. " +
+                                             $"Kết quả truy vấn thực tế từ Database dưới dạng JSON: {dataResultText}. " +
+                                             $"Dựa vào dữ liệu này, hãy viết một câu thông báo/cảnh báo thông minh, tự nhiên bằng tiếng Việt gửi cho người dùng (Không kèm mã code hay chữ JSON).";
+
+                        string aiAnalysisResponse = await _aiService.FetchAiResponseAsync(finalPrompt, false);
+
+                        // Bước C: Hiển thị lời thông báo "ma" siêu thông minh của AI lên khung chat!
+                        AddMessageToHistory("AI", aiAnalysisResponse);
+                    }
+                    else
+                    {
+                        AddMessageToHistory("AI", aiResponse);
+                    }
+
+                    txtAiSearch.Clear();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi tầng Form: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    AddMessageToHistory("Hệ thống", $"⚠️ Đã xảy ra sự cố: {ex.Message}");
+                }
+                finally
+                {
+                    // Luôn luôn giải phóng ô nhập liệu và trả trạng thái nhãn
+                    txtAiSearch.Enabled = true;
+                    txtAiSearch.Focus();
+                    lblAiStatus.Text = "Hệ thống sẵn sàng.";
+                    lblAiStatus.ForeColor = Color.DarkSlateBlue;
+                }
+            }
+        }
+        private string ExecuteSqlToText(string sqlQuery)
+        {
+            try
+            {
+                // Sử dụng đối tượng kết nối của bạn (Ví dụ dùng _db ở Form Điểm hoặc chuỗi kết nối gốc)
+                string connectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=ClassProject;Integrated Security=True;TrustServerCertificate=True";
+
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(sqlQuery, conn))
+                    {
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            da.Fill(dt);
+
+                            // Biến toàn bộ bảng dữ liệu thành chuỗi text dạng JSON để AI đọc hiểu dễ nhất
+                            List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
+                            foreach (DataRow row in dt.Rows)
+                            {
+                                var dict = new Dictionary<string, object>();
+                                foreach (DataColumn col in dt.Columns)
+                                {
+                                    dict[col.ColumnName] = row[col];
+                                }
+                                rows.Add(dict);
+                            }
+                            return System.Text.Json.JsonSerializer.Serialize(rows);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"[Lỗi kết nối cơ sở dữ liệu: {ex.Message}]";
+            }
+        }
+        // --- HÀM ĐIỀU HƯỚNG FORM CON TỰ ĐỘNG CHUẨN ĐÃ LOẠI BỎ LỖI LỆCH CHỮ ---
+        private void OpenFormByName(string formName)
+        {
+            if (string.IsNullOrEmpty(formName)) return;
+
+            Form targetForm = null;
+            string safeFormName = formName.Trim().ToLower();
+
+            switch (safeFormName)
+            {
+                case "managescoreform": targetForm = new ManageScoreForm(); break;
+                case "managestudentform": targetForm = new ManageStudentForm(); break;
+                case "managecourseform": targetForm = new ManageCourseForm(); break;
+                case "manageclassroomform": targetForm = new ManageClassroomForm(); break;
+                case "accountmanageform": targetForm = new AccountManageForm(); break;
+
+                case "statisticsform":
+                    string role = UserSession.IsAdmin ? "Admin" : (UserSession.IsStaff ? "HR" : "Student");
+                    targetForm = new StatisticsForm(role, 0);
+                    break;
+
+                case "transcriptform": targetForm = new TranscriptForm(); break;
+                case "profileform": targetForm = new ProfileForm(); break;
+                case "studentrequestform": targetForm = new StudentRequestForm(); break;
+
+                default:
+                    System.Diagnostics.Debug.WriteLine($"[AI Warning] Không tìm thấy case map cho form: {formName}");
+                    break;
+            }
+
+            if (targetForm != null)
+            {
+                // 1. Gọi hàm nạp form con lồng vào Panel Container của bạn
+                OpenChildForm(targetForm);
+
+                // CỐ ĐỊNH CHÍ PHÁP: ẨN KHUNG CHAT ĐỂ TRÁNH CHE KHUẤT GIAO DIỆN FORM MỚI
+                pnlAiChatBox.Visible = false;
+                lblAiStatus.Visible = false; // Nếu bạn dùng nhãn trạng thái riêng ngoài panel
+
+                // Trả lại trạng thái chữ mặc định để lần sau mở chat lên trông gọn gàng
+                lblAiStatus.Text = "Hệ thống sẵn sàng.";
+                lblAiStatus.ForeColor = Color.DarkSlateBlue;
+            }
+        }
+
+        // --- THIẾT KẾ BONG BÓNG CHAT DOANH NGHIỆP HIỂN THỊ TRONG FLOWLAYOUTPANEL ---
+        private void AddMessageToHistory(string sender, string message)
+        {
+            Label lblBubble = new Label();
+            lblBubble.Text = message; // Bỏ chữ tiền tố lặp lại để UI trông giống Telegram/Messenger hơn
+            lblBubble.AutoSize = true;
+            lblBubble.MaximumSize = new Size(flowChatHistory.Width - 35, 0); // Ép text tự động xuống dòng mượt mà
+            lblBubble.Padding = new Padding(10, 8, 10, 8);
+            lblBubble.Font = new Font("Segoe UI", 9.5F);
+
+            // Cấu hình lề biên: Tránh dính các cục bong bóng lại với nhau
+            lblBubble.Margin = new Padding(3, 5, 3, 5);
+
+            // Phân biệt kiểu dáng thiết kế chuẩn UI/UX doanh nghiệp
+            if (sender == "You")
+            {
+                // Người dùng: Nằm sát bên phải (hoặc căn lề phù hợp), nền xanh nhạt, chữ xanh dương đậm
+                lblBubble.BackColor = Color.FromArgb(231, 243, 255);
+                lblBubble.ForeColor = Color.FromArgb(0, 120, 212);
+                // Tạo hiệu ứng bo góc nhẹ qua FlatStyle nếu cần, hoặc giữ nguyên kiểu chữ tinh tế
+            }
+            else if (sender == "Hệ thống")
+            {
+                // Cảnh báo lỗi hệ thống: Màu đỏ cảnh báo dịu
+                lblBubble.BackColor = Color.FromArgb(254, 242, 242);
+                lblBubble.ForeColor = Color.FromArgb(220, 38, 38);
+            }
+            else
+            {
+                // Phản hồi từ AI: Nền xám nhạt, chữ xám đen cực kỳ dịu mắt
+                lblBubble.BackColor = Color.FromArgb(243, 244, 246);
+                lblBubble.ForeColor = Color.FromArgb(31, 41, 55);
+            }
+
+            // Đẩy bong bóng vào khung cuộn lịch sử tin nhắn
+            flowChatHistory.Controls.Add(lblBubble);
+
+            // MẸO UX: Tự động cuộn thanh Scroll xuống đáy để luôn nhìn thấy câu trả lời mới nhất
+            flowChatHistory.ScrollControlIntoView(lblBubble);
         }
     }
 }

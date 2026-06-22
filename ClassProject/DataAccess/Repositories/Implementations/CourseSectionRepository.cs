@@ -19,8 +19,7 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             DataTable table = new DataTable();
             using (SqlConnection conn = _db.GetConnection())
             {
-                // ĐỒNG BỘ VẬT LÝ: Ghép FirstName + LastName theo chuẩn (Họ + Tên lót + Tên)
-                // Lưu ý: Nếu DB của bạn thiết kế t.LastName là Họ, t.FirstName là Tên, hãy đổi lại là t.LastName + ' ' + t.FirstName
+                // ĐỒNG BỘ VẬT LÝ: Lấy thêm ThuHoc, CaHoc phục vụ hiển thị hoặc chỉnh sửa lịch
                 string query = @"
                     SELECT 
                         cs.MaLopHP, 
@@ -31,6 +30,8 @@ namespace ClassProject.DataAccess.Repositories.Implementations
                         cs.MSGV, 
                         ISNULL(t.LastName + ' ' + t.FirstName, N'Chưa phân công') AS TenGiangVien,
                         cs.PhongHoc, 
+                        cs.ThuHoc,
+                        cs.CaHoc,
                         cs.MaxStudents,
                         cs.Status,
                         (SELECT COUNT(1) FROM dbo.DKMH dk WHERE dk.MaLopHP = cs.MaLopHP) AS SisoHienTai
@@ -53,24 +54,26 @@ namespace ClassProject.DataAccess.Repositories.Implementations
 
             using (SqlConnection conn = _db.GetConnection())
             {
+                // ĐỒNG BỘ VẬT LÝ: Thêm cột ThuHoc và CaHoc vào câu lệnh INSERT
                 string query = @"INSERT INTO dbo.CourseSection 
-                                 (MaLopHP, MaMH, HocKy, NamHoc, MSGV, PhongHoc, MaxStudents, Status, Created_At)
-                                 VALUES (@maLopHP, @maMH, @hocKy, @namHoc, @msgv, @phongHoc, @maxStudents, @status, GETDATE())";
+                                 (MaLopHP, MaMH, HocKy, NamHoc, MSGV, PhongHoc, ThuHoc, CaHoc, MaxStudents, Status, Created_At)
+                                 VALUES (@maLopHP, @maMH, @hocKy, @namHoc, @msgv, @phongHoc, @thuHoc, @caHoc, @maxStudents, @status, GETDATE())";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    // ĐỒNG BỘ VẬT LÝ: Đổi sang SqlDbType.VarChar cho các trường Mã hệ thống
                     cmd.Parameters.Add("@maLopHP", SqlDbType.VarChar, 30).Value = section.MaLopHP.Trim();
+                    // Lưu ý: SQL Đang để CHAR(10) cho MaMH, gửi VarChar(20) vẫn tương thích tốt
                     cmd.Parameters.Add("@maMH", SqlDbType.VarChar, 20).Value = section.MaMH.Trim();
-
                     cmd.Parameters.Add("@hocKy", SqlDbType.Int).Value = section.HocKy;
                     cmd.Parameters.Add("@namHoc", SqlDbType.NVarChar, 20).Value = section.NamHoc.Trim();
-
-                    // ĐỒNG BỘ VẬT LÝ: Trả MSGV về VarChar để khớp chuẩn khóa ngoại bảng Teachers
                     cmd.Parameters.Add("@msgv", SqlDbType.VarChar, 30).Value = string.IsNullOrWhiteSpace(section.MSGV) ? DBNull.Value : (object)section.MSGV.Trim();
-
-                    // Giữ nguyên NVarChar vì phòng học và trạng thái có thể có ký tự đặc biệt/Unicode
                     cmd.Parameters.Add("@phongHoc", SqlDbType.NVarChar, 50).Value = string.IsNullOrWhiteSpace(section.PhongHoc) ? DBNull.Value : (object)section.PhongHoc;
+
+                    // LẤY TỪ ENTITY (Cần đảm bảo file Entity CourseSection.cs của bạn đã khai báo 2 thuộc tính này)
+                    // Nếu chưa có, bạn chỉ cần viết thêm: public int ThuHoc { get; set; } = 2; public int CaHoc { get; set; } = 1; vào Entity.
+                    cmd.Parameters.Add("@thuHoc", SqlDbType.Int).Value = section.ThuHoc;
+                    cmd.Parameters.Add("@caHoc", SqlDbType.Int).Value = section.CaHoc;
+
                     cmd.Parameters.Add("@maxStudents", SqlDbType.Int).Value = section.MaxStudents;
                     cmd.Parameters.Add("@status", SqlDbType.Int).Value = section.Status;
 
@@ -95,17 +98,21 @@ namespace ClassProject.DataAccess.Repositories.Implementations
 
             using (SqlConnection conn = _db.GetConnection())
             {
+                // ĐỒNG BỘ VẬT LÝ: Thêm sửa đổi cả ThuHoc và CaHoc khi Admin điều chỉnh lịch của lớp
                 string query = @"UPDATE dbo.CourseSection 
-                                 SET MSGV = @msgv, PhongHoc = @phongHoc, MaxStudents = @maxStudents, Status = @status, Updated_At = GETDATE()
+                                 SET MSGV = @msgv, PhongHoc = @phongHoc, ThuHoc = @thuHoc, CaHoc = @caHoc, 
+                                     MaxStudents = @maxStudents, Status = @status, Updated_At = GETDATE()
                                  WHERE MaLopHP = @maLopHP";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    // ĐỒNG BỘ VẬT LÝ: Đổi sang VarChar đồng bộ với cấu trúc bảng
                     cmd.Parameters.Add("@maLopHP", SqlDbType.VarChar, 30).Value = section.MaLopHP.Trim();
                     cmd.Parameters.Add("@msgv", SqlDbType.VarChar, 30).Value = string.IsNullOrWhiteSpace(section.MSGV) ? DBNull.Value : (object)section.MSGV.Trim();
-
                     cmd.Parameters.Add("@phongHoc", SqlDbType.NVarChar, 50).Value = string.IsNullOrWhiteSpace(section.PhongHoc) ? DBNull.Value : (object)section.PhongHoc;
+
+                    cmd.Parameters.Add("@thuHoc", SqlDbType.Int).Value = section.ThuHoc;
+                    cmd.Parameters.Add("@caHoc", SqlDbType.Int).Value = section.CaHoc;
+
                     cmd.Parameters.Add("@maxStudents", SqlDbType.Int).Value = section.MaxStudents;
                     cmd.Parameters.Add("@status", SqlDbType.Int).Value = section.Status;
 
@@ -123,7 +130,6 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             {
                 conn.Open();
 
-                // ĐỒNG BỘ VẬT LÝ: Kiểm tra ràng buộc đăng ký môn học (DKMH) trước khi xóa
                 string checkQuery = "SELECT COUNT(1) FROM dbo.DKMH WHERE MaLopHP = @maLopHP";
                 using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
                 {

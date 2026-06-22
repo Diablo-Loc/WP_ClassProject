@@ -1,16 +1,14 @@
-﻿namespace ClassProject.Presentation.Forms
+﻿using System;
+using System.Data;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace ClassProject.Presentation.Forms
 {
     partial class ForgetPassForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,222 +20,419 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ForgetPassForm));
-            pnlCreateAccount = new Panel();
+            components = new System.ComponentModel.Container();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            ElipseForm = new Guna.UI2.WinForms.Guna2Elipse(components);
+            pnlBackground = new Guna.UI2.WinForms.Guna2GradientPanel();
+            btnClose = new Guna.UI2.WinForms.Guna2ControlBox();
+            pnlCard = new Guna.UI2.WinForms.Guna2Panel();
             lblBacktoLogin = new Label();
-            btnReset = new Button();
-            btnSendOTP = new Button();
+            lblOr = new Label();
+            btnReset = new Guna.UI2.WinForms.Guna2Button();
             lblConfirmPassword = new Label();
+            txtConfirm = new Guna.UI2.WinForms.Guna2TextBox();
             lblNewPassword = new Label();
-            lblEmail = new Label();
-            lblOTP = new Label();
-            lblResetPassword = new Label();
-            txtNewPassword = new TextBox();
-            pictureBox1 = new PictureBox();
-            txtOTP = new TextBox();
-            txtEmail = new TextBox();
-            txtConfirm = new TextBox();
-            pnlCreateAccount.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            txtNewPassword = new Guna.UI2.WinForms.Guna2TextBox();
+            btnSendOTP = new Guna.UI2.WinForms.Guna2Button();
+            txtEmail = new Guna.UI2.WinForms.Guna2TextBox();
+            lblSubTitle = new Label();
+            lblTitle = new Label();
+            picLogo = new Guna.UI2.WinForms.Guna2PictureBox();
+            pnlChatbot = new Guna.UI2.WinForms.Guna2Panel();
+            rtbChatLog = new RichTextBox();
+            txtChatInput = new Guna.UI2.WinForms.Guna2TextBox();
+            btnSendChat = new Guna.UI2.WinForms.Guna2Button();
+            btnToggleChat = new Guna.UI2.WinForms.Guna2Button();
+            ElipseCard = new Guna.UI2.WinForms.Guna2Elipse(components);
+            ElipseChat = new Guna.UI2.WinForms.Guna2Elipse(components);
+            pnlBackground.SuspendLayout();
+            pnlCard.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
+            pnlChatbot.SuspendLayout();
             SuspendLayout();
             // 
-            // pnlCreateAccount
+            // ElipseForm
             // 
-            pnlCreateAccount.BorderStyle = BorderStyle.FixedSingle;
-            pnlCreateAccount.Controls.Add(lblBacktoLogin);
-            pnlCreateAccount.Controls.Add(btnReset);
-            pnlCreateAccount.Controls.Add(btnSendOTP);
-            pnlCreateAccount.Controls.Add(lblConfirmPassword);
-            pnlCreateAccount.Controls.Add(lblNewPassword);
-            pnlCreateAccount.Controls.Add(lblEmail);
-            pnlCreateAccount.Controls.Add(lblOTP);
-            pnlCreateAccount.Controls.Add(lblResetPassword);
-            pnlCreateAccount.Controls.Add(txtNewPassword);
-            pnlCreateAccount.Controls.Add(pictureBox1);
-            pnlCreateAccount.Controls.Add(txtOTP);
-            pnlCreateAccount.Controls.Add(txtEmail);
-            pnlCreateAccount.Controls.Add(txtConfirm);
-            pnlCreateAccount.Location = new Point(177, 10);
-            pnlCreateAccount.Margin = new Padding(3, 2, 3, 2);
-            pnlCreateAccount.Name = "pnlCreateAccount";
-            pnlCreateAccount.Size = new Size(316, 372);
-            pnlCreateAccount.TabIndex = 13;
+            ElipseForm.BorderRadius = 15;
+            ElipseForm.TargetControl = this;
+            // 
+            // pnlBackground
+            // 
+            pnlBackground.Controls.Add(btnClose);
+            pnlBackground.Controls.Add(pnlCard);
+            pnlBackground.Controls.Add(pnlChatbot);
+            pnlBackground.Controls.Add(btnToggleChat);
+            pnlBackground.CustomizableEdges = customizableEdges21;
+            pnlBackground.Dock = DockStyle.Fill;
+            pnlBackground.FillColor = Color.FromArgb(37, 120, 141);
+            pnlBackground.FillColor2 = Color.FromArgb(44, 74, 92);
+            pnlBackground.Location = new Point(0, 0);
+            pnlBackground.Margin = new Padding(3, 4, 3, 4);
+            pnlBackground.Name = "pnlBackground";
+            pnlBackground.ShadowDecoration.CustomizableEdges = customizableEdges22;
+            pnlBackground.Size = new Size(1314, 960);
+            pnlBackground.TabIndex = 0;
+            // 
+            // btnClose
+            // 
+            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnClose.BackColor = Color.Transparent;
+            btnClose.CustomizableEdges = customizableEdges1;
+            btnClose.FillColor = Color.Transparent;
+            btnClose.IconColor = Color.White;
+            btnClose.Location = new Point(1263, 16);
+            btnClose.Margin = new Padding(3, 4, 3, 4);
+            btnClose.Name = "btnClose";
+            btnClose.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            btnClose.Size = new Size(38, 39);
+            btnClose.TabIndex = 1;
+            // 
+            // pnlCard
+            // 
+            pnlCard.BackColor = Color.White;
+            pnlCard.Controls.Add(lblBacktoLogin);
+            pnlCard.Controls.Add(lblOr);
+            pnlCard.Controls.Add(btnReset);
+            pnlCard.Controls.Add(lblConfirmPassword);
+            pnlCard.Controls.Add(txtConfirm);
+            pnlCard.Controls.Add(lblNewPassword);
+            pnlCard.Controls.Add(txtNewPassword);
+            pnlCard.Controls.Add(btnSendOTP);
+            pnlCard.Controls.Add(txtEmail);
+            pnlCard.Controls.Add(lblSubTitle);
+            pnlCard.Controls.Add(lblTitle);
+            pnlCard.Controls.Add(picLogo);
+            pnlCard.CustomizableEdges = customizableEdges15;
+            pnlCard.Location = new Point(171, 40);
+            pnlCard.Margin = new Padding(3, 4, 3, 4);
+            pnlCard.Name = "pnlCard";
+            pnlCard.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            pnlCard.Size = new Size(526, 788);
+            pnlCard.TabIndex = 0;
             // 
             // lblBacktoLogin
             // 
-            lblBacktoLogin.AutoSize = true;
-            lblBacktoLogin.Font = new Font("Segoe UI", 9F, FontStyle.Underline);
-            lblBacktoLogin.Location = new Point(110, 340);
+            lblBacktoLogin.Cursor = Cursors.Hand;
+            lblBacktoLogin.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lblBacktoLogin.ForeColor = Color.FromArgb(54, 102, 240);
+            lblBacktoLogin.Location = new Point(46, 716);
             lblBacktoLogin.Name = "lblBacktoLogin";
-            lblBacktoLogin.Size = new Size(79, 15);
-            lblBacktoLogin.TabIndex = 18;
-            lblBacktoLogin.Text = "Back to Login";
+            lblBacktoLogin.Size = new Size(434, 33);
+            lblBacktoLogin.TabIndex = 10;
+            lblBacktoLogin.Text = "← Back to Login";
+            lblBacktoLogin.TextAlign = ContentAlignment.MiddleCenter;
             lblBacktoLogin.Click += lblBacktoLogin_Click;
+            // 
+            // lblOr
+            // 
+            lblOr.Font = new Font("Segoe UI", 9F);
+            lblOr.ForeColor = Color.FromArgb(170, 170, 170);
+            lblOr.Location = new Point(46, 685);
+            lblOr.Name = "lblOr";
+            lblOr.Size = new Size(434, 20);
+            lblOr.TabIndex = 9;
+            lblOr.Text = "or";
+            lblOr.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // btnReset
             // 
-            btnReset.BackColor = SystemColors.ActiveCaption;
-            btnReset.Location = new Point(32, 303);
-            btnReset.Margin = new Padding(3, 2, 3, 2);
+            btnReset.BorderRadius = 6;
+            btnReset.CustomizableEdges = customizableEdges3;
+            btnReset.FillColor = Color.FromArgb(28, 111, 238);
+            btnReset.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnReset.ForeColor = Color.White;
+            btnReset.Location = new Point(46, 609);
+            btnReset.Margin = new Padding(3, 4, 3, 4);
             btnReset.Name = "btnReset";
-            btnReset.Size = new Size(246, 27);
-            btnReset.TabIndex = 17;
+            btnReset.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            btnReset.Size = new Size(434, 56);
+            btnReset.TabIndex = 8;
             btnReset.Text = "Reset Password";
-            btnReset.UseVisualStyleBackColor = false;
             btnReset.Click += btnReset_Click;
-            // 
-            // btnSendOTP
-            // 
-            btnSendOTP.BackColor = SystemColors.ActiveCaption;
-            btnSendOTP.Location = new Point(34, 128);
-            btnSendOTP.Margin = new Padding(3, 2, 3, 2);
-            btnSendOTP.Name = "btnSendOTP";
-            btnSendOTP.Size = new Size(246, 26);
-            btnSendOTP.TabIndex = 16;
-            btnSendOTP.Text = "Send OTP";
-            btnSendOTP.UseVisualStyleBackColor = false;
-            btnSendOTP.Click += btnSendOTP_Click;
             // 
             // lblConfirmPassword
             // 
-            lblConfirmPassword.AutoSize = true;
-            lblConfirmPassword.Location = new Point(32, 254);
+            lblConfirmPassword.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblConfirmPassword.ForeColor = Color.FromArgb(64, 64, 64);
+            lblConfirmPassword.Location = new Point(46, 498);
             lblConfirmPassword.Name = "lblConfirmPassword";
-            lblConfirmPassword.Size = new Size(104, 15);
-            lblConfirmPassword.TabIndex = 15;
-            lblConfirmPassword.Text = "Confirm Password";
-            // 
-            // lblNewPassword
-            // 
-            lblNewPassword.AutoSize = true;
-            lblNewPassword.Location = new Point(33, 206);
-            lblNewPassword.Name = "lblNewPassword";
-            lblNewPassword.Size = new Size(84, 15);
-            lblNewPassword.TabIndex = 14;
-            lblNewPassword.Text = "New Password";
-            // 
-            // lblEmail
-            // 
-            lblEmail.AutoSize = true;
-            lblEmail.Location = new Point(31, 82);
-            lblEmail.Name = "lblEmail";
-            lblEmail.Size = new Size(36, 15);
-            lblEmail.TabIndex = 13;
-            lblEmail.Text = "Email";
-            // 
-            // lblOTP
-            // 
-            lblOTP.AutoSize = true;
-            lblOTP.Location = new Point(32, 157);
-            lblOTP.Name = "lblOTP";
-            lblOTP.Size = new Size(28, 15);
-            lblOTP.TabIndex = 12;
-            lblOTP.Text = "OTP";
-            // 
-            // lblResetPassword
-            // 
-            lblResetPassword.AutoSize = true;
-            lblResetPassword.BackColor = Color.Transparent;
-            lblResetPassword.Font = new Font("Segoe UI", 19.875F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblResetPassword.ForeColor = Color.Black;
-            lblResetPassword.Location = new Point(46, 52);
-            lblResetPassword.Margin = new Padding(2, 0, 2, 0);
-            lblResetPassword.Name = "lblResetPassword";
-            lblResetPassword.Size = new Size(216, 37);
-            lblResetPassword.TabIndex = 2;
-            lblResetPassword.Text = "Reset Password";
-            lblResetPassword.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // txtNewPassword
-            // 
-            txtNewPassword.Location = new Point(34, 224);
-            txtNewPassword.Margin = new Padding(3, 2, 3, 2);
-            txtNewPassword.Name = "txtNewPassword";
-            txtNewPassword.PlaceholderText = "New Password";
-            txtNewPassword.Size = new Size(245, 23);
-            txtNewPassword.TabIndex = 7;
-            txtNewPassword.UseSystemPasswordChar = true;
-            // 
-            // pictureBox1
-            // 
-            pictureBox1.BackColor = Color.Transparent;
-            pictureBox1.BackgroundImage = (Image)resources.GetObject("pictureBox1.BackgroundImage");
-            pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
-            pictureBox1.Location = new Point(129, 2);
-            pictureBox1.Margin = new Padding(2);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(65, 50);
-            pictureBox1.TabIndex = 1;
-            pictureBox1.TabStop = false;
-            // 
-            // txtOTP
-            // 
-            txtOTP.Location = new Point(34, 175);
-            txtOTP.Margin = new Padding(3, 2, 3, 2);
-            txtOTP.Name = "txtOTP";
-            txtOTP.PlaceholderText = "Enter OTP";
-            txtOTP.Size = new Size(246, 23);
-            txtOTP.TabIndex = 5;
-            // 
-            // txtEmail
-            // 
-            txtEmail.Location = new Point(32, 100);
-            txtEmail.Margin = new Padding(3, 2, 3, 2);
-            txtEmail.Name = "txtEmail";
-            txtEmail.PlaceholderText = "Email";
-            txtEmail.Size = new Size(246, 23);
-            txtEmail.TabIndex = 6;
+            lblConfirmPassword.Size = new Size(229, 24);
+            lblConfirmPassword.TabIndex = 13;
+            lblConfirmPassword.Text = "Nhập lại mật khẩu";
             // 
             // txtConfirm
             // 
-            txtConfirm.Location = new Point(34, 272);
-            txtConfirm.Margin = new Padding(3, 2, 3, 2);
+            txtConfirm.BorderRadius = 6;
+            txtConfirm.Cursor = Cursors.IBeam;
+            txtConfirm.CustomizableEdges = customizableEdges5;
+            txtConfirm.DefaultText = "";
+            txtConfirm.Font = new Font("Segoe UI", 9.5F);
+            txtConfirm.ForeColor = Color.Black;
+            txtConfirm.Location = new Point(46, 526);
+            txtConfirm.Margin = new Padding(3, 5, 3, 5);
             txtConfirm.Name = "txtConfirm";
-            txtConfirm.PlaceholderText = "Confirm Password";
-            txtConfirm.Size = new Size(245, 23);
-            txtConfirm.TabIndex = 8;
+            txtConfirm.PasswordChar = '●';
+            txtConfirm.PlaceholderText = "Nhập lại mật khẩu...";
+            txtConfirm.SelectedText = "";
+            txtConfirm.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            txtConfirm.Size = new Size(434, 53);
+            txtConfirm.TabIndex = 7;
             txtConfirm.UseSystemPasswordChar = true;
+            // 
+            // lblNewPassword
+            // 
+            lblNewPassword.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblNewPassword.ForeColor = Color.FromArgb(64, 64, 64);
+            lblNewPassword.Location = new Point(46, 392);
+            lblNewPassword.Name = "lblNewPassword";
+            lblNewPassword.Size = new Size(229, 24);
+            lblNewPassword.TabIndex = 12;
+            lblNewPassword.Text = "Mật khẩu mới";
+            // 
+            // txtNewPassword
+            // 
+            txtNewPassword.BorderRadius = 6;
+            txtNewPassword.Cursor = Cursors.IBeam;
+            txtNewPassword.CustomizableEdges = customizableEdges7;
+            txtNewPassword.DefaultText = "";
+            txtNewPassword.Font = new Font("Segoe UI", 9.5F);
+            txtNewPassword.ForeColor = Color.Black;
+            txtNewPassword.Location = new Point(46, 420);
+            txtNewPassword.Margin = new Padding(3, 5, 3, 5);
+            txtNewPassword.Name = "txtNewPassword";
+            txtNewPassword.PasswordChar = '●';
+            txtNewPassword.PlaceholderText = "At least 8 characters";
+            txtNewPassword.SelectedText = "";
+            txtNewPassword.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            txtNewPassword.Size = new Size(434, 53);
+            txtNewPassword.TabIndex = 6;
+            txtNewPassword.UseSystemPasswordChar = true;
+            // 
+            // btnSendOTP
+            // 
+            btnSendOTP.BorderRadius = 6;
+            btnSendOTP.CustomizableEdges = customizableEdges9;
+            btnSendOTP.FillColor = Color.FromArgb(28, 111, 238);
+            btnSendOTP.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnSendOTP.ForeColor = Color.White;
+            btnSendOTP.Location = new Point(46, 296);
+            btnSendOTP.Margin = new Padding(3, 4, 3, 4);
+            btnSendOTP.Name = "btnSendOTP";
+            btnSendOTP.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            btnSendOTP.Size = new Size(434, 56);
+            btnSendOTP.TabIndex = 4;
+            btnSendOTP.Text = "Gửi OTP";
+            btnSendOTP.Click += btnSendOTP_Click;
+            // 
+            // txtEmail
+            // 
+            txtEmail.BorderRadius = 6;
+            txtEmail.Cursor = Cursors.IBeam;
+            txtEmail.CustomizableEdges = customizableEdges11;
+            txtEmail.DefaultText = "";
+            txtEmail.Font = new Font("Segoe UI", 9.5F);
+            txtEmail.ForeColor = Color.Black;
+            txtEmail.Location = new Point(46, 220);
+            txtEmail.Margin = new Padding(3, 5, 3, 5);
+            txtEmail.Name = "txtEmail";
+            txtEmail.PlaceholderText = "Email Address";
+            txtEmail.SelectedText = "";
+            txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            txtEmail.Size = new Size(434, 53);
+            txtEmail.TabIndex = 3;
+            // 
+            // lblSubTitle
+            // 
+            lblSubTitle.Font = new Font("Segoe UI", 9F);
+            lblSubTitle.ForeColor = Color.FromArgb(128, 137, 149);
+            lblSubTitle.Location = new Point(34, 168);
+            lblSubTitle.Name = "lblSubTitle";
+            lblSubTitle.Size = new Size(457, 47);
+            lblSubTitle.TabIndex = 2;
+            lblSubTitle.Text = "Nhập email đã đăng ký của bạn để nhận mã xác minh.";
+            lblSubTitle.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblTitle
+            // 
+            lblTitle.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.FromArgb(26, 37, 48);
+            lblTitle.Location = new Point(34, 117);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(457, 51);
+            lblTitle.TabIndex = 1;
+            lblTitle.Text = "QUÊN MẬT KHẨU";
+            lblTitle.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // picLogo
+            // 
+            picLogo.BackColor = Color.Transparent;
+            picLogo.CustomizableEdges = customizableEdges13;
+            picLogo.Image = Properties.Resources.Login_ico;
+            picLogo.ImageRotate = 0F;
+            picLogo.Location = new Point(223, 20);
+            picLogo.Margin = new Padding(3, 4, 3, 4);
+            picLogo.Name = "picLogo";
+            picLogo.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            picLogo.Size = new Size(80, 93);
+            picLogo.SizeMode = PictureBoxSizeMode.Zoom;
+            picLogo.TabIndex = 0;
+            picLogo.TabStop = false;
+            // 
+            // pnlChatbot
+            // 
+            pnlChatbot.BackColor = Color.White;
+            pnlChatbot.Controls.Add(rtbChatLog);
+            pnlChatbot.Controls.Add(txtChatInput);
+            pnlChatbot.Controls.Add(btnSendChat);
+            pnlChatbot.CustomizableEdges = customizableEdges19;
+            pnlChatbot.Location = new Point(720, 40);
+            pnlChatbot.Margin = new Padding(3, 4, 3, 4);
+            pnlChatbot.Name = "pnlChatbot";
+            pnlChatbot.ShadowDecoration.CustomizableEdges = customizableEdges19;
+            pnlChatbot.Size = new Size(400, 705);
+            pnlChatbot.TabIndex = 12;
+            pnlChatbot.Visible = false;
+            // 
+            // rtbChatLog
+            // 
+            rtbChatLog.BackColor = Color.FromArgb(248, 250, 252);
+            rtbChatLog.BorderStyle = BorderStyle.None;
+            rtbChatLog.Font = new Font("Segoe UI", 9.5F);
+            rtbChatLog.Location = new Point(17, 20);
+            rtbChatLog.Margin = new Padding(3, 4, 3, 4);
+            rtbChatLog.Name = "rtbChatLog";
+            rtbChatLog.ReadOnly = true;
+            rtbChatLog.Size = new Size(366, 592);
+            rtbChatLog.TabIndex = 0;
+            rtbChatLog.Text = "";
+            // 
+            // txtChatInput
+            // 
+            txtChatInput.BorderRadius = 6;
+            txtChatInput.Cursor = Cursors.IBeam;
+            txtChatInput.CustomizableEdges = customizableEdges17;
+            txtChatInput.DefaultText = "";
+            txtChatInput.Font = new Font("Segoe UI", 9.5F);
+            txtChatInput.ForeColor = Color.Black;
+            txtChatInput.Location = new Point(17, 632);
+            txtChatInput.Margin = new Padding(3, 5, 3, 5);
+            txtChatInput.Name = "txtChatInput";
+            txtChatInput.PlaceholderText = "Nhập câu hỏi tại đây...";
+            txtChatInput.SelectedText = "";
+            txtChatInput.ShadowDecoration.CustomizableEdges = customizableEdges17;
+            txtChatInput.Size = new Size(297, 53);
+            txtChatInput.TabIndex = 1;
+            txtChatInput.KeyDown += txtChatInput_KeyDown;
+            // 
+            // btnSendChat
+            // 
+            btnSendChat.BorderRadius = 6;
+            btnSendChat.CustomizableEdges = customizableEdges18;
+            btnSendChat.FillColor = Color.FromArgb(28, 111, 238);
+            btnSendChat.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnSendChat.ForeColor = Color.White;
+            btnSendChat.Location = new Point(326, 632);
+            btnSendChat.Margin = new Padding(3, 4, 3, 4);
+            btnSendChat.Name = "btnSendChat";
+            btnSendChat.ShadowDecoration.CustomizableEdges = customizableEdges18;
+            btnSendChat.Size = new Size(57, 53);
+            btnSendChat.TabIndex = 2;
+            btnSendChat.Text = "➔";
+            btnSendChat.Click += btnSendChat_Click;
+            // 
+            // btnToggleChat
+            // 
+            btnToggleChat.BorderRadius = 20;
+            btnToggleChat.CustomizableEdges = customizableEdges20;
+            btnToggleChat.FillColor = Color.FromArgb(16, 185, 129);
+            btnToggleChat.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnToggleChat.ForeColor = Color.White;
+            btnToggleChat.Location = new Point(720, 768);
+            btnToggleChat.Margin = new Padding(3, 4, 3, 4);
+            btnToggleChat.Name = "btnToggleChat";
+            btnToggleChat.ShadowDecoration.CustomizableEdges = customizableEdges20;
+            btnToggleChat.Size = new Size(171, 60);
+            btnToggleChat.TabIndex = 11;
+            btnToggleChat.Text = "💬 Trợ lý AI";
+            btnToggleChat.Click += btnToggleChat_Click;
+            // 
+            // ElipseCard
+            // 
+            ElipseCard.BorderRadius = 20;
+            ElipseCard.TargetControl = pnlCard;
+            // 
+            // ElipseChat
+            // 
+            ElipseChat.BorderRadius = 20;
+            ElipseChat.TargetControl = pnlChatbot;
             // 
             // ForgetPassForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
-            BackgroundImageLayout = ImageLayout.Stretch;
-            ClientSize = new Size(668, 390);
-            Controls.Add(pnlCreateAccount);
-            Margin = new Padding(3, 2, 3, 2);
-            MaximizeBox = false;
+            ClientSize = new Size(1314, 960);
+            Controls.Add(pnlBackground);
+            FormBorderStyle = FormBorderStyle.None;
+            Margin = new Padding(3, 4, 3, 4);
             Name = "ForgetPassForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "ForgetPass";
-            pnlCreateAccount.ResumeLayout(false);
-            pnlCreateAccount.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            Text = "Forget Password";
+            pnlBackground.ResumeLayout(false);
+            pnlCard.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)picLogo).EndInit();
+            pnlChatbot.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
 
-        private Panel pnlCreateAccount;
-        private Label lblConfirmPassword;
-        private Label lblNewPassword;
-        private Label lblEmail;
-        private Label lblOTP;
-        private Label lblResetPassword;
-        private TextBox txtNewPassword;
-        private PictureBox pictureBox1;
-        private TextBox txtOTP;
-        private TextBox txtEmail;
-        private TextBox txtConfirm;
-        private Button btnSendOTP;
-        private Label lblBacktoLogin;
-        private Button btnReset;
+        private Guna.UI2.WinForms.Guna2Elipse ElipseForm;
+        private Guna.UI2.WinForms.Guna2GradientPanel pnlBackground;
+        private Guna.UI2.WinForms.Guna2Panel pnlCard;
+        private Guna.UI2.WinForms.Guna2Elipse ElipseCard;
+        private Guna.UI2.WinForms.Guna2PictureBox picLogo;
+        private System.Windows.Forms.Label lblTitle;
+        private System.Windows.Forms.Label lblSubTitle;
+        private Guna.UI2.WinForms.Guna2TextBox txtEmail;
+        private Guna.UI2.WinForms.Guna2Button btnSendOTP;
+        private System.Windows.Forms.Label lblNewPassword;
+        private Guna.UI2.WinForms.Guna2TextBox txtNewPassword;
+        private System.Windows.Forms.Label lblConfirmPassword;
+        private Guna.UI2.WinForms.Guna2TextBox txtConfirm;
+        private Guna.UI2.WinForms.Guna2Button btnReset;
+        private System.Windows.Forms.Label lblOr;
+        private System.Windows.Forms.Label lblBacktoLogin;
+        private Guna.UI2.WinForms.Guna2ControlBox btnClose;
+
+        // Các biến thành phần Chatbot Guna2 được khai báo mới
+        private Guna.UI2.WinForms.Guna2Button btnToggleChat;
+        private Guna.UI2.WinForms.Guna2Panel pnlChatbot;
+        private System.Windows.Forms.RichTextBox rtbChatLog;
+        private Guna.UI2.WinForms.Guna2TextBox txtChatInput;
+        private Guna.UI2.WinForms.Guna2Button btnSendChat;
+        private Guna.UI2.WinForms.Guna2Elipse ElipseChat;
     }
 }
