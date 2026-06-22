@@ -360,7 +360,7 @@ namespace ClassProject.Presentation.Forms.Score
                 txtTK.Text = tk.ToString("0.00");
 
                 decimal he4 = ConvertToHe4(tk);
-                txtDiemHe4.Text = he4.ToString("0.1");
+                txtDiemHe4.Text = he4.ToString("0.0");
                 txtXepLoai.Text = GetXepLoai(tk);
             }
             else
