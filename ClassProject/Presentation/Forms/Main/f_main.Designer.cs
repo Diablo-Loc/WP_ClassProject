@@ -39,14 +39,13 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(f_main));
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
@@ -54,21 +53,24 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges25 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges23 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges25 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges26 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges27 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             guna2PictureBox1 = new Guna.UI2.WinForms.Guna2PictureBox();
             guna2Panel1 = new Guna.UI2.WinForms.Guna2Panel();
             pnlinfor = new Panel();
+            lblLogout = new Label();
             lblRole = new Label();
             lblUserName = new Label();
             picAvatar = new Guna.UI2.WinForms.Guna2CirclePictureBox();
@@ -98,6 +100,7 @@
             btnCloseAiChat = new Guna.UI2.WinForms.Guna2CircleButton();
             lblAiStatus = new Label();
             txtAiSearch = new Guna.UI2.WinForms.Guna2TextBox();
+            guna2CircleButton1 = new Guna.UI2.WinForms.Guna2CircleButton();
             ((System.ComponentModel.ISupportInitialize)guna2PictureBox1).BeginInit();
             guna2Panel1.SuspendLayout();
             pnlinfor.SuspendLayout();
@@ -127,20 +130,21 @@
             // guna2Panel1
             // 
             guna2Panel1.BackColor = Color.White;
+            guna2Panel1.Controls.Add(guna2CircleButton1);
             guna2Panel1.Controls.Add(pnlinfor);
             guna2Panel1.Controls.Add(guna2PictureBox1);
             guna2Panel1.Controls.Add(picAvatar);
             guna2Panel1.Controls.Add(btnSetting);
             guna2Panel1.Controls.Add(btnNotification);
             guna2Panel1.Controls.Add(lblTitle);
-            guna2Panel1.CustomizableEdges = customizableEdges6;
+            guna2Panel1.CustomizableEdges = customizableEdges7;
             guna2Panel1.Dock = DockStyle.Top;
             guna2Panel1.FillColor = Color.White;
             guna2Panel1.Location = new Point(0, 0);
             guna2Panel1.Name = "guna2Panel1";
             guna2Panel1.Padding = new Padding(20);
             guna2Panel1.ShadowDecoration.Color = Color.FromArgb(15, 0, 0, 0);
-            guna2Panel1.ShadowDecoration.CustomizableEdges = customizableEdges7;
+            guna2Panel1.ShadowDecoration.CustomizableEdges = customizableEdges8;
             guna2Panel1.ShadowDecoration.Depth = 8;
             guna2Panel1.ShadowDecoration.Enabled = true;
             guna2Panel1.Size = new Size(1128, 133);
@@ -149,6 +153,7 @@
             // pnlinfor
             // 
             pnlinfor.BackColor = Color.Transparent;
+            pnlinfor.Controls.Add(lblLogout);
             pnlinfor.Controls.Add(lblRole);
             pnlinfor.Controls.Add(lblUserName);
             pnlinfor.Dock = DockStyle.Right;
@@ -156,6 +161,21 @@
             pnlinfor.Name = "pnlinfor";
             pnlinfor.Size = new Size(170, 93);
             pnlinfor.TabIndex = 7;
+            // 
+            // lblLogout
+            // 
+            lblLogout.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblLogout.BackColor = Color.Transparent;
+            lblLogout.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblLogout.ForeColor = Color.Red;
+            lblLogout.Location = new Point(16, 70);
+            lblLogout.Name = "lblLogout";
+            lblLogout.RightToLeft = RightToLeft.No;
+            lblLogout.Size = new Size(154, 20);
+            lblLogout.TabIndex = 2;
+            lblLogout.Text = "Logout";
+            lblLogout.TextAlign = ContentAlignment.MiddleRight;
+            lblLogout.Click += btnLogout_Click;
             // 
             // lblRole
             // 
@@ -193,7 +213,7 @@
             picAvatar.ImageRotate = 0F;
             picAvatar.Location = new Point(852, 30);
             picAvatar.Name = "picAvatar";
-            picAvatar.ShadowDecoration.CustomizableEdges = customizableEdges3;
+            picAvatar.ShadowDecoration.CustomizableEdges = customizableEdges4;
             picAvatar.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             picAvatar.Size = new Size(80, 80);
             picAvatar.TabIndex = 4;
@@ -214,7 +234,7 @@
             btnSetting.HoverState.ForeColor = Color.FromArgb(0, 120, 212);
             btnSetting.Location = new Point(785, 50);
             btnSetting.Name = "btnSetting";
-            btnSetting.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            btnSetting.ShadowDecoration.CustomizableEdges = customizableEdges5;
             btnSetting.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             btnSetting.Size = new Size(45, 45);
             btnSetting.TabIndex = 3;
@@ -236,7 +256,7 @@
             btnNotification.HoverState.ForeColor = Color.FromArgb(0, 120, 212);
             btnNotification.Location = new Point(721, 50);
             btnNotification.Name = "btnNotification";
-            btnNotification.ShadowDecoration.CustomizableEdges = customizableEdges5;
+            btnNotification.ShadowDecoration.CustomizableEdges = customizableEdges6;
             btnNotification.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             btnNotification.Size = new Size(45, 45);
             btnNotification.TabIndex = 2;
@@ -261,13 +281,13 @@
             pnlNavigation.Controls.Add(flowMenu);
             pnlNavigation.Controls.Add(btnScrollLeft);
             pnlNavigation.Controls.Add(btnScrollRight);
-            pnlNavigation.CustomizableEdges = customizableEdges16;
+            pnlNavigation.CustomizableEdges = customizableEdges17;
             pnlNavigation.Dock = DockStyle.Top;
             pnlNavigation.FillColor = Color.White;
             pnlNavigation.Location = new Point(0, 133);
             pnlNavigation.Margin = new Padding(20);
             pnlNavigation.Name = "pnlNavigation";
-            pnlNavigation.ShadowDecoration.CustomizableEdges = customizableEdges17;
+            pnlNavigation.ShadowDecoration.CustomizableEdges = customizableEdges18;
             pnlNavigation.Size = new Size(1128, 63);
             pnlNavigation.TabIndex = 2;
             // 
@@ -294,7 +314,7 @@
             btn1.ButtonMode = Guna.UI2.WinForms.Enums.ButtonMode.RadioButton;
             btn1.CheckedState.FillColor = Color.FromArgb(0, 120, 212);
             btn1.CheckedState.ForeColor = Color.White;
-            btn1.CustomizableEdges = customizableEdges8;
+            btn1.CustomizableEdges = customizableEdges9;
             btn1.DisabledState.BorderColor = Color.DarkGray;
             btn1.DisabledState.CustomBorderColor = Color.DarkGray;
             btn1.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
@@ -306,7 +326,7 @@
             btn1.HoverState.ForeColor = Color.FromArgb(0, 120, 212);
             btn1.Location = new Point(8, 8);
             btn1.Name = "btn1";
-            btn1.ShadowDecoration.CustomizableEdges = customizableEdges9;
+            btn1.ShadowDecoration.CustomizableEdges = customizableEdges10;
             btn1.Size = new Size(140, 45);
             btn1.TabIndex = 0;
             btn1.Text = "Chức năng 1";
@@ -317,7 +337,7 @@
             btn2.ButtonMode = Guna.UI2.WinForms.Enums.ButtonMode.RadioButton;
             btn2.CheckedState.FillColor = Color.FromArgb(0, 120, 212);
             btn2.CheckedState.ForeColor = Color.White;
-            btn2.CustomizableEdges = customizableEdges10;
+            btn2.CustomizableEdges = customizableEdges11;
             btn2.DisabledState.BorderColor = Color.DarkGray;
             btn2.DisabledState.CustomBorderColor = Color.DarkGray;
             btn2.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
@@ -329,7 +349,7 @@
             btn2.HoverState.ForeColor = Color.FromArgb(0, 120, 212);
             btn2.Location = new Point(154, 8);
             btn2.Name = "btn2";
-            btn2.ShadowDecoration.CustomizableEdges = customizableEdges11;
+            btn2.ShadowDecoration.CustomizableEdges = customizableEdges12;
             btn2.Size = new Size(140, 45);
             btn2.TabIndex = 1;
             btn2.Text = "Chức năng 2";
@@ -340,7 +360,7 @@
             btn3.ButtonMode = Guna.UI2.WinForms.Enums.ButtonMode.RadioButton;
             btn3.CheckedState.FillColor = Color.FromArgb(0, 120, 212);
             btn3.CheckedState.ForeColor = Color.White;
-            btn3.CustomizableEdges = customizableEdges12;
+            btn3.CustomizableEdges = customizableEdges13;
             btn3.DisabledState.BorderColor = Color.DarkGray;
             btn3.DisabledState.CustomBorderColor = Color.DarkGray;
             btn3.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
@@ -352,7 +372,7 @@
             btn3.HoverState.ForeColor = Color.FromArgb(0, 120, 212);
             btn3.Location = new Point(300, 8);
             btn3.Name = "btn3";
-            btn3.ShadowDecoration.CustomizableEdges = customizableEdges13;
+            btn3.ShadowDecoration.CustomizableEdges = customizableEdges14;
             btn3.Size = new Size(140, 45);
             btn3.TabIndex = 2;
             btn3.Text = "Chức năng 3";
@@ -363,7 +383,7 @@
             btn4.ButtonMode = Guna.UI2.WinForms.Enums.ButtonMode.RadioButton;
             btn4.CheckedState.FillColor = Color.FromArgb(0, 120, 212);
             btn4.CheckedState.ForeColor = Color.White;
-            btn4.CustomizableEdges = customizableEdges14;
+            btn4.CustomizableEdges = customizableEdges15;
             btn4.DisabledState.BorderColor = Color.DarkGray;
             btn4.DisabledState.CustomBorderColor = Color.DarkGray;
             btn4.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
@@ -375,7 +395,7 @@
             btn4.HoverState.ForeColor = Color.FromArgb(0, 120, 212);
             btn4.Location = new Point(446, 8);
             btn4.Name = "btn4";
-            btn4.ShadowDecoration.CustomizableEdges = customizableEdges15;
+            btn4.ShadowDecoration.CustomizableEdges = customizableEdges16;
             btn4.Size = new Size(140, 45);
             btn4.TabIndex = 3;
             btn4.Text = "Chức năng 4";
@@ -418,12 +438,12 @@
             pnlStatusBar.Controls.Add(lblDateTime);
             pnlStatusBar.Controls.Add(lblVersion);
             pnlStatusBar.Controls.Add(lblReady);
-            pnlStatusBar.CustomizableEdges = customizableEdges18;
+            pnlStatusBar.CustomizableEdges = customizableEdges19;
             pnlStatusBar.Dock = DockStyle.Bottom;
             pnlStatusBar.FillColor = Color.FromArgb(243, 244, 246);
             pnlStatusBar.Location = new Point(0, 564);
             pnlStatusBar.Name = "pnlStatusBar";
-            pnlStatusBar.ShadowDecoration.CustomizableEdges = customizableEdges19;
+            pnlStatusBar.ShadowDecoration.CustomizableEdges = customizableEdges20;
             pnlStatusBar.Size = new Size(1128, 36);
             pnlStatusBar.TabIndex = 4;
             // 
@@ -471,12 +491,12 @@
             pnlContainer.AutoScroll = true;
             pnlContainer.BackColor = Color.Transparent;
             pnlContainer.BorderRadius = 12;
-            pnlContainer.CustomizableEdges = customizableEdges20;
+            pnlContainer.CustomizableEdges = customizableEdges21;
             pnlContainer.Dock = DockStyle.Fill;
             pnlContainer.FillColor = Color.White;
             pnlContainer.Location = new Point(0, 196);
             pnlContainer.Name = "pnlContainer";
-            pnlContainer.ShadowDecoration.CustomizableEdges = customizableEdges21;
+            pnlContainer.ShadowDecoration.CustomizableEdges = customizableEdges22;
             pnlContainer.Size = new Size(1128, 368);
             pnlContainer.TabIndex = 5;
             // 
@@ -502,7 +522,7 @@
             btnToggleAiChat.Location = new Point(1050, 495);
             btnToggleAiChat.Name = "btnToggleAiChat";
             btnToggleAiChat.ShadowDecoration.Color = Color.FromArgb(40, 0, 120, 212);
-            btnToggleAiChat.ShadowDecoration.CustomizableEdges = customizableEdges22;
+            btnToggleAiChat.ShadowDecoration.CustomizableEdges = customizableEdges23;
             btnToggleAiChat.ShadowDecoration.Depth = 10;
             btnToggleAiChat.ShadowDecoration.Enabled = true;
             btnToggleAiChat.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
@@ -522,12 +542,12 @@
             pnlAiChatBox.Controls.Add(pnlAiHeader);
             pnlAiChatBox.Controls.Add(lblAiStatus);
             pnlAiChatBox.Controls.Add(txtAiSearch);
-            pnlAiChatBox.CustomizableEdges = customizableEdges28;
+            pnlAiChatBox.CustomizableEdges = customizableEdges29;
             pnlAiChatBox.FillColor = Color.FromArgb(192, 255, 255);
             pnlAiChatBox.Location = new Point(710, 133);
             pnlAiChatBox.Name = "pnlAiChatBox";
             pnlAiChatBox.ShadowDecoration.Color = Color.FromArgb(35, 0, 0, 0);
-            pnlAiChatBox.ShadowDecoration.CustomizableEdges = customizableEdges29;
+            pnlAiChatBox.ShadowDecoration.CustomizableEdges = customizableEdges30;
             pnlAiChatBox.ShadowDecoration.Depth = 15;
             pnlAiChatBox.ShadowDecoration.Enabled = true;
             pnlAiChatBox.Size = new Size(395, 415);
@@ -549,12 +569,12 @@
             pnlAiHeader.BorderRadius = 16;
             pnlAiHeader.Controls.Add(lblAiTitle);
             pnlAiHeader.Controls.Add(btnCloseAiChat);
-            pnlAiHeader.CustomizableEdges = customizableEdges24;
+            pnlAiHeader.CustomizableEdges = customizableEdges25;
             pnlAiHeader.Dock = DockStyle.Top;
             pnlAiHeader.FillColor = Color.FromArgb(0, 120, 212);
             pnlAiHeader.Location = new Point(0, 0);
             pnlAiHeader.Name = "pnlAiHeader";
-            pnlAiHeader.ShadowDecoration.CustomizableEdges = customizableEdges25;
+            pnlAiHeader.ShadowDecoration.CustomizableEdges = customizableEdges26;
             pnlAiHeader.Size = new Size(395, 45);
             pnlAiHeader.TabIndex = 0;
             // 
@@ -579,7 +599,7 @@
             btnCloseAiChat.ForeColor = Color.White;
             btnCloseAiChat.Location = new Point(355, 9);
             btnCloseAiChat.Name = "btnCloseAiChat";
-            btnCloseAiChat.ShadowDecoration.CustomizableEdges = customizableEdges23;
+            btnCloseAiChat.ShadowDecoration.CustomizableEdges = customizableEdges24;
             btnCloseAiChat.Size = new Size(26, 26);
             btnCloseAiChat.TabIndex = 1;
             btnCloseAiChat.Text = "✕";
@@ -601,7 +621,7 @@
             txtAiSearch.BackColor = Color.Transparent;
             txtAiSearch.BorderColor = Color.FromArgb(218, 223, 230);
             txtAiSearch.BorderRadius = 8;
-            txtAiSearch.CustomizableEdges = customizableEdges26;
+            txtAiSearch.CustomizableEdges = customizableEdges27;
             txtAiSearch.DefaultText = "";
             txtAiSearch.Font = new Font("Segoe UI", 9.5F);
             txtAiSearch.ForeColor = Color.FromArgb(31, 41, 55);
@@ -610,10 +630,32 @@
             txtAiSearch.Name = "txtAiSearch";
             txtAiSearch.PlaceholderText = "Nhập câu hỏi tại đây... (Ấn Enter)";
             txtAiSearch.SelectedText = "";
-            txtAiSearch.ShadowDecoration.CustomizableEdges = customizableEdges27;
+            txtAiSearch.ShadowDecoration.CustomizableEdges = customizableEdges28;
             txtAiSearch.Size = new Size(324, 40);
             txtAiSearch.TabIndex = 2;
             txtAiSearch.KeyDown += txtAiSearch_KeyDown;
+            // 
+            // guna2CircleButton1
+            // 
+            guna2CircleButton1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            guna2CircleButton1.BackColor = Color.Transparent;
+            guna2CircleButton1.DisabledState.BorderColor = Color.DarkGray;
+            guna2CircleButton1.DisabledState.CustomBorderColor = Color.DarkGray;
+            guna2CircleButton1.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
+            guna2CircleButton1.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            guna2CircleButton1.FillColor = Color.FromArgb(243, 244, 246);
+            guna2CircleButton1.Font = new Font("Segoe UI", 10F);
+            guna2CircleButton1.ForeColor = Color.FromArgb(75, 85, 99);
+            guna2CircleButton1.HoverState.FillColor = Color.FromArgb(229, 231, 235);
+            guna2CircleButton1.HoverState.ForeColor = Color.FromArgb(0, 120, 212);
+            guna2CircleButton1.Location = new Point(542, 44);
+            guna2CircleButton1.Name = "guna2CircleButton1";
+            guna2CircleButton1.ShadowDecoration.CustomizableEdges = customizableEdges3;
+            guna2CircleButton1.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
+            guna2CircleButton1.Size = new Size(45, 45);
+            guna2CircleButton1.TabIndex = 8;
+            guna2CircleButton1.Text = "🔔";
+            guna2CircleButton1.Click += guna2CircleButton1_Click;
             // 
             // f_main
             // 
@@ -684,5 +726,7 @@
         private Guna.UI2.WinForms.Guna2CircleButton btnToggleAiChat;
         private Guna.UI2.WinForms.Guna2TextBox txtAiSearch;
         private System.Windows.Forms.Label lblAiStatus;
+        private Label lblLogout;
+        private Guna.UI2.WinForms.Guna2CircleButton guna2CircleButton1;
     }
 }

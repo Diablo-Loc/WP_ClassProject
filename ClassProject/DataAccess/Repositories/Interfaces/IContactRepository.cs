@@ -23,6 +23,10 @@ namespace ClassProject.DataAccess.Repositories.Interfaces
         // --- QUẢN LÝ DANH MỤC NHÓM (GROUPS) ---
         Task<DataTable> GetGroupsByUserAsync(int userId);
         Task<bool> InsertGroupAsync(string groupName, int userId);
+
+        // Cần bổ sung hàm này để đồng bộ với hàm mở rộng cấu trúc phân cấp trong Repository
+        Task<bool> InsertGroupExtendedAsync(string groupName, string groupCode, int? parentId, int userId, bool isSystem);
+
         Task<bool> UpdateGroupAsync(int groupId, string groupName, int userId);
         Task<bool> DeleteGroupAsync(int groupId, int userId);
     }

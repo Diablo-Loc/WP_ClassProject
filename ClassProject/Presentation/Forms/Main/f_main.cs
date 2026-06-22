@@ -544,7 +544,7 @@ namespace ClassProject.Presentation.Forms.Main
             OpenChildForm(new StudentRequestForm());
         }
 
-        private void TeachingAssignment_Click (object sender, EventArgs e) => OpenChildForm(new TeachingAssignmentForm());
+        private void TeachingAssignment_Click(object sender, EventArgs e) => OpenChildForm(new TeachingAssignmentForm());
         // --- ĐĂNG XUẤT ---
         private void btnLogout_Click(object sender, EventArgs e)
         {
@@ -683,7 +683,8 @@ namespace ClassProject.Presentation.Forms.Main
 
             // 1. Mục Đổi mật khẩu
             ToolStripMenuItem itemChangePassword = new ToolStripMenuItem("🔑 Đổi mật khẩu cá nhân");
-            itemChangePassword.Click += (s, ev) => {
+            itemChangePassword.Click += (s, ev) =>
+            {
                 ChangePasswordForm frmChangePass = new ChangePasswordForm();
                 ApplyThemeToChildForm(frmChangePass, isDarkMode);
 
@@ -691,7 +692,8 @@ namespace ClassProject.Presentation.Forms.Main
                 {
                     this.Hide();
                     LoginForm frmLogin = new LoginForm();
-                    frmLogin.FormClosed += (senderForm, args) => {
+                    frmLogin.FormClosed += (senderForm, args) =>
+                    {
                         this.Dispose();
                     };
                     this.Close();
@@ -700,7 +702,8 @@ namespace ClassProject.Presentation.Forms.Main
 
             // 2. THÊM MỚI: Mục Đăng ký Face ID (Sinh trắc học)
             ToolStripMenuItem itemRegisterFace = new ToolStripMenuItem("📸 Thiết lập Face ID (Quét mặt)");
-            itemRegisterFace.Click += (s, ev) => {
+            itemRegisterFace.Click += (s, ev) =>
+            {
                 using (FaceLoginForm frmRegisterFace = new FaceLoginForm(UserSession.Username, true))
                 {
                     ApplyThemeToChildForm(frmRegisterFace, isDarkMode);
@@ -713,14 +716,16 @@ namespace ClassProject.Presentation.Forms.Main
             ToolStripMenuItem itemDarkMode = new ToolStripMenuItem("🌙 Chế độ nền tối (Dark Mode)");
             itemDarkMode.CheckOnClick = true;
             itemDarkMode.Checked = isDarkMode;
-            itemDarkMode.Click += (s, ev) => {
+            itemDarkMode.Click += (s, ev) =>
+            {
                 isDarkMode = itemDarkMode.Checked;
                 ApplyTheme(isDarkMode);
             };
 
             // 4. Mục Thông tin phần mềm
             ToolStripMenuItem itemAbout = new ToolStripMenuItem("ℹ️ Thông tin phần mềm");
-            itemAbout.Click += (s, ev) => {
+            itemAbout.Click += (s, ev) =>
+            {
                 MessageBox.Show("Hệ thống Quản lý Đào tạo - Phiên bản 1.0.0\n© 2026 ClassProject Team.", "About");
             };
 
@@ -928,116 +933,117 @@ namespace ClassProject.Presentation.Forms.Main
                 string userQuery = txtAiSearch.Text.Trim();
                 if (string.IsNullOrEmpty(userQuery)) return;
 
-                // 1. Đẩy câu hỏi người dùng lên UI trước
+                // 1. Hiển thị câu hỏi của người dùng lên màn hình Chat
                 AddMessageToHistory("You", userQuery);
+                txtAiSearch.Clear(); // Xóa trống ô nhập liệu ngay cho mượt
 
-                lblAiStatus.Text = "🤖 AI đang xử lý...";
-                lblAiStatus.ForeColor = Color.DimGray;
-
-                // Khóa tạm thời ô tìm kiếm để tránh nhấn Enter liên tục gây crash
+                lblAiStatus.Text = "🤖 Hệ thống đang xử lý...";
                 txtAiSearch.Enabled = false;
 
                 try
                 {
-                    // BƯỚC 1: KIỂM TRA CÂU HỎI HỆ THỐNG CỐ ĐỊNH TRƯỚC (OTP, Mật khẩu...)
-                    string localResponse = _aiService.CheckLocalStaticResponse(userQuery);
-                    if (!string.IsNullOrEmpty(localResponse))
+                    // === TẦNG 1: CHẠY HOÀN TOÀN LOCAL (TỐC ĐỘ < 10ms) ===
+                    string localStaticResponse = _aiService.CheckLocalStaticResponse(userQuery);
+                    if (!string.IsNullOrEmpty(localStaticResponse))
                     {
-                        AddMessageToHistory("AI", localResponse);
-                        txtAiSearch.Clear();
+                        AddMessageToHistory("AI (Local)", localStaticResponse);
                         return;
                     }
 
-                    // BƯỚC 2: KHÔNG TRÚNG CÁI NÀO BÊN TRÊN -> ĐẨY THẲNG LÊN CLOUD AI GEMINI
-                    string aiResponse = await _aiService.FetchAiResponseAsync(userQuery, false);
-
-                    // 1. Nếu là lệnh mở Form trống (Vẫn giữ nguyên câu 1 của bạn)
-                    if (aiResponse.Contains("OPEN_FORM:"))
+                    var navIntent = _aiService.AnalyzeNavigationIntent(userQuery);
+                    if (!string.IsNullOrEmpty(navIntent.FormName))
                     {
-                        int index = aiResponse.IndexOf("OPEN_FORM:");
-                        string targetFormName = aiResponse.Substring(index + "OPEN_FORM:".Length).Trim();
-                        AddMessageToHistory("AI", "🤖 Đang tiến hành điều hướng...");
-                        OpenFormByName(targetFormName);
+                        AddMessageToHistory("AI (Local)", navIntent.ResponseMessage);
+                        OpenFormByName(navIntent.FormName);
+                        return;
                     }
-                    // 2. AI RA LỆNH TRUY VẤN ĐỂ LẤY DỮ LIỆU PHÂN TÍCH (CÂU 2 THÔNG BÁO MA)
-                    else if (aiResponse.Contains("EXECUTE_SQL:"))
+
+                    // === TẦNG 2: GỬI LÊN CLOUD AI GEMINI (GỌI ĐÚNG 1 LẦN) ===
+                    lblAiStatus.Text = "🤖 Đang kết nối trí tuệ nhân tạo Cloud...";
+                    string aiResponse = await _aiService.FetchAiResponseAsync(userQuery, isForgetScreen: false, isSystemInternalCall: false);
+
+                    // Tình huống A: AI phân tích thấy cần truy vấn dữ liệu
+                    if (aiResponse.Contains("EXECUTE_SQL:"))
                     {
                         int index = aiResponse.IndexOf("EXECUTE_SQL:");
                         string sqlQuery = aiResponse.Substring(index + "EXECUTE_SQL:".Length).Trim();
 
-                        // Bước A: Âm thầm chạy SQL dưới nền để lấy dữ liệu thô dạng Text/JSON
-                        string dataResultText = ExecuteSqlToText(sqlQuery);
+                        // Làm sạch câu lệnh phòng trường hợp AI bọc ký tự đặc biệt
+                        sqlQuery = sqlQuery.Replace("```sql", "").Replace("```", "").Trim();
 
-                        // Bước B: Gửi dữ liệu thô này ngược lại cho AI để nó tự "đọc hiểu" và viết thông báo
-                        string finalPrompt = $"Người dùng hỏi: '{userQuery}'. " +
-                                             $"Kết quả truy vấn thực tế từ Database dưới dạng JSON: {dataResultText}. " +
-                                             $"Dựa vào dữ liệu này, hãy viết một câu thông báo/cảnh báo thông minh, tự nhiên bằng tiếng Việt gửi cho người dùng (Không kèm mã code hay chữ JSON).";
+                        // Hiển thị câu lệnh ẩn hoặc hiện tùy bạn (để debug)
+                        System.Diagnostics.Debug.WriteLine($"[AI_SQL_EXECUTE]: {sqlQuery}");
 
-                        string aiAnalysisResponse = await _aiService.FetchAiResponseAsync(finalPrompt, false);
+                        // GỌI THẲNG QUA REPOSITORY: Lấy dữ liệu thật từ kết nối chuẩn
+                        string dataResultText = _studentRepo.ExecuteAiQueryToJson(sqlQuery);
 
-                        // Bước C: Hiển thị lời thông báo "ma" siêu thông minh của AI lên khung chat!
-                        AddMessageToHistory("AI", aiAnalysisResponse);
+                        // === XỬ LÝ KẾT QUẢ THÀNH CHỮ ĐẸP KHÔNG TỐN TOKEN GỌI AI LẦN 2 ===
+                        if (dataResultText.StartsWith("[Lỗi"))
+                        {
+                            AddMessageToHistory("Hệ thống", $"❌ Không thể truy xuất dữ liệu: {dataResultText}");
+                        }
+                        else if (dataResultText == "[]")
+                        {
+                            AddMessageToHistory("AI", "📊 Không tìm thấy dữ liệu phù hợp trong hệ thống.");
+                        }
+                        else
+                        {
+                            // Chuyển đổi JSON thành chuỗi danh sách dễ đọc bằng hàm phụ bên dưới
+                            string cleanReadableText = ConvertJsonToReadableText(dataResultText);
+                            AddMessageToHistory("AI", cleanReadableText);
+                        }
                     }
+                    // Tình huống B: AI tự trò chuyện hoặc xử lý các câu hỏi mở rộng khác
                     else
                     {
                         AddMessageToHistory("AI", aiResponse);
                     }
-
-                    txtAiSearch.Clear();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Lỗi tầng Form: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    AddMessageToHistory("Hệ thống", $"⚠️ Đã xảy ra sự cố: {ex.Message}");
+                    AddMessageToHistory("Hệ thống", $"⚠️ Sự cố: {ex.Message}");
                 }
                 finally
                 {
-                    // Luôn luôn giải phóng ô nhập liệu và trả trạng thái nhãn
                     txtAiSearch.Enabled = true;
                     txtAiSearch.Focus();
                     lblAiStatus.Text = "Hệ thống sẵn sàng.";
-                    lblAiStatus.ForeColor = Color.DarkSlateBlue;
                 }
             }
         }
-        private string ExecuteSqlToText(string sqlQuery)
+        private string ConvertJsonToReadableText(string jsonString)
         {
             try
             {
-                // Sử dụng đối tượng kết nối của bạn (Ví dụ dùng _db ở Form Điểm hoặc chuỗi kết nối gốc)
-                string connectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=ClassProject;Integrated Security=True;TrustServerCertificate=True";
+                // Phân tích chuỗi JSON thành một mảng các đối tượng
+                var jsonArray = Newtonsoft.Json.Linq.JArray.Parse(jsonString);
+                System.Text.StringBuilder readableText = new System.Text.StringBuilder();
 
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                readableText.AppendLine("📊 Kết quả tìm kiếm thực tế từ hệ thống:");
+
+                int rowCount = 1;
+                foreach (var item in jsonArray)
                 {
-                    conn.Open();
-                    using (SqlCommand cmd = new SqlCommand(sqlQuery, conn))
+                    // Tạo một dòng hiển thị thông tin dạng: 1. CộtA: GiáTrịA | CộtB: GiáTrịB
+                    List<string> properties = new List<string>();
+                    foreach (var prop in ((Newtonsoft.Json.Linq.JObject)item).Properties())
                     {
-                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                        {
-                            DataTable dt = new DataTable();
-                            da.Fill(dt);
-
-                            // Biến toàn bộ bảng dữ liệu thành chuỗi text dạng JSON để AI đọc hiểu dễ nhất
-                            List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
-                            foreach (DataRow row in dt.Rows)
-                            {
-                                var dict = new Dictionary<string, object>();
-                                foreach (DataColumn col in dt.Columns)
-                                {
-                                    dict[col.ColumnName] = row[col];
-                                }
-                                rows.Add(dict);
-                            }
-                            return System.Text.Json.JsonSerializer.Serialize(rows);
-                        }
+                        properties.Add($"{prop.Name}: {prop.Value}");
                     }
+
+                    readableText.AppendLine($"{rowCount}. {string.Join(" | ", properties)}");
+                    rowCount++;
                 }
+
+                return readableText.ToString();
             }
-            catch (Exception ex)
+            catch
             {
-                return $"[Lỗi kết nối cơ sở dữ liệu: {ex.Message}]";
+                // Phòng hờ nếu có lỗi phân tích cú pháp thì trả về chuỗi JSON gốc
+                return jsonString;
             }
         }
+
         // --- HÀM ĐIỀU HƯỚNG FORM CON TỰ ĐỘNG CHUẨN ĐÃ LOẠI BỎ LỖI LỆCH CHỮ ---
         private void OpenFormByName(string formName)
         {
@@ -1122,6 +1128,86 @@ namespace ClassProject.Presentation.Forms.Main
 
             // MẸO UX: Tự động cuộn thanh Scroll xuống đáy để luôn nhìn thấy câu trả lời mới nhất
             flowChatHistory.ScrollControlIntoView(lblBubble);
+        }
+
+        private void guna2CircleButton1_Click(object sender, EventArgs e)
+        {
+            TestDatabaseConnection();
+        }
+        public void TestDatabaseConnection()
+        {
+            System.Text.StringBuilder report = new System.Text.StringBuilder();
+            report.AppendLine("=== KẾT QUẢ KIỂM TRA TOÀN DIỆN DATABASE THEO SCRIPT THỰC TẾ ===");
+            report.AppendLine();
+
+            // Sửa lại danh sách bảng CHÍNH XÁC theo file SQL của bạn (Không có chữ s ở cuối bảng điểm và môn học)
+            string[] tables = { "dbo.Students", "dbo.Score", "dbo.Course", "dbo.CourseSection", "dbo.Classroom" };
+
+            foreach (string tableName in tables)
+            {
+                report.AppendLine($"--------------------------------------------------");
+                report.AppendLine($"📍 BẢNG THỰC TẾ: {tableName}");
+
+                // 1. Lấy thông tin cột
+                string schemaQuery = $@"
+            SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_NAME = '{tableName.Replace("dbo.", "")}'";
+
+                string schemaResult = _studentRepo.ExecuteAiQueryToJson(schemaQuery);
+                report.AppendLine("1. Cấu trúc các cột (Schema):");
+                report.AppendLine(schemaResult);
+                report.AppendLine();
+
+                // 2. Lấy dữ liệu mẫu
+                string dataQuery = $"SELECT TOP 2 * FROM {tableName}";
+                string dataResult = _studentRepo.ExecuteAiQueryToJson(dataQuery);
+                report.AppendLine("2. Dữ liệu mẫu (Top 2 rows):");
+                report.AppendLine(dataResult);
+                report.AppendLine();
+            }
+
+            // ============================================================================
+            // TỰ ĐỘNG SINH LUÔN PROMPT CHUẨN CHO AI (BẠN CHỈ CẦN COPY NÉM VÀO SYSTEM PROMPT)
+            // ============================================================================
+            report.AppendLine("==================================================");
+            report.AppendLine("🤖 CHUỖI SYSTEM PROMPT CHUẨN ĐỂ DẠY AI CHAT:");
+            report.AppendLine("Bạn là trợ lý AI phân tích dữ liệu học vụ của trường HCMUTE, cơ sở dữ liệu LoginDB.");
+            report.AppendLine("Dưới đây là cấu trúc các bảng bắt buộc phải viết đúng tên bảng và tên cột khi sinh câu lệnh SQL:");
+            report.AppendLine("- Bảng sinh viên: dbo.Students (Id, UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Email, MaLop, MaNganh)");
+            report.AppendLine("- Bảng điểm HP: dbo.Score (MSSV, MaLopHP, DiemQT, DiemCK, DiemTK, Mota)");
+            report.AppendLine("- Bảng môn học: dbo.Course (MaMH, TenMH, SoTC, Tuan, Hky, NamHoc)");
+            report.AppendLine("- Bảng lớp học phần: dbo.CourseSection (MaLopHP, MaMH, HocKy, NamHoc, MSGV, PhongHoc, MaxStudents, ThuHoc, CaHoc)");
+            report.AppendLine("- Bảng lớp hành chính: dbo.Classroom (MaLop, TenLop, SiSo, GVCN, MaNganh)");
+            report.AppendLine("Ngoài ra bạn có thể sử dụng các View có sẵn sau nếu cần truy vấn nhanh:");
+            report.AppendLine("* View bảng điểm đầy đủ: dbo.vw_StudentTranscript (MSSV, StudentName, MaLopHP, MaMH, TenMH, SoTC, DiemQT, DiemCK, DiemTK, NamHoc, HocKy)");
+            report.AppendLine("* View lịch học hằng ngày: dbo.vw_StudentDailySchedule (MSSV, MaLopHP, TenMH, PhongHoc, ThuHoc, CaHoc, ThoiGian)");
+            report.AppendLine("\nQUY ĐỊNH TRẢ LỜI: Nếu người dùng yêu cầu thống kê/tra cứu, chỉ trả về dạng: EXECUTE_SQL:[Lệnh_SQL_Server]. Không bọc ký tự đặc biệt.");
+
+            string finalReport = report.ToString();
+
+            // In ra cửa sổ Output để bạn Ctrl + A -> Ctrl + C copy cho tiện
+            System.Diagnostics.Debug.WriteLine(finalReport);
+
+            // Hiển thị hộp thoại lớn trực tiếp trên giao diện phần mềm
+            Form reportForm = new Form
+            {
+                Text = "Cấu trúc dữ liệu thực tế phục vụ AI",
+                Width = 750,
+                Height = 600,
+                StartPosition = FormStartPosition.CenterScreen
+            };
+            TextBox txtReport = new TextBox
+            {
+                Multiline = true,
+                Dock = DockStyle.Fill,
+                ScrollBars = ScrollBars.Vertical,
+                Text = finalReport,
+                ReadOnly = true,
+                Font = new System.Drawing.Font("Consolas", 10)
+            };
+            reportForm.Controls.Add(txtReport);
+            reportForm.ShowDialog();
         }
     }
 }

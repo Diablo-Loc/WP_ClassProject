@@ -139,6 +139,25 @@ INSERT INTO dbo.Requests (MSSV, RequestType, RequestContent, Status, AdminCommen
 (N'30110201', N'Hoãn thi', N'Xin hoãn thi môn Cơ sở dữ liệu do lịch trùng lịch phẫu thuật.', N'Rejected', N'Lý do minh chứng chưa đầy đủ đóng mộc bệnh viện');
 GO
 
+INSERT INTO dbo.Groups (Name, GroupCode, ParentID, IsSystemData, UserID) VALUES 
+(N'Khoa Công nghệ thông tin', 'CNTT', NULL, 1, 1),
+(N'Khoa Kỹ thuật Phần mềm', 'KTPM', NULL, 1, 1),
+(N'Khoa Khoa học Máy tính', 'KHMT', NULL, 1, 1),
+(N'Phòng Hành chính Nhân sự', 'HCNS', NULL, 1, 1),
+(N'Phòng Giáo vụ / Đào tạo', 'PGV', NULL, 1, 1);
+GO
+
+-- 2. Ánh xạ (Mapping) thử các Giảng viên bạn đã tạo ở Bước 4 vào các phòng ban trên
+-- Sử dụng chính các chuỗi UniqueID định danh trên Gridview: 'MSGV_001', 'MSGV_002', 'MSGV_003'
+DECLARE @IdKcntt INT = (SELECT ID FROM dbo.Groups WHERE GroupCode = 'CNTT');
+DECLARE @IdKktpm INT = (SELECT ID FROM dbo.Groups WHERE GroupCode = 'KTPM');
+
+INSERT INTO dbo.MemberGroupMappings (UniqueID, GroupID, IsPrimary) VALUES
+('MSGV_001', @IdKcntt, 1), -- Thầy Nguyễn Văn An (MSGV_001) thuộc Khoa CNTT
+('MSGV_002', @IdKktpm, 1), -- Cô Trần Thị Bình (MSGV_002) thuộc Khoa Kỹ thuật Phần mềm
+('MSGV_003', @IdKcntt, 1); -- Thầy Phạm Hoàng Cường (MSGV_003) thuộc Khoa CNTT
+GO
+
 PRINT N'======================================================================';
 PRINT N'---> DỮ LIỆU ĐÃ ĐƯỢC ĐỔ CỰC KỲ ĐẦY ĐỦ VÀ SỬA LỖI THÀNH CÔNG 100%! <---';
 PRINT N'======================================================================';

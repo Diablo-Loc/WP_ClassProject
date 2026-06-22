@@ -496,3 +496,34 @@ BEGIN
     ORDER BY c.MaLop ASC;
 END;
 GO
+
+CREATE PROCEDURE sp_AnalyzeStudentScores
+    @MinScore FLOAT = NULL,
+    @MaxScore FLOAT = NULL,
+    @TopCount INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Nếu yêu cầu lấy Top sinh viên điểm cao/thấp
+    IF @TopCount IS NOT NULL AND @MaxScore IS NOT NULL
+    BEGIN
+        SELECT TOP (@TopCount) MaSV, DiemQuaTrinh, DiemThi, DiemTongKet 
+        FROM Diem 
+        WHERE DiemTongKet < @MaxScore
+        ORDER BY DiemTongKet ASC;
+    END
+    -- Nếu chỉ lọc sinh viên dưới một mức điểm nào đó
+    ELSE IF @MinScore IS NOT NULL
+    BEGIN
+        SELECT MaSV, DiemQuaTrinh, DiemThi, DiemTongKet 
+        FROM Diem 
+        WHERE DiemTongKet < @MinScore;
+    END
+    -- Ngược lại trả về toàn bộ dữ liệu mẫu để AI phân tích
+    ELSE
+    BEGIN
+        SELECT TOP 50 MaSV, DiemQuaTrinh, DiemThi, DiemTongKet FROM Diem;
+    END
+END;
+GO

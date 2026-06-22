@@ -11,33 +11,21 @@ namespace ClassProject.Presentation.Forms.Admin
 {
     public partial class ContactForm : Form
     {
-        // Khai báo Interface (Đúng chuẩn Loose Coupling - Liên kết lỏng)
         private readonly IContactRepository _contactRepo;
 
         private bool _isEditMode = false;
         private string _selectedUniqueId = string.Empty;
         private int _selectedContactId = -1;
-
-        // Lấy thông tin phiên làm việc của User đang đăng nhập hệ thống
         private readonly int _currentUserId = UserSession.UserId;
-
-        // Bộ đếm thời gian Debounce chống quá tải (overload) câu lệnh SQL truy vấn tìm kiếm
         private readonly System.Windows.Forms.Timer _searchDebounceTimer;
 
-        /// <summary>
-        /// Constructor nhận lớp Repository từ DI Container truyền vào 
-        /// </summary>
         public ContactForm(IContactRepository contactRepo)
         {
             InitializeComponent();
-
-            // Gán giá trị thông qua cơ chế Constructor Injection (Nếu null sẽ báo lỗi ngay lập tức)
             _contactRepo = contactRepo ?? throw new ArgumentNullException(nameof(contactRepo));
 
-            // Đăng ký sự kiện hạn chế nhập chữ cho ô số điện thoại
             this.txtPhone.KeyPress += txtPhone_KeyPress;
 
-            // Cấu hình Debounce thời gian tìm kiếm: 350ms
             _searchDebounceTimer = new System.Windows.Forms.Timer { Interval = 350 };
             _searchDebounceTimer.Tick += SearchDebounceTimer_Tick;
         }
@@ -45,7 +33,7 @@ namespace ClassProject.Presentation.Forms.Admin
         private async void ContactForm_Load(object sender, EventArgs e)
         {
             StyleGrid();
-            await LoadGroupsComboBoxAsync(); // Nạp danh mục phòng ban vào ComboBox trước
+            await LoadGroupsComboBoxAsync();
             ResetFormToInsertMode();
             await LoadContactGridAsync();
         }
@@ -71,12 +59,10 @@ namespace ClassProject.Presentation.Forms.Admin
         {
             if (dgvContacts.Columns.Count == 0) return;
 
-            // Ẩn các cột logic xử lý ngầm của hệ thống
             if (dgvContacts.Columns.Contains("UniqueID")) dgvContacts.Columns["UniqueID"].Visible = false;
             if (dgvContacts.Columns.Contains("IsSystemData")) dgvContacts.Columns["IsSystemData"].Visible = false;
             if (dgvContacts.Columns.Contains("Group_ID")) dgvContacts.Columns["Group_ID"].Visible = false;
 
-            // Định dạng tiêu đề hiển thị chuẩn hóa cho người dùng cuối
             if (dgvContacts.Columns.Contains("Name")) dgvContacts.Columns["Name"].HeaderText = "Họ và tên nhân sự";
             if (dgvContacts.Columns.Contains("Phone")) dgvContacts.Columns["Phone"].HeaderText = "Số điện thoại";
             if (dgvContacts.Columns.Contains("Email")) dgvContacts.Columns["Email"].HeaderText = "Địa chỉ Email";
@@ -85,18 +71,24 @@ namespace ClassProject.Presentation.Forms.Admin
             dgvContacts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
-        // Tải danh mục nhóm phòng ban trực tiếp thông qua định danh ComboBox có sẵn trên Designer
         private async Task LoadGroupsComboBoxAsync()
         {
             try
             {
                 if (cboGroups == null) return;
 
+                // FIX: Dùng đúng tài khoản đang đăng nhập để lấy danh mục phòng ban đồng bộ với lưới dữ liệu
                 DataTable dtGroups = await _contactRepo.GetGroupsByUserAsync(_currentUserId);
 
-                // Tạo dòng mặc định tương thích logic DB SET NULL khi không chọn phòng ban
+                if (dtGroups == null)
+                {
+                    dtGroups = new DataTable();
+                    dtGroups.Columns.Add("ID", typeof(int));
+                    dtGroups.Columns.Add("Name", typeof(string));
+                }
+
                 DataRow dr = dtGroups.NewRow();
-                dr["ID"] = DBNull.Value;
+                dr["ID"] = -1; // Đổi thành -1 cho khớp logic lọc dữ liệu rỗng
                 dr["Name"] = "-- Chưa phân phòng --";
                 dtGroups.Rows.InsertAt(dr, 0);
 
@@ -114,7 +106,6 @@ namespace ClassProject.Presentation.Forms.Admin
         {
             try
             {
-                // Ngắt sự kiện CellClick tạm thời nhằm tránh kích hoạt sai luồng logic khi đổ dữ liệu
                 dgvContacts.CellClick -= dgvContacts_CellClick;
 
                 DataTable dt = await _contactRepo.GetAllContactsByUserAsync(_currentUserId);
@@ -145,28 +136,64 @@ namespace ClassProject.Presentation.Forms.Admin
             if (row.Cells["UniqueID"].Value != null)
             {
                 _selectedUniqueId = row.Cells["UniqueID"].Value.ToString();
-                int isSystemData = Convert.ToInt32(row.Cells["IsSystemData"].Value);
+
+                int isSystemData = 0;
+                var sysValue = row.Cells["IsSystemData"].Value;
+                if (sysValue != null && sysValue != DBNull.Value)
+                {
+                    if (sysValue is bool boolVal)
+                        isSystemData = boolVal ? 1 : 0;
+                    else
+                        int.TryParse(sysValue.ToString(), out isSystemData);
+                }
 
                 txtName.Text = row.Cells["Name"].Value?.ToString() ?? string.Empty;
                 txtPhone.Text = row.Cells["Phone"].Value?.ToString() ?? string.Empty;
                 txtEmail.Text = row.Cells["Email"].Value?.ToString() ?? string.Empty;
 
-                // Đồng bộ hiển thị lựa chọn ComboBox Phòng ban trực tiếp và an toàn
-                if (cboGroups != null && row.Cells["Group_ID"].Value != null)
+                // --- ĐỒNG BỘ HÓA COMBOBOX PHÒNG BAN ---
+                if (cboGroups != null)
                 {
-                    if (row.Cells["Group_ID"].Value == DBNull.Value || Convert.ToInt32(row.Cells["Group_ID"].Value) == -1)
-                        cboGroups.SelectedIndex = 0;
+                    var groupIdValue = row.Cells["Group_ID"].Value;
+                    if (groupIdValue != null && groupIdValue != DBNull.Value)
+                    {
+                        if (int.TryParse(groupIdValue.ToString(), out int gId) && gId > 0)
+                        {
+                            cboGroups.SelectedValue = gId;
+
+                            // Phòng hờ nếu danh sách ComboBox không chứa ID này thì đẩy về dòng 0
+                            if (cboGroups.SelectedValue == null || (int)cboGroups.SelectedValue != gId)
+                            {
+                                cboGroups.SelectedIndex = 0;
+                            }
+                        }
+                        else
+                        {
+                            cboGroups.SelectedIndex = 0;
+                        }
+                    }
                     else
-                        cboGroups.SelectedValue = row.Cells["Group_ID"].Value;
+                    {
+                        cboGroups.SelectedIndex = 0;
+                    }
                 }
 
-                // Bảo mật phân quyền dữ liệu: Hệ thống (Chỉ đọc) và Cá nhân (Được sửa đổi)
-                if (isSystemData == 1)
+                string numberOnly = Regex.Match(_selectedUniqueId, @"\d+").Value;
+                if (!string.IsNullOrEmpty(numberOnly) && int.TryParse(numberOnly, out int parsedId))
                 {
+                    _selectedContactId = parsedId;
+                }
+                else
+                {
+                    _selectedContactId = -1;
+                }
+
+                // --- KIỂM TRA PHÂN QUYỀN GIAO DIỆN ---
+                if (isSystemData == 1 && !UserSession.IsAdmin)
+                {
+                    _isEditMode = false;
                     btnInsert.Enabled = false;
                     btnDelete.Enabled = false;
-
-                    // Khóa ComboBox phòng ban không cho phép chỉnh sửa dữ liệu dùng chung toàn trường
                     if (cboGroups != null) cboGroups.Enabled = false;
 
                     if (lblTotalContacts != null)
@@ -178,18 +205,23 @@ namespace ClassProject.Presentation.Forms.Admin
                 else
                 {
                     btnInsert.Enabled = true;
-                    btnDelete.Enabled = true;
-
-                    // Mở khóa ComboBox phòng ban phục vụ tính năng "Đổi phòng ban" của liên hệ cá nhân
+                    btnDelete.Enabled = (isSystemData == 0 || UserSession.IsAdmin);
                     if (cboGroups != null) cboGroups.Enabled = true;
 
                     if (lblTotalContacts != null)
                     {
-                        lblTotalContacts.ForeColor = Color.Black;
-                        lblTotalContacts.Text = $"Đang chọn liên hệ: {txtName.Text}";
+                        if (isSystemData == 1 && UserSession.IsAdmin)
+                        {
+                            lblTotalContacts.ForeColor = Color.DarkBlue;
+                            lblTotalContacts.Text = "[ADMIN] Quyền quản trị: Đang chỉnh sửa thông tin Giảng viên hệ thống";
+                        }
+                        else
+                        {
+                            lblTotalContacts.ForeColor = Color.Black;
+                            lblTotalContacts.Text = $"Đang chọn liên hệ: {txtName.Text}";
+                        }
                     }
 
-                    _selectedContactId = Convert.ToInt32(_selectedUniqueId.Replace("CONTACT_", ""));
                     SwitchMode(editMode: true);
                 }
             }
@@ -221,7 +253,6 @@ namespace ClassProject.Presentation.Forms.Admin
             btnInsert.Enabled = true;
             btnDelete.Enabled = true;
 
-            // Đưa ComboBox về lựa chọn đầu tiên và mở khóa sẵn sàng thêm mới
             if (cboGroups != null)
             {
                 cboGroups.SelectedIndex = 0;
@@ -242,7 +273,6 @@ namespace ClassProject.Presentation.Forms.Admin
                 return;
             }
 
-            // Thuật toán bóc tách chuỗi thành Họ đệm (LastName) và Tên (FirstName)
             string fname = string.Empty;
             string lname = string.Empty;
             string[] nameParts = Regex.Split(nameInput, @"\s+");
@@ -260,14 +290,15 @@ namespace ClassProject.Presentation.Forms.Admin
             string phoneInput = txtPhone.Text.Trim();
             string emailInput = txtEmail.Text.Trim();
 
-            // Trích xuất an toàn giá trị Group_ID phục vụ đổi phòng ban từ thuộc tính SelectedValue
             int? groupId = null;
             if (cboGroups != null && cboGroups.SelectedValue != null && cboGroups.SelectedValue != DBNull.Value)
             {
-                groupId = Convert.ToInt32(cboGroups.SelectedValue);
+                if (int.TryParse(cboGroups.SelectedValue.ToString(), out int parsedGroupId) && parsedGroupId > 0)
+                {
+                    groupId = parsedGroupId;
+                }
             }
 
-            // Kiểm định biểu thức chính quy (Regex Validation)
             if (!string.IsNullOrEmpty(phoneInput))
             {
                 string phonePattern = @"^(0[35789][0-9]{8})|(02[0-9]{8,9})$";
@@ -281,19 +312,15 @@ namespace ClassProject.Presentation.Forms.Admin
 
             if (!string.IsNullOrEmpty(emailInput))
             {
-                // Regex chuẩn quốc tế, chấp nhận mọi loại email thật và email giáo dục nhiều cấp tên miền
                 string emailPattern = @"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
-
                 if (!Regex.IsMatch(emailInput, emailPattern, RegexOptions.IgnoreCase))
                 {
-                    MessageBox.Show("Định dạng địa chỉ Email không hợp lệ!\nHệ thống hỗ trợ cả Email cá nhân và Email giáo dục (Ví dụ: nguyenvanb@fe.edu.vn).",
-                                    "Lỗi định dạng", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Định dạng địa chỉ Email không hợp lệ!", "Lỗi định dạng", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     txtEmail.Focus();
                     return;
                 }
             }
 
-            // Kiểm tra ràng buộc duy nhất trong phạm vi danh bạ riêng của tài khoản này
             int? currentExcludeId = _isEditMode ? (int?)_selectedContactId : null;
             if (await _contactRepo.IsPhoneOrEmailExistsAsync(phoneInput, emailInput, currentExcludeId, _currentUserId))
             {
@@ -303,40 +330,54 @@ namespace ClassProject.Presentation.Forms.Admin
 
             try
             {
-                // Thực thi Cập nhật (Đổi phòng ban) hoặc Thêm mới tương thích cấu trúc database
+                // ĐÃ FIX: Chuyển sang dùng biến _selectedUniqueId cho hàm Update để tránh gán nhầm mapping bảng phòng ban con
                 bool result = _isEditMode
-                    ? await _contactRepo.UpdateContactAsync(_selectedContactId, fname, lname, phoneInput, emailInput, groupId, _currentUserId)
-                    : await _contactRepo.InsertContactAsync(fname, lname, phoneInput, emailInput, groupId, _currentUserId);
+                ? await _contactRepo.UpdateContactAsync(_selectedContactId, fname, lname, phoneInput, emailInput, groupId, _currentUserId)
+                : await _contactRepo.InsertContactAsync(fname, lname, phoneInput, emailInput, groupId, _currentUserId);
 
                 if (result)
                 {
                     MessageBox.Show("Xử lý thông tin danh bạ thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    ResetFormToInsertMode();
+
+                    // FIX THỨ TỰ: Load lại danh sách lên lưới trước để lấy tên phòng ban mới từ DB
                     await LoadContactGridAsync();
+
+                    // Sau đó mới reset các ô nhập liệu về trạng thái ban đầu
+                    ResetFormToInsertMode();
+                }
+                else
+                {
+                    MessageBox.Show("Cập nhật dữ liệu thất bại. Vui lòng kiểm tra lại quyền hạn!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi nghiệp vụ phát sinh ngoài ý muốn: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi nghiệp vụ phát sinh: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private async void btnDelete_Click(object sender, EventArgs e)
         {
-            if (_selectedContactId == -1 || _selectedUniqueId.StartsWith("TEACHER_"))
+            bool isSystemTeacher = _selectedUniqueId.StartsWith("TEACHER_") || _selectedUniqueId.StartsWith("MSGV_");
+
+            if (_selectedContactId == -1 || (isSystemTeacher && !UserSession.IsAdmin))
             {
                 MessageBox.Show("Không thể xóa dữ liệu thuộc quyền quản lý của hệ thống!", "Từ chối truy cập", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return;
             }
 
-            if (MessageBox.Show("Bạn có chắc chắn muốn gỡ bỏ vĩnh viễn liên hệ này khỏi danh bạ cá nhân?", "Xác nhận hành động", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            string confirmMsg = isSystemTeacher
+                ? "CẢNH BÁO: Bạn đang xóa một Giảng viên hệ thống ra khỏi danh bạ chung toàn trường! Xác nhận hành động?"
+                : "Bạn có chắc chắn muốn gỡ bỏ vĩnh viễn liên hệ này khỏi danh bạ cá nhân?";
+
+            if (MessageBox.Show(confirmMsg, "Xác nhận hành động", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 try
                 {
                     if (await _contactRepo.DeleteContactAsync(_selectedContactId, _currentUserId))
                     {
-                        ResetFormToInsertMode();
                         await LoadContactGridAsync();
+                        ResetFormToInsertMode();
                     }
                 }
                 catch (Exception ex)
@@ -355,7 +396,6 @@ namespace ClassProject.Presentation.Forms.Admin
         private async void SearchDebounceTimer_Tick(object sender, EventArgs e)
         {
             _searchDebounceTimer.Stop();
-
             string keyword = txtSearch.Text.Trim();
             try
             {

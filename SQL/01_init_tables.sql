@@ -86,14 +86,20 @@ CREATE TABLE dbo.Users
 );
 GO
 
+-- NÂNG CẤP: Bảng quản lý Nhóm/Phòng ban dạng Cây Phân Cấp (Hierarchy)
 CREATE TABLE dbo.Groups (
     ID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
-    UserID INT NOT NULL,
+    GroupCode VARCHAR(50) NULL,          -- Mã phòng ban (CNTT, HCNS, TO-AI,...)
+    ParentID INT NULL,                  -- Đệ quy: NULL nếu là cấp cao nhất (Khối/Phòng gốc)
+    IsSystemData BIT DEFAULT 0,         -- 1: Phòng ban của Trường, 0: Nhóm cá nhân tự tạo
+    UserID INT NOT NULL,                -- User sở hữu hoặc tạo lập nhóm này
+    CONSTRAINT FK_Groups_Parent FOREIGN KEY (ParentID) REFERENCES dbo.Groups(ID),
     CONSTRAINT FK_Groups_Users FOREIGN KEY (UserID) REFERENCES dbo.Users(Id) ON DELETE CASCADE
 );
 GO
 
+-- CHUẨN HÓA: Bảng Contact cá nhân (Không còn cột Group_ID trực tiếp)
 CREATE TABLE dbo.Contact (
     ContactID INT IDENTITY(1,1) PRIMARY KEY, 
     Name NVARCHAR(100) NOT NULL,             
@@ -101,14 +107,11 @@ CREATE TABLE dbo.Contact (
     Lname NVARCHAR(50) NULL,              
     Dob DATETIME NULL,
     Gender NVARCHAR(10) NULL,
-    Group_ID INT NULL,
     Phone NVARCHAR(15) NULL,
     Address NVARCHAR(200) NULL,
     Email NVARCHAR(100) NULL,
     Pic IMAGE NULL,
     UserID INT NOT NULL,
-    CONSTRAINT FK_Contact_Groups FOREIGN KEY (Group_ID) REFERENCES dbo.Groups(ID) ON DELETE SET NULL,
-    -- Đổi thành NO ACTION ở đây để SQL Server không báo lỗi trùng lặp đường dẫn xóa
     CONSTRAINT FK_Contact_Users FOREIGN KEY (UserID) REFERENCES dbo.Users(Id) ON DELETE NO ACTION
 );
 GO
@@ -178,6 +181,17 @@ CREATE TABLE dbo.Students
 );
 GO
 
+CREATE TABLE dbo.MemberGroupMappings
+(
+    UniqueID VARCHAR(50) NOT NULL,      -- Định danh chuỗi: 'TEACHER_1', 'CONTACT_12'
+    GroupID INT NOT NULL,
+    IsPrimary BIT DEFAULT 1,            -- 1: Phòng ban chính (Dùng để hiển thị mặc định), 0: Kiêm nhiệm/Nhóm phụ
+    AssignedAt DATETIME DEFAULT GETDATE(),
+    
+    CONSTRAINT PK_MemberGroupMappings PRIMARY KEY (UniqueID, GroupID),
+    CONSTRAINT FK_Mappings_Groups FOREIGN KEY (GroupID) REFERENCES dbo.Groups(ID) ON DELETE CASCADE
+);
+GO
 
 -- ============================================================================
 -- 3. PHÂN HỆ QUẢN LÝ ĐÀO TẠO THEO TÍN CHỈ (LỚP HỌC PHẦN)
@@ -273,7 +287,8 @@ CREATE INDEX IX_Users_Username ON dbo.Users(Username);
 CREATE INDEX IX_Score_MSSV ON dbo.Score(MSSV);               
 CREATE INDEX IX_Requests_MSSV ON dbo.Requests(MSSV);         
 CREATE INDEX IX_DKMH_MaLopHP ON dbo.DKMH(MaLopHP);   
-CREATE NONCLUSTERED INDEX IX_Contact_User_Group ON dbo.Contact(UserID, Group_ID) INCLUDE (Name, Phone, Email);
+CREATE NONCLUSTERED INDEX IX_Contact_User ON dbo.Contact(UserID) INCLUDE (Name, Phone, Email);
+CREATE NONCLUSTERED INDEX IX_Mappings_GroupID ON dbo.MemberGroupMappings(GroupID) INCLUDE (UniqueID, IsPrimary);
 CREATE NONCLUSTERED INDEX IX_Groups_User ON dbo.Groups(UserID) INCLUDE (Name);
 CREATE NONCLUSTERED INDEX IX_Teachers_UserId ON dbo.Teachers(UserId);
 CREATE NONCLUSTERED INDEX IX_Teachers_MSGV ON dbo.Teachers(MSGV);

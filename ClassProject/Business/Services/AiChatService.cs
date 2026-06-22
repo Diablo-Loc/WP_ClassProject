@@ -1,4 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using ClassProject.DataAccess.Entities;
+using Emgu.CV.ML;
+using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -6,6 +8,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Net.Http;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -30,30 +33,32 @@ namespace ClassProject.Business.Services
         /// <summary>
         /// Hàm xử lý Chat chính thức gửi lên Cloud AI Gemini sau khi đã lọc các dữ liệu rác
         /// </summary>
-        public async Task<string> FetchAiResponseAsync(string question, bool isForgetScreen = false)
+        public async Task<string> FetchAiResponseAsync(string question, bool isForgetScreen = false, bool isSystemInternalCall = false)
         {
-            // 1. Kiểm tra các điều kiện chặn Spam cơ bản
             if (string.IsNullOrWhiteSpace(question))
                 return "🤖 Tôi không nhận được nội dung câu hỏi. Hãy nhập gì đó nhé!";
 
-            if (question.Length > 250)
-                return "⚠️ Câu hỏi quá dài! Vui lòng tóm tắt ngắn gọn dưới 250 ký tự để tôi hỗ trợ tốt nhất.";
-
-            string cleanQuestion = question.Trim();
-            if (Regex.IsMatch(cleanQuestion, @"^[a-zA-Z0-9\s]+$") && double.TryParse(cleanQuestion, out _))
-                return "🤖 Hệ thống không hiểu chuỗi số này. Vui lòng hỏi rõ nhu cầu của bạn.";
-
-            if (Regex.IsMatch(cleanQuestion, @"^[^a-zA-Z0-9\s]+$"))
-                return "🤖 Vui lòng không gửi các ký tự đặc biệt vô nghĩa.";
-
-            // 2. Nếu là màn hình quên mật khẩu cố định (Bối cảnh đặc biệt)
-            if (isForgetScreen)
+            // NẾU KHÔNG PHẢI CUỘC GỌI NỘI BỘ THÌ MỚI CHECK SPAM NGƯỜI DÙNG
+            if (!isSystemInternalCall)
             {
-                return "🤖 Tại màn hình này, tôi chỉ hỗ trợ các vấn đề liên quan đến: Quy trình lấy lại mật khẩu, lỗi nhận mã OTP, và tiêu chuẩn an toàn mật khẩu. Vui lòng đặt câu hỏi liên quan.";
+                if (question.Length > 250)
+                    return "⚠️ Câu hỏi quá dài! Vui lòng tóm tắt ngắn gọn dưới 250 ký tự để tôi hỗ trợ tốt nhất.";
+
+                string cleanQuestion = question.Trim();
+                if (Regex.IsMatch(cleanQuestion, @"^[a-zA-Z0-9\s]+$") && double.TryParse(cleanQuestion, out _))
+                    return "🤖 Hệ thống không hiểu chuỗi số này. Vui lòng hỏi rõ nhu cầu của bạn.";
+
+                if (Regex.IsMatch(cleanQuestion, @"^[^a-zA-Z0-9\s]+$"))
+                    return "🤖 Vui lòng không gửi các ký tự đặc biệt vô nghĩa.";
+
+                if (isForgetScreen)
+                {
+                    return "🤖 Tại màn hình này, tôi chỉ hỗ trợ các vấn đề liên quan đến: Quy trình lấy lại mật khẩu, lỗi nhận mã OTP, và tiêu chuẩn an toàn mật khẩu. Vui lòng đặt câu hỏi liên quan.";
+                }
             }
 
-            // 3. BẮN THẲNG LÊN GOOGLE GEMINI KHÔNG QUA BỘ LỌC CHỮ LOCAL NÀO NỮA
-            return await CallCloudAiApiAsync(cleanQuestion);
+            // BẮN THẲNG LÊN GOOGLE GEMINI KHÔNG QUA BỘ LỌC KHÁC
+            return await CallCloudAiApiAsync(question.Trim());
         }
 
         /// <summary>
@@ -94,30 +99,38 @@ namespace ClassProject.Business.Services
             string cleanQuery = RemoveSignForVietnameseString(question.Trim().ToLower());
 
             var formIntents = new Dictionary<string, string[]>
-{
-                // Bổ sung thêm từ "diem so" vào danh sách bên dưới
-                { "ManageScoreForm", new[] { "diem", "diem so", "xem diem", "ket qua", "bang diem", "diem thi", "quan ly diem" } },
+    {
+        { "ManageScoreForm", new[] { "diem", "diem so", "xem diem", "ket qua", "bang diem", "diem thi", "quan ly diem" } },
+        { "ManageStudentForm", new[] { "sinh vien", "danh sach sv", "ho so", "thong tin sv", "sv" } },
+        { "ManageCourseForm", new[] { "mon hoc", "tin chi", "hoc phan", "chuong trinh hoc", "quan ly mon" } },
+        { "ManageClassroomForm", new[] { "lop hoc", "quan ly lop", "lop nien che" } },
+        { "AccountManageForm", new[] { "tai khoan", "user", "admin", "cap tai khoan" } },
+        { "StatisticsForm", new[] { "thong ke", "bieu do", "bao cao", "statistic" } },
+        { "TranscriptForm", new[] { "bang diem ca nhan", "diem cua toi", "diem sv" } },
+        { "ProfileForm", new[] { "thong tin ca nhan", "ho so cua toi", "profile" } },
+        { "StudentRequestForm", new[] { "yeu cau ho tro", "gui yeu cau", "xin giay" } }
+    };
 
-                { "ManageStudentForm", new[] { "sinh vien", "danh sach sv", "ho so", "thong tin sv", "sv" } },
-                { "ManageCourseForm", new[] { "mon hoc", "tin chi", "hoc phan", "chuong trinh hoc", "quan ly mon" } },
-                { "ManageClassroomForm", new[] { "lop hoc", "quan ly lop", "lop nien che" } },
-                { "AccountManageForm", new[] { "tai khoan", "user", "admin", "cap tai khoan" } },
-                { "StatisticsForm", new[] { "thong ke", "bieu do", "bao cao", "statistic" } },
-                { "TranscriptForm", new[] { "bang diem ca nhan", "diem cua toi", "diem sv" } },
-                { "ProfileForm", new[] { "thong tin ca nhan", "ho so cua toi", "profile" } },
-                { "StudentRequestForm", new[] { "yeu cau ho tro", "gui yeu cau", "xin giay" } }
-            };
+            // Định nghĩa các từ khóa kích hoạt hành động mở form
+            string[] actionPrefixes = { "mo", "vao", "chuyen den", "den", "open", "go to" };
 
             foreach (var intent in formIntents)
             {
                 foreach (var keyword in intent.Value)
                 {
-                    // Tạo khuôn Regex khớp chính xác cụm từ hệ thống quy định độc lập trong câu
-                    string pattern = $@"\b{Regex.Escape(keyword)}\b";
-
-                    if (Regex.IsMatch(cleanQuery, pattern) || ComputeLevenshteinDistance(cleanQuery, keyword) <= 1)
+                    // Kiểm tra 1: Khớp chuẩn xác và tuyệt đối (Ví dụ gõ đúng chữ "sinh vien" hoặc "sinh vien ")
+                    if (cleanQuery == keyword || ComputeLevenshteinDistance(cleanQuery, keyword) <= 1)
                     {
                         return (intent.Key, $"🤖 AI: Nhận lệnh. Đang điều hướng bạn đến màn hình chức năng phù hợp...");
+                    }
+
+                    // Kiểm tra 2: Có chứa từ khóa hành động đi kèm (Ví dụ: "mo form sinh vien", "vao muc diem")
+                    foreach (var prefix in actionPrefixes)
+                    {
+                        if (cleanQuery.StartsWith(prefix + " " + keyword) || cleanQuery.Contains(" " + prefix + " " + keyword))
+                        {
+                            return (intent.Key, $"🤖 AI: Nhận lệnh hành động. Đang mở màn hình...");
+                        }
                     }
                 }
             }
@@ -162,27 +175,35 @@ namespace ClassProject.Business.Services
             try
             {
                 string requestUrl = $"{_geminiUrl}?key={_apiKey}";
-                // Thay thế đoạn cấu hình systemPrompt cũ bằng đoạn rõ ràng này:
-                string systemPrompt = "Bạn là trợ lý AI phân tích dữ liệu học vụ có quyền truy cập cơ sở dữ liệu SQL Server của phần mềm UTEID.\n" +
-                                      "Dưới đây là cấu trúc các bảng dữ liệu trong hệ thống của chúng tôi:\n" +
-                                      "- Bảng SinhVien(MaSV VARCHAR(10) PRIMARY KEY, HoTen NVARCHAR(100), Lop NVARCHAR(20), NgaySinh DATE, GioiTinh NVARCHAR(10))\n" +
-                                      "- Bảng Diem(MaSV VARCHAR(10), MaMon VARCHAR(10), DiemQuaTrinh FLOAT, DiemThi FLOAT, DiemTongKet FLOAT, PRIMARY KEY(MaSV, MaMon))\n" +
-                                      "- Bảng MonHoc(MaMon VARCHAR(10) PRIMARY KEY, TenMon NVARCHAR(100), SoTinChi INT)\n\n" +
-                                      "QUY ĐỊNH TRẢ LỜI QUAN TRỌNG:\n" +
-                                      "1. Khi người dùng yêu cầu thống kê, lọc, tìm kiếm danh sách hoặc so sánh số liệu (Ví dụ có chứa các từ hoặc ký tự như: 'điểm trung bình < 8', 'top 5', 'dưới 5', 'qua môn'), " +
-                                      "bạn BẮT BUỘC phải chuyển câu hỏi đó thành một câu lệnh SQL Server chính xác để truy vấn dữ liệu.\n" +
-                                      "Không được phép từ chối, không được chê câu hỏi quá dài hay quá ngắn.\n" +
-                                      "Định dạng kết quả trả về bắt buộc phải là: EXECUTE_SQL:[Câu_lệnh_SQL]. Không giải thích gì thêm.\n" +
-                                      "Ví dụ: EXECUTE_SQL:SELECT TOP 5 MaSV, DiemTongKet FROM Diem WHERE DiemTongKet < 8 ORDER BY DiemTongKet DESC\n\n" +
-                                      "2. Nếu người dùng ra lệnh mở màn hình trống (Ví dụ: 'mở form sinh viên'), trả về: OPEN_FORM:[Tên_Form].\n" +
-                                      "3. Nếu là câu hỏi trò chuyện bình thường không liên quan đến dữ liệu, hãy trả lời ngắn gọn dưới 3 câu.";
 
+                // ============================================================================
+                // TÁI CẤU TRÚC SYSTEM PROMPT CHUẨN XÁC THEO SCRIPT DATABASE THỰC TẾ (LOGINDB)
+                // ============================================================================
+                string systemPrompt =
+                    "Bạn là trợ lý AI phân tích dữ liệu học vụ trường HCMUTE, kết nối trực tiếp với SQL Server (Database: LoginDB).\n\n" +
+                    "Dưới đây là cấu trúc bảng CHÍNH XÁC 100% trong hệ thống, bắt buộc phải viết đúng tên bảng và tên cột khi sinh câu lệnh SQL:\n" +
+                    "- Bảng sinh viên: dbo.Students (Id, UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Address, Email, MaLop, MaNganh)\n" +
+                    "- Bảng điểm HP: dbo.Score (MSSV, MaLopHP, DiemQT, DiemCK, DiemTK, Mota)\n" +
+                    "- Bảng môn học: dbo.Course (MaMH, TenMH, SoTC, Tuan, Hky, NamHoc, Mota)\n" +
+                    "- Bảng lớp học phần: dbo.CourseSection (MaLopHP, MaMH, HocKy, NamHoc, MSGV, PhongHoc, MaxStudents, ThuHoc, CaHoc)\n" +
+                    "- Bảng lớp hành chính: dbo.Classroom (MaLop, TenLop, SiSo, GVCN, MaNganh)\n\n" +
+                    "CÁC VIEW CÓ SẴN (Ưu tiên SELECT từ đây nếu câu hỏi cần thông tin tổng hợp điểm, lịch học):\n" +
+                    "* View bảng điểm đầy đủ: dbo.vw_StudentTranscript (MSSV, StudentName, MaLopHP, MaMH, TenMH, SoTC, DiemQT, DiemCK, DiemTK, NamHoc, HocKy)\n" +
+                    "* View lịch học hằng ngày: dbo.vw_StudentDailySchedule (MSSV, MaLopHP, TenMH, PhongHoc, ThuHoc, CaHoc, ThoiGian)\n\n" +
+                    "⚠️ QUY TẮC SẢN SINH SQL BẮT BUỘC (QUAN TRỌNG):\n" +
+                    "1. Tuyệt đối KHÔNG ĐƯỢC dùng các tên bảng tự đoán như 'SinhVien', 'Diem', 'MonHoc'. Phải dùng chính xác tiền tố dbo. và tên bảng tiếng Anh ở trên.\n" +
+                    "2. Cột 'MaMH' và 'MaNganh' dùng kiểu CHAR(10) nên chứa khoảng trắng thừa ở cuối. Khi lọc theo 2 cột này, BẮT BUỘC phải dùng hàm TRIM() hoặc RTRIM(). Ví dụ: WHERE TRIM(MaNganh) = 'CNTT' hoặc WHERE TRIM(MaMH) = 'ANM004'.\n" +
+                    "3. Khi tìm theo tên Sinh viên, hãy dùng phép cộng chuỗi: (FirstName + ' ' + LastName) LIKE N'%Tên_Cần_Tìm%'.\n\n" +
+                    "QUY ĐỊNH TRẢ LỜI:\n" +
+                    "- Nếu người dùng yêu cầu thống kê, lọc, tra cứu, hoặc đếm dữ liệu, bạn CHỈ ĐƯỢC PHÉP trả về chuỗi có định dạng duy nhất: EXECUTE_SQL:[Câu_lệnh_SQL_Server_ở_đây]\n" +
+                    "- Tuyệt đối không bọc câu lệnh trong ký tự markdown như ```sql ... ```. Không giải thích dông dài.\n" +
+                    "- Nếu là câu hỏi chào hỏi xã giao bình thường không liên quan đến dữ liệu, trả lời ngắn gọn không quá 2 câu." +
+                    "4.Khi viết các câu lệnh đếm dữ liệu(COUNT), tính trung bình(AVG), hoặc tính tổng(SUM), BẮT BUỘC phải đặt tên định danh dễ hiểu cho cột bằng từ khóa 'As'. Ví dụ đúng: SELECT COUNT(*) As[Số lượng sinh viên] FROM dbo.Students";
                 var requestData = new GeminiPayload
                 {
                     Contents = new[] { new GeminiContentItem { Parts = new[] { new GeminiPartItem { Text = userQuestion } } } },
                     SystemInstruction = new GeminiSystemInstructionItem { Parts = new[] { new GeminiPartItem { Text = systemPrompt } } },
-                    // Tăng nhẹ Temperature từ 0.2 lên 0.3 để tránh việc AI bị bó hẹp tư duy khi gặp ký tự toán học <, >
-                    GenerationConfig = new GeminiGenerationConfig { Temperature = 0.3, MaxOutputTokens = 350 }
+                    GenerationConfig = new GeminiGenerationConfig { Temperature = 0.2, MaxOutputTokens = 350 }
                 };
 
                 string jsonPayload = JsonConvert.SerializeObject(requestData);
@@ -197,7 +218,18 @@ namespace ClassProject.Business.Services
                             dynamic jsonResult = JsonConvert.DeserializeObject(rawResponse);
                             string aiText = jsonResult.candidates[0].content.parts[0].text;
                             aiText = aiText.Trim();
-                            return aiText.StartsWith("🤖") ? aiText : "🤖 AI: " + aiText;
+
+                            // Để đồng bộ với tầng WinForms xử lý cắt chuỗi EXECUTE_SQL:, ta loại bỏ tiền tố tự thêm ngẫu nhiên
+                            if (aiText.StartsWith("🤖 AI: "))
+                            {
+                                aiText = aiText.Substring("🤖 AI: ".Length).Trim();
+                            }
+                            else if (aiText.StartsWith("🤖"))
+                            {
+                                aiText = aiText.Substring(1).Trim();
+                            }
+
+                            return aiText;
                         }
                         string errorContent = await response.Content.ReadAsStringAsync();
                         return $"❌ Lỗi API Google ({response.StatusCode}): {errorContent}";
@@ -213,7 +245,7 @@ namespace ClassProject.Business.Services
                 return $"⚠️ Lỗi kết nối hệ thống: {ex.Message}";
             }
         }
-           
+
         public class GeminiPayload
         {
             [JsonProperty("contents")] public GeminiContentItem[] Contents { get; set; }

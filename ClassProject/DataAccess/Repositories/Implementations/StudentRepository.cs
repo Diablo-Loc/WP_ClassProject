@@ -663,5 +663,37 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             }
             return table;
         }
+        // ==========================================
+        // HÀM BỔ SUNG: PHỤC VỤ TRUY VẤN CHO AI CHAT
+        // ==========================================
+        public string ExecuteAiQueryToJson(string sqlQuery)
+        {
+            try
+            {
+                // Sử dụng đối tượng kết nối _db có sẵn của Repository (Đảm bảo ăn khớp database 100%)
+                using (SqlConnection conn = _db.GetConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand(sqlQuery, conn))
+                    {
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+
+                            if (conn.State == ConnectionState.Closed) conn.Open();
+                            da.Fill(dt);
+
+                            // Tối ưu hóa: Trả về chuỗi JSON trực tiếp bằng Newtonsoft.Json
+                            return Newtonsoft.Json.JsonConvert.SerializeObject(dt);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ghi log ra màn hình Output để bạn dễ kiểm tra khi AI viết sai câu lệnh SQL
+                System.Diagnostics.Debug.WriteLine($"[AI_SQL_ERROR]: {ex.Message} -> Query: {sqlQuery}");
+                return $"[Lỗi thực thi dữ liệu: {ex.Message}]";
+            }
+        }
     }
 }

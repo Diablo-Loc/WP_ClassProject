@@ -244,23 +244,10 @@ namespace ClassProject
             {
                 mainForm.ShowDialog();
             }
-
-            // Xử lý sau khi Form Main đóng (Đăng xuất hoặc thoát)
-            if (Application.OpenForms.Count > 0)
-            {
-                this.Show();
-                if (!Properties.Settings.Default.RememberMe)
-                {
-                    txtUsername.Clear();
-                    txtPassword.Clear();
-                    txtUsername.Focus();
-                }
-                else
-                {
-                    txtPassword.Clear();
-                    txtPassword.Focus();
-                }
-            }
+            this.Dispose();
+            // THAY ĐỔI Ở ĐÂY: Khi mainForm đóng (ShowDialog kết thúc), thoát hẳn ứng dụng luôn
+            Application.Exit();
+            return; // Ngăn không cho chạy xuống đoạn code hiển thị lại LoginForm bên dưới
         }
 
         private string EncryptPassword(string plainText)
