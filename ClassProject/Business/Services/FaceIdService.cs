@@ -43,68 +43,73 @@ namespace ClassProject.Business.Services // Thay đổi namespace cho đúng pro
                 string exeDir = AppDomain.CurrentDomain.BaseDirectory;
                 string trainedPath = Path.Combine(exeDir, "TrainedFaces");
 
-                if (!Directory.Exists(trainedPath))
-                {
-                    Directory.CreateDirectory(trainedPath);
-                }
+                if (!Directory.Exists(trainedPath)) Directory.CreateDirectory(trainedPath);
 
-                // 1. Lấy tất cả file ảnh đang có trong thư mục
                 string[] files = Directory.GetFiles(trainedPath, "*.jpg");
 
-                // 2. Lọc riêng ra những ảnh thuộc về Username đang chuẩn bị Đăng nhập
                 List<string> userFiles = new List<string>();
+                List<string> negativeFiles = new List<string>(); // 🌟 THÊM: Chứa ảnh của người khác làm đối chứng
+
                 foreach (string file in files)
                 {
                     string rawName = Path.GetFileNameWithoutExtension(file);
                     if (rawName.Contains("_")) rawName = rawName.Split('_')[0];
 
-                    // So sánh không phân biệt hoa thường
                     if (rawName.Equals(loginUsername, StringComparison.OrdinalIgnoreCase))
                     {
                         userFiles.Add(file);
                     }
+                    else
+                    {
+                        negativeFiles.Add(file); // Gom các ảnh của tài khoản khác lại
+                    }
                 }
 
-                // 3. ĐẶC BIỆT: Nếu danh sách trống -> Student này chưa đăng ký Face ID -> Báo lỗi cụ thể ngay lập tức!
                 if (userFiles.Count == 0)
                 {
-                    UIWarningNotifier?.Invoke($"Tài khoản [{loginUsername}] chưa từng thiết lập dữ liệu Face ID trên hệ thống!\r\n\r\nVui lòng đăng nhập bằng mật khẩu thường và vào phần cá nhân để cài đặt.");
+                    UIWarningNotifier?.Invoke($"Tài khoản [{loginUsername}] chưa từng thiết lập dữ liệu Face ID!\r\n\r\nVui lòng đăng nhập bằng mật khẩu thường để cài đặt.");
                     return false;
                 }
 
                 _trainedFaces.Clear();
                 _trainedLabels.Clear();
                 _trainedIntLabels.Clear();
-                int idCounter = 0;
 
-                // 4. Thay vì train hết toàn trường, AI bây giờ chỉ nạp duy nhất tập ảnh của chính User này để so khớp 1:1
+                int currentId = 0;
+
+                // 1. Nạp ảnh của chính User cần đăng nhập (Nhãn: 0)
                 foreach (string file in userFiles)
                 {
                     try
                     {
-                        if (new FileInfo(file).Length == 0) continue;
-
-                        using (Mat testMat = CvInvoke.Imread(file, ImreadModes.Grayscale))
-                        {
-                            if (testMat.IsEmpty) continue;
-                        }
-
                         Image<Gray, byte> faceImg = new Image<Gray, byte>(file).Resize(200, 200, Inter.Cubic);
                         _trainedFaces.Add(faceImg);
+                        _trainedLabels.Add(loginUsername); // Nhãn chuỗi thật
+                        _trainedIntLabels.Add(0);          // Mã hóa số nguyên cố định cho user này
+                    }
+                    catch { continue; }
+                }
 
-                        string rawName = Path.GetFileNameWithoutExtension(file);
-                        if (rawName.Contains("_")) rawName = rawName.Split('_')[0];
-
-                        _trainedLabels.Add(rawName);
-                        _trainedIntLabels.Add(idCounter);
-                        idCounter++;
+                // 2. 🌟 QUAN TRỌNG: Lấy tối đa 5 tấm ảnh của người khác làm mẫu đối chứng (Nhãn: 1)
+                int negativeCount = 0;
+                foreach (string file in negativeFiles)
+                {
+                    if (negativeCount >= 5) break; // Chỉ cần tối đa 5 tấm để AI làm mốc phân biệt
+                    try
+                    {
+                        Image<Gray, byte> faceImg = new Image<Gray, byte>(file).Resize(200, 200, Inter.Cubic);
+                        _trainedFaces.Add(faceImg);
+                        _trainedLabels.Add("UNKNOWN_FACE"); // Nhãn người lạ
+                        _trainedIntLabels.Add(1);           // Mã hóa số nguyên cố định cho tập đối chứng
+                        negativeCount++;
                     }
                     catch { continue; }
                 }
 
                 if (_trainedFaces.Count > 0)
                 {
-                    _recognizer = new EigenFaceRecognizer(_trainedFaces.Count);
+                    // Khởi tạo bộ nhận diện
+                    _recognizer = new EigenFaceRecognizer();
                     using (VectorOfMat vectorOfMat = new VectorOfMat())
                     using (VectorOfInt vectorOfIds = new VectorOfInt())
                     {
@@ -115,7 +120,7 @@ namespace ClassProject.Business.Services // Thay đổi namespace cho đúng pro
                     return true;
                 }
 
-                UIWarningNotifier?.Invoke("Các file ảnh mẫu hiện tại của bạn bị lỗi cấu trúc dữ liệu!");
+                UIWarningNotifier?.Invoke("Các file ảnh mẫu hiện tại bị lỗi cấu trúc dữ liệu!");
                 return false;
             }
             catch (Exception ex)
@@ -126,14 +131,31 @@ namespace ClassProject.Business.Services // Thay đổi namespace cho đúng pro
         }
 
         // Dự đoán xem mặt này là của ai
-        public string PredictOwner(Image<Gray, byte> faceResult, double maxDistance = 3500)
+        public string PredictOwner(Image<Gray, byte> faceResult, double maxDistance = 2800)
         {
-            if (_recognizer == null) return null;
+            if (_recognizer == null || _trainedLabels.Count == 0) return null;
 
-            var result = _recognizer.Predict(faceResult);
-            if (result.Label != -1 && result.Distance < maxDistance)
+            try
             {
-                return _trainedLabels[result.Label];
+                var result = _recognizer.Predict(faceResult);
+
+                // Nếu tìm thấy nhãn hợp lệ, khoảng cách nằm trong ngưỡng an toàn 
+                // VÀ nhãn đó index trỏ tới không phải là người lạ (UNKNOWN_FACE)
+                if (result.Label >= 0 && result.Label < _trainedLabels.Count && result.Distance < maxDistance)
+                {
+                    string predictionName = _trainedLabels[result.Label];
+
+                    if (predictionName.Equals("UNKNOWN_FACE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return null; // Nhận diện ra là người lạ -> Trả về null chặn đăng nhập công cụ
+                    }
+
+                    return predictionName;
+                }
+            }
+            catch
+            {
+                return null;
             }
             return null;
         }

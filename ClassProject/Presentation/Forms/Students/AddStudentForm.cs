@@ -520,10 +520,8 @@ namespace ClassProject
             {
                 _voiceService = new VoiceRecognitionService();
 
-                // Đăng ký nhận kết quả trả về từ Service
+                // Chỉ đăng ký duy nhất sự kiện trả dữ liệu cuối cùng khi nói xong
                 _voiceService.OnStudentDataParsed += VoiceService_OnStudentDataParsed;
-
-                // Đăng ký nhận thay đổi trạng thái UI (màu sắc nút, chữ trên nút)
                 _voiceService.OnListeningStatusChanged += VoiceService_OnListeningStatusChanged;
             }
             catch (Exception ex)
@@ -545,23 +543,40 @@ namespace ClassProject
 
         private void VoiceService_OnListeningStatusChanged(bool isListening)
         {
-            // Cập nhật trạng thái hiển thị của Guna2Button theo chuẩn thiết kế đẹp
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => VoiceService_OnListeningStatusChanged(isListening)));
+                return;
+            }
+
             if (isListening)
             {
+                // 1. Đổi chữ nút bấm để bạn biết là mic đang bật
                 btnVoiceInput.Text = "🛑 Đang nghe... Hãy nói";
-                btnVoiceInput.FillColor = System.Drawing.Color.FromArgb(253, 237, 237); // Màu đỏ nhạt sang trọng
-                btnVoiceInput.ForeColor = System.Drawing.Color.FromArgb(220, 53, 69);  // Chữ đỏ đậm
+                btnVoiceInput.FillColor = System.Drawing.Color.FromArgb(253, 237, 237);
+                btnVoiceInput.ForeColor = System.Drawing.Color.FromArgb(220, 53, 69);
+
+                // 2. Hiện MessageBox báo hiệu cho bạn bắt đầu nói
+                MessageBox.Show("Hệ thống đã bật Mic và đang lắng nghe!\nHãy nói rõ [Họ tên] và [Mã số sinh viên] của bạn.",
+                                "Trạng thái Mic", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
+                // Trả nút bấm về trạng thái cũ
                 btnVoiceInput.Text = "🎙️ Nhập giọng nói";
-                btnVoiceInput.FillColor = System.Drawing.Color.Transparent;              // Trả về trong suốt
-                btnVoiceInput.ForeColor = System.Drawing.Color.FromArgb(40, 167, 69);  // Chữ xanh lá cũ
+                btnVoiceInput.FillColor = System.Drawing.Color.Transparent;
+                btnVoiceInput.ForeColor = System.Drawing.Color.FromArgb(40, 167, 69);
             }
         }
 
         private void VoiceService_OnStudentDataParsed(string hoTen, string mssv)
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => VoiceService_OnStudentDataParsed(hoTen, mssv)));
+                return;
+            }
+
             // Đổ dữ liệu xịn nhận từ Service vào TextBox trên UI
             if (!string.IsNullOrEmpty(hoTen))
             {
@@ -570,22 +585,22 @@ namespace ClassProject
 
                 if (lastSpaceIndex != -1)
                 {
-                    // Lấy phần "Nguyễn Văn"
                     txtLastName.Text = hoTen.Substring(0, lastSpaceIndex).Trim();
-                    // Lấy phần "A"
                     txtFirstName.Text = hoTen.Substring(lastSpaceIndex + 1).Trim();
                 }
                 else
                 {
-                    // Nếu người dùng chỉ nói đúng 1 từ (Ví dụ: "An")
                     txtLastName.Text = string.Empty;
                     txtFirstName.Text = hoTen;
                 }
             }
             if (!string.IsNullOrEmpty(mssv)) txtMSSV.Text = mssv;
+
+            // Bật hiện thông báo kết quả cuối cùng thu được cho bạn check dữ liệu
+            MessageBox.Show($"Hệ thống đã nhận diện xong!\n- Họ và tên: {hoTen}\n- MSSV: {mssv}",
+                            "Kết quả nhận diện", MessageBoxButtons.OK, MessageBoxIcon.Information); // <-- Thay bằng Information
         }
 
-        // Giải phóng tài nguyên hệ thống khi đóng Form
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);

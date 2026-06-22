@@ -158,29 +158,48 @@ namespace ClassProject
             // 🔑 XỬ LÝ CỘT CHECKBOX (Chỉ hiển thị cho Admin)
             // ==========================================
             if (isAdmin)
-            {
-                if (dgvStudents.Columns["chkSelect"] == null)
-                {
-                    DataGridViewCheckBoxColumn chkCol = new DataGridViewCheckBoxColumn
-                    {
-                        Name = "chkSelect",
-                        HeaderText = "[ ] Chọn",
-                        Width = 50,
-                        AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
-                        Resizable = DataGridViewTriState.False
-                    };
-                    dgvStudents.Columns.Insert(0, chkCol);
-                    dgvStudents.CellClick += DgvStudents_HeaderCheckBoxClick;
-                }
-            }
-            else
-            {
-                // Gỡ bỏ hoàn toàn nếu tài khoản không phải Admin (Giáo vụ, Giảng viên...)
-                if (dgvStudents.Columns["chkSelect"] != null)
-                {
-                    dgvStudents.Columns.Remove("chkSelect");
-                }
-            }
+{
+    if (dgvStudents.Columns["chkSelect"] == null)
+    {
+        // 1. Cho phép bảng có thể chỉnh sửa để CheckBox hoạt động
+        dgvStudents.ReadOnly = false;
+
+        // Khóa chỉnh sửa tất cả các cột hiện tại trước khi chèn cột CheckBox vào
+        foreach (DataGridViewColumn col in dgvStudents.Columns)
+        {
+            col.ReadOnly = true; 
+        }
+
+        // 2. Định nghĩa và cấu hình riêng cho cột CheckBox
+        DataGridViewCheckBoxColumn chkCol = new DataGridViewCheckBoxColumn
+        {
+            Name = "chkSelect",
+            HeaderText = "[ ] Chọn",
+            Width = 50,
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            Resizable = DataGridViewTriState.False,
+            
+            // CẤU HÌNH QUAN TRỌNG:
+            ReadOnly = false, // Ép riêng cột này PHẢI tích chọn được
+            TrueValue = true,
+            FalseValue = false
+        };
+
+        dgvStudents.Columns.Insert(0, chkCol);
+
+        // LƯU Ý: Đổi sang sự kiện CellContentClick thay vì CellClick để xử lý Header chính xác hơn
+        dgvStudents.CellContentClick += DgvStudents_HeaderCheckBoxClick;
+    }
+}
+else
+{
+    // Gỡ bỏ hoàn toàn nếu tài khoản không phải Admin
+    if (dgvStudents.Columns["chkSelect"] != null)
+    {
+        dgvStudents.Columns.Remove("chkSelect");
+    }
+    dgvStudents.ReadOnly = true; // Trả lại trạng thái chỉ đọc an toàn cho user thường
+}
 
             // ==========================================
             // 👁️ XỬ LÝ CỘT CON MẮT BẢO MẬT (Chỉ hiển thị cho Admin)
@@ -451,8 +470,8 @@ namespace ClassProject
                             var mappingCols = new[]
                             {
                                 new { Src = dtSource.Columns.Contains("Mssv") ? "Mssv" : "Mã SV", Target = "Mã SV" },
-                                new { Src = dtSource.Columns.Contains("FirstName") ? "FirstName" : "Họ", Target = "Họ và tên đệm" },
-                                new { Src = dtSource.Columns.Contains("LastName") ? "LastName" : "Tên", Target = "Tên" },
+                                new { Src = dtSource.Columns.Contains("LastName") ? "LastName" : "Họ", Target = "Họ và tên đệm" },
+                                new { Src = dtSource.Columns.Contains("FirstName") ? "FirstName" : "Tên", Target = "Tên" },
                                 new { Src = "ClassName", Target = "Lớp sinh hoạt" },
                                 new { Src = "MajorName", Target = "Chuyên ngành" },
                                 new { Src = "DateOfBirth", Target = "Ngày sinh" },
@@ -708,9 +727,9 @@ namespace ClassProject
 
                                         if (colName == "Mssv" || colHeader == "Mã SV")
                                             maSV = cell.Value?.ToString()?.Trim() ?? "";
-                                        else if (colName == "FirstName" || colHeader == "Họ và tên đệm")
+                                        else if (colName == "LastName" || colHeader == "Họ và tên đệm")
                                             hoTenDem = cell.Value?.ToString()?.Trim() ?? "";
-                                        else if (colName == "LastName" || colHeader == "Tên")
+                                        else if (colName == "FirstName" || colHeader == "Tên")
                                             ten = cell.Value?.ToString()?.Trim() ?? "";
                                         else if (colName == "ClassName" || colHeader == "Lớp sinh hoạt")
                                             lopSH = cell.Value?.ToString()?.Trim() ?? "";

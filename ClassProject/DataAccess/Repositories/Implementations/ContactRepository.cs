@@ -13,14 +13,14 @@ namespace ClassProject.DataAccess.Repositories.Implementations
 
         #region --- 1. CÁC TRUY VẤN LOAD DỮ LIỆU (READ) ---
 
-        // Lấy toàn bộ danh bạ hệ thống (Hàm cũ - Giữ nguyên logic)
+        // Lấy toàn bộ danh bạ hệ thống
         public async Task<DataTable> GetAllContactsAsync()
         {
             DataTable dt = new DataTable();
             string query = @"
-                SELECT 'TEACHER_' + CAST(t.MSGV AS VARCHAR(50)) AS UniqueID, (t.FirstName + ' ' + t.LastName) AS Name, ISNULL(t.Phone, '') AS Phone, ISNULL(t.Email, '') AS Email, 1 AS IsSystemData FROM dbo.Teachers t WHERE t.Status = 1
+                SELECT 'TEACHER_' + CAST(t.MSGV AS VARCHAR(50)) AS UniqueID, (t.FirstName + ' ' + t.LastName) AS Name, ISNULL(t.Phone, '') AS Phone, ISNULL(t.Email, '') AS Email, N'Hệ thống / Giảng viên' AS GroupName, 1 AS IsSystemData FROM dbo.Teachers t WHERE t.Status = 1
                 UNION ALL
-                SELECT 'CONTACT_' + CAST(ContactID AS VARCHAR(50)) AS UniqueID, Name, ISNULL(Phone, '') AS Phone, ISNULL(Email, '') AS Email, 0 AS IsSystemData FROM dbo.Contact
+                SELECT 'CONTACT_' + CAST(c.ContactID AS VARCHAR(50)) AS UniqueID, c.Name, ISNULL(c.Phone, '') AS Phone, ISNULL(c.Email, '') AS Email, ISNULL(g.Name, N'-- Chưa phân phòng --') AS GroupName, 0 AS IsSystemData FROM dbo.Contact c LEFT JOIN dbo.Groups g ON c.Group_ID = g.ID
                 ORDER BY IsSystemData DESC, Name ASC";
 
             using (SqlConnection conn = _db.GetConnection())
@@ -32,15 +32,15 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             return dt;
         }
 
-        // Tìm kiếm trên toàn bộ hệ thống (Hàm cũ - Giữ nguyên logic)
+        // Tìm kiếm trên toàn bộ hệ thống 
         public async Task<DataTable> SearchContactsAsync(string keyword)
         {
             DataTable dt = new DataTable();
             string query = @"
                 SELECT * FROM (
-                    SELECT 'TEACHER_' + CAST(MSGV AS VARCHAR(50)) AS UniqueID, (FirstName + ' ' + LastName) AS Name, Phone, Email, 1 AS IsSystemData FROM dbo.Teachers WHERE Status = 1
+                    SELECT 'TEACHER_' + CAST(MSGV AS VARCHAR(50)) AS UniqueID, (FirstName + ' ' + LastName) AS Name, Phone, Email, N'Hệ thống / Giảng viên' AS GroupName, 1 AS IsSystemData FROM dbo.Teachers WHERE Status = 1
                     UNION ALL
-                    SELECT 'CONTACT_' + CAST(ContactID AS VARCHAR(50)) AS UniqueID, Name, Phone, Email, 0 AS IsSystemData FROM dbo.Contact
+                    SELECT 'CONTACT_' + CAST(c.ContactID AS VARCHAR(50)) AS UniqueID, c.Name, c.Phone, c.Email, ISNULL(g.Name, N'-- Chưa phân phòng --') AS GroupName, 0 AS IsSystemData FROM dbo.Contact c LEFT JOIN dbo.Groups g ON c.Group_ID = g.ID
                 ) AS Combined
                 WHERE Name LIKE @keyword OR Phone LIKE @keyword OR Email LIKE @keyword
                 ORDER BY IsSystemData DESC, Name ASC";
@@ -57,14 +57,32 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             return dt;
         }
 
-        // Lấy danh bạ gộp (Teachers + Contact cá nhân của riêng User đó)
+        // Lấy danh bạ gộp có JOIN lấy tên phòng ban (Dùng chính cho ContactForm của bạn)
         public async Task<DataTable> GetAllContactsByUserAsync(int userId)
         {
             DataTable dt = new DataTable();
             string query = @"
-                SELECT 'TEACHER_' + CAST(t.MSGV AS VARCHAR(50)) AS UniqueID, (t.FirstName + ' ' + t.LastName) AS Name, ISNULL(t.Phone, '') AS Phone, ISNULL(t.Email, '') AS Email, -1 AS Group_ID, 1 AS IsSystemData FROM dbo.Teachers t WHERE t.Status = 1
+                SELECT 'TEACHER_' + CAST(t.MSGV AS VARCHAR(50)) AS UniqueID, 
+                       (t.FirstName + ' ' + t.LastName) AS Name, 
+                       ISNULL(t.Phone, '') AS Phone, 
+                       ISNULL(t.Email, '') AS Email, 
+                       -1 AS Group_ID, 
+                       N'Hệ thống / Giảng viên' AS GroupName, -- Cột hiển thị phòng ban hệ thống
+                       1 AS IsSystemData 
+                FROM dbo.Teachers t WHERE t.Status = 1
+                
                 UNION ALL
-                SELECT 'CONTACT_' + CAST(ContactID AS VARCHAR(50)) AS UniqueID, Name, ISNULL(Phone, '') AS Phone, ISNULL(Email, '') AS Email, ISNULL(Group_ID, -1) AS Group_ID, 0 AS IsSystemData FROM dbo.Contact WHERE UserID = @UserID
+                
+                SELECT 'CONTACT_' + CAST(c.ContactID AS VARCHAR(50)) AS UniqueID, 
+                       c.Name, 
+                       ISNULL(c.Phone, '') AS Phone, 
+                       ISNULL(c.Email, '') AS Email, 
+                       ISNULL(c.Group_ID, -1) AS Group_ID, 
+                       ISNULL(g.Name, N'-- Chưa phân phòng --') AS GroupName, -- LEFT JOIN lấy tên phòng ban thực tế từ bảng Groups
+                       0 AS IsSystemData 
+                FROM dbo.Contact c
+                LEFT JOIN dbo.Groups g ON c.Group_ID = g.ID
+                WHERE c.UserID = @UserID
                 ORDER BY IsSystemData DESC, Name ASC";
 
             using (SqlConnection conn = _db.GetConnection())
@@ -79,13 +97,15 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             return dt;
         }
 
-        // Lọc danh bạ theo nhóm cụ thể của User (Chỉ lấy trong bảng Contact cá nhân)
+        // Lọc danh bạ theo nhóm phòng ban cụ thể
         public async Task<DataTable> GetContactsByGroupAsync(int groupId, int userId)
         {
             DataTable dt = new DataTable();
             string query = @"
-                SELECT 'CONTACT_' + CAST(ContactID AS VARCHAR(50)) AS UniqueID, Name, ISNULL(Phone, '') AS Phone, ISNULL(Email, '') AS Email, Group_ID, 0 AS IsSystemData 
-                FROM dbo.Contact WHERE Group_ID = @GroupID AND UserID = @UserID ORDER BY Name ASC";
+                SELECT 'CONTACT_' + CAST(c.ContactID AS VARCHAR(50)) AS UniqueID, c.Name, ISNULL(c.Phone, '') AS Phone, ISNULL(c.Email, '') AS Email, c.Group_ID, ISNULL(g.Name, N'-- Chưa phân phòng --') AS GroupName, 0 AS IsSystemData 
+                FROM dbo.Contact c 
+                LEFT JOIN dbo.Groups g ON c.Group_ID = g.ID 
+                WHERE c.Group_ID = @GroupID AND c.UserID = @UserID ORDER BY c.Name ASC";
 
             using (SqlConnection conn = _db.GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -100,15 +120,15 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             return dt;
         }
 
-        // Tìm kiếm danh bạ bảo mật (Chỉ tìm trên Giảng viên + Contact thuộc User này)
+        // Tìm kiếm danh bạ bảo mật có kèm tên phòng ban
         public async Task<DataTable> SearchContactsByUserAsync(string keyword, int userId)
         {
             DataTable dt = new DataTable();
             string query = @"
                 SELECT * FROM (
-                    SELECT 'TEACHER_' + CAST(MSGV AS VARCHAR(50)) AS UniqueID, (FirstName + ' ' + LastName) AS Name, Phone, Email, 1 AS IsSystemData FROM dbo.Teachers WHERE Status = 1
+                    SELECT 'TEACHER_' + CAST(MSGV AS VARCHAR(50)) AS UniqueID, (FirstName + ' ' + LastName) AS Name, Phone, Email, -1 AS Group_ID, N'Hệ thống / Giảng viên' AS GroupName, 1 AS IsSystemData FROM dbo.Teachers WHERE Status = 1
                     UNION ALL
-                    SELECT 'CONTACT_' + CAST(ContactID AS VARCHAR(50)) AS UniqueID, Name, Phone, Email, 0 AS IsSystemData FROM dbo.Contact WHERE UserID = @UserID
+                    SELECT 'CONTACT_' + CAST(c.ContactID AS VARCHAR(50)) AS UniqueID, c.Name, c.Phone, c.Email, ISNULL(c.Group_ID, -1) AS Group_ID, ISNULL(g.Name, N'-- Chưa phân phòng --') AS GroupName, 0 AS IsSystemData FROM dbo.Contact c LEFT JOIN dbo.Groups g ON c.Group_ID = g.ID WHERE c.UserID = @UserID
                 ) AS Combined
                 WHERE Name LIKE @keyword OR Phone LIKE @keyword OR Email LIKE @keyword
                 ORDER BY IsSystemData DESC, Name ASC";
@@ -130,7 +150,6 @@ namespace ClassProject.DataAccess.Repositories.Implementations
 
         #region --- 2. CÁC THAO TÁC CRUD CONTACT ---
 
-        // Thêm mới danh bạ (Tách Fname/Lname, đồng bộ trường Name cũ)
         public async Task<bool> InsertContactAsync(string fname, string lname, string phone, string email, int? groupId, int userId)
         {
             string query = @"INSERT INTO dbo.Contact (Name, Fname, Lname, Phone, Email, Group_ID, UserID) 
@@ -154,7 +173,6 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             }
         }
 
-        // Cập nhật thông tin danh bạ (Chỉ cho phép sửa nếu đúng UserID sở hữu)
         public async Task<bool> UpdateContactAsync(int contactId, string fname, string lname, string phone, string email, int? groupId, int userId)
         {
             string query = @"UPDATE dbo.Contact 
@@ -180,7 +198,6 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             }
         }
 
-        // Xóa danh bạ an toàn theo đúng UserID
         public async Task<bool> DeleteContactAsync(int contactId, int userId)
         {
             string query = "DELETE FROM dbo.Contact WHERE ContactID = @ContactID AND UserID = @UserID";
@@ -196,7 +213,6 @@ namespace ClassProject.DataAccess.Repositories.Implementations
             }
         }
 
-        // Kiểm tra trùng SĐT/Email (Bảo mật: Có thể cấu hình kiểm tra toàn cục hoặc theo riêng User)
         public async Task<bool> IsPhoneOrEmailExistsAsync(string phone, string email, int? excludeId = null, int? userId = null)
         {
             if (string.IsNullOrEmpty(phone) && string.IsNullOrEmpty(email)) return false;
@@ -224,7 +240,6 @@ namespace ClassProject.DataAccess.Repositories.Implementations
 
         #region --- 3. QUẢN LÝ DANH MỤC NHÓM (GROUPS CRUD) ---
 
-        // Lấy danh sách nhóm của riêng User phục vụ ComboBox
         public async Task<DataTable> GetGroupsByUserAsync(int userId)
         {
             DataTable dt = new DataTable();

@@ -27,9 +27,7 @@ INSERT INTO dbo.Users (Username, Email, Password, RoleId, Valid, Status, FailedA
 (N'sinhvien1', N'30110158@student.hcmute.edu.vn', N'$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS', 1, 1, 1, 0, NULL),
 (N'sinhvien2', N'30110159@student.hcmute.edu.vn', N'$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS', 1, 1, 1, 0, NULL),
 (N'sinhvien3', N'30110201@student.hcmute.edu.vn', N'$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS', 1, 1, 1, 0, NULL),
-(N'giaovu1',  N'giaovu1@giaovu.hcmute.edu.vn', N'$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS', 3, 1, 1, 0, NULL),
-(N'24110107', N'24110107@student.hcmute.edu.vn', N'$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS', 1, 1, 1, 0, NULL),
-(N'24110077', N'24110077@student.hcmute.edu.vn', N'$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS', 1, 1, 1, 0, NULL);
+(N'giaovu1',  N'giaovu1@giaovu.hcmute.edu.vn', N'$2a$12$cWrDKpQg5HtG7nixf4Wu1OTveL5mWu8h5.1tIrA43Ssc4JCPWX8GS', 3, 1, 1, 0, NULL);
 GO
 
 -- 4. LIÊN KẾT HỒ SƠ GIẢNG VIÊN VẬT LÝ
@@ -38,9 +36,9 @@ DECLARE @Gv2Uid INT = (SELECT Id FROM dbo.Users WHERE Username = N'giangvien2');
 DECLARE @Gv3Uid INT = (SELECT Id FROM dbo.Users WHERE Username = N'giangvien3');
 
 INSERT INTO dbo.Teachers (UserId, MSGV, FirstName, LastName, DateOfBirth, Gender, Phone, Email, AcademicRank, Status) VALUES
-(@Gv1Uid, N'MSGV_001',  N'An', N'Nguyễn Văn','1980-05-12', N'Nam', '0912345678', N'gv1@gmail.com', N'Tiến sĩ', 1),
-(@Gv2Uid, N'MSGV_002', N'Bình', N'Trần Thị', '1985-08-20', N'Nữ', '0987654321', N'gv2@gmail.com', N'Thạc sĩ', 1),
-(@Gv3Uid, N'MSGV_003', N'Cường', N'Phạm Hoàng', '1978-11-02', N'Nam', '0966778899', N'gv3@gmail.com', N'Phó Giáo sư', 1);
+(@Gv1Uid, N'MSGV_001',  N'An', N'Nguyễn Văn','1980-05-12', N'Nam', '0912345678', N'nguyenvanan@teacher.hcmute.edu.vn', N'Tiến sĩ', 1),
+(@Gv2Uid, N'MSGV_002', N'Bình', N'Trần Thị', '1985-08-20', N'Nữ', '0987654321', N'tranthibinh@teacher.hcmute.edu.vn', N'Thạc sĩ', 1),
+(@Gv3Uid, N'MSGV_003', N'Cường', N'Phạm Hoàng', '1978-11-02', N'Nam', '0966778899', N'phamhoangcuong@teacher.hcmute.edu.vn', N'Phó Giáo sư', 1);
 GO
 
 -- 5. NẠP DANH MỤC LỚP HÀNH CHÍNH
@@ -63,11 +61,9 @@ DECLARE @Sv4Uid INT = (SELECT Id FROM dbo.Users WHERE Username = N'24110107');
 DECLARE @Sv5Uid INT = (SELECT Id FROM dbo.Users WHERE Username = N'24110077');
 
 INSERT INTO dbo.Students (UserId, MSSV, FirstName, LastName, DateOfBirth, Gender, Phone, Email, MaLop, MaNganh) VALUES
-(@Sv1Uid, N'30110158', N'Nguyễn Văn', N'Hùng', '2004-01-15', N'Nam', '0901112223', N'sv1@gmail.com', 'LH_CNTT_K16A', 'CNTT'),
-(@Sv2Uid, N'30110159', N'Lê Thị', N'Mai', '2004-06-20', N'Nữ', '0904445556', N'sv2@gmail.com', 'LH_CNTT_K16A', 'CNTT'),
-(@Sv3Uid, N'30110201', N'Phạm Minh', N'Quang', '2004-11-02', N'Nam', '0907778889', N'sv3@gmail.com', 'LH_KTPM_K16A', 'KTPM'),
-(@Sv4Uid, N'24110107', N'Nguyễn Đăk', N'Lộc', '2006-01-01', N'Nam', '0911111111', N'locnguyen@gmail.com', 'LH_CNTT_K16A', 'CNTT'),
-(@Sv5Uid, N'24110077', N'Trần Thiên', N'Ân', '2006-02-02', N'Nam', '0922222222', N'antran@gmail.com', 'LH_CNTT_K16A', 'CNTT');
+(@Sv1Uid, N'30110158', N'Nguyễn Văn', N'Hùng', '2004-01-15', N'Nam', '0901112223', N'30110158@student.hcmute.edu.vn', 'LH_CNTT_K16A', 'CNTT'),
+(@Sv2Uid, N'30110159', N'Lê Thị', N'Mai', '2004-06-20', N'Nữ', '0904445556', N'30110159@student.hcmute.edu.vn', 'LH_CNTT_K16A', 'CNTT'),
+(@Sv3Uid, N'30110201', N'Phạm Minh', N'Quang', '2004-11-02', N'Nam', '0907778889', N'30110201@student.hcmute.edu.vn', 'LH_KTPM_K16A', 'KTPM');
 
 -- Cập nhật sĩ số cơ sở dữ liệu sau khi thêm sinh viên
 UPDATE dbo.Classroom SET SiSo = (SELECT COUNT(*) FROM dbo.Students WHERE MaLop = 'LH_CNTT_K16A') WHERE MaLop = 'LH_CNTT_K16A';
@@ -119,15 +115,7 @@ INSERT INTO dbo.DKMH (MSSV, MaLopHP) VALUES
 
 (N'30110159', 'LHP_NMTH_K24_N01'),
 (N'30110159', 'LHP_CTDL_N01'),
-(N'30110159', 'LHP_CSDL_N01'),
-
-(N'24110107', 'LHP_CTDL_N01'),  
-(N'24110107', 'LHP_CSDL_N01'),
-(N'24110107', 'LHP_HDH_N01'),
-
-(N'24110077', 'LHP_CTDL_N01'),  
-(N'24110077', 'LHP_CSDL_N01'),
-(N'24110077', 'LHP_HDH_N01');
+(N'30110159', 'LHP_CSDL_N01');
 GO
 
 -- 11. NHẬP ĐIỂM KIỂM THỬ (Biến động tăng dần qua từng kỳ để vẽ đồ thị Line đẹp xuất sắc)
@@ -140,15 +128,7 @@ INSERT INTO dbo.Score (MSSV, MaLopHP, DiemQT, DiemCK, DiemTK, Mota) VALUES
 
 (N'30110159', 'LHP_NMTH_K24_N01', 6.0, 6.0, 6.00, N'Trung bình'),
 (N'30110159', 'LHP_CTDL_N01', 5.5, 6.0, 5.85, N'Trung bình khá'),
-(N'30110159', 'LHP_CSDL_N01', 8.0, 7.5, 7.70, N'Khá'),
-
-(N'24110107', 'LHP_CTDL_N01',10, 10, 10, N'Xuất sắc'),
-(N'24110107', 'LHP_CSDL_N01', 10,10, 10, N'Xuất sắc'),
-(N'24110107', 'LHP_HDH_N01', 10,10, 10, N'Xuất sắc'),
-
-(N'24110077', 'LHP_CTDL_N01', 10,10, 10, N'Xuất sắc'),
-(N'24110077', 'LHP_CSDL_N01', 10,10, 10, N'Xuất sắc'),
-(N'24110077', 'LHP_HDH_N01', 10,10, 10, N'Xuất sắc');
+(N'30110159', 'LHP_CSDL_N01', 8.0, 7.5, 7.70, N'Khá');
 GO
 
 -- 12. ĐƠN TỪ ĐỂ TEST TRẠNG THÁI UI

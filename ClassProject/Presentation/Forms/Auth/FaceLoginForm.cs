@@ -136,6 +136,14 @@ namespace ClassProject.Presentation.Forms.Auth
                 {
                     Rectangle[] facesDetected = _faceService.DetectFaces(grayFrame);
 
+                    // BIỆN PHÁP AN TOÀN: Nếu không tìm thấy mặt, cập nhật UI và thoát sớm
+                    if (facesDetected.Length == 0 && !IsRegisterMode)
+                    {
+                        this.BeginInvoke(new Action(() => {
+                            lblStatus.Text = "Hệ thống đang chờ: Vui lòng đưa khuôn mặt vào chính diện khung hình...";
+                        }));
+                    }
+
                     foreach (Rectangle faceRect in facesDetected)
                     {
                         currentFrame.Draw(faceRect, new Bgr(Color.LimeGreen), 2);
@@ -149,10 +157,10 @@ namespace ClassProject.Presentation.Forms.Auth
                             {
                                 string matchedUsername = _faceService.PredictOwner(trainedFaceResult);
 
-                                // TRƯỜNG HỢP 1: ĐỐI CHIẾU KHỚP KHUÔN MẶT
+                                // TRƯỜNG HỢP 1: ĐỐI CHIẾU KHỚP KHUÔN MẶT CHÍNH XÁC
                                 if (matchedUsername != null && matchedUsername.Equals(_loginUsername, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    // KIỂM TOÁN NGẦM: Ghi nhận đăng nhập Face ID thành công & Quét kiểm tra giờ lạ
+                                    // KIỂM TOÁN NGẦM: Ghi nhận thành công
                                     _securityService.ProcessSecurityAudit(_loginUsername, isSuccess: true, method: "FACE_ID", userEmail: _cachedUserEmail);
 
                                     this.Invoke(new Action(() =>
@@ -160,25 +168,31 @@ namespace ClassProject.Presentation.Forms.Auth
                                         StopCamera();
                                         ProcLoginWithFace(matchedUsername);
                                     }));
+
+                                    // Ngắt toàn bộ luồng xử lý frame vì đã đăng nhập thành công
                                     _isProcessingFrame = false;
                                     return;
                                 }
-                                // TRƯỜNG HỢP 2: SAI KHUÔN MẶT (Có người lạ đứng trước camera hoặc sai tài khoản)
+                                // TRƯỜNG HỢP 2: SAI KHUÔN MẶT HOẶC KHÔNG KHỚP TÀI KHOẢN ĐANG YÊU CẦU
                                 else
                                 {
-                                    // KIỂM TOÁN NGẦM: Ghi nhận thất bại Face ID, AI bắt đầu tính tần suất dò mặt liên tiếp trong 5 phút
+                                    // KIỂM TOÁN NGẦM: Ghi nhận thất bại Face ID
                                     _securityService.ProcessSecurityAudit(_loginUsername, isSuccess: false, method: "FACE_ID", userEmail: _cachedUserEmail, failureReason: "Guong mat khong trung khop");
 
                                     this.BeginInvoke(new Action(() =>
                                     {
-                                        lblStatus.Text = "Cảnh báo: Khuôn mặt không khớp với tài khoản yêu cầu!";
+                                        lblStatus.Text = $"⚠️ Cảnh báo: Khuôn mặt không trùng khớp với tài khoản [{_loginUsername}]!";
                                     }));
+
+                                    // 🔥 SỬA LỖI QUAN TRỌNG: Phải bẻ gãy luồng xử lý tại đây để không cho chạy xuống dưới bừa bãi!
+                                    _isProcessingFrame = false;
+                                    return;
                                 }
                             }
                         }
                     }
 
-                    // Đẩy hình lên PictureBox
+                    // Đẩy hình ảnh thực tế từ Webcam lên giao diện phần mềm
                     if (picCamera.IsHandleCreated)
                     {
                         Bitmap bmp = currentFrame.ToBitmap();

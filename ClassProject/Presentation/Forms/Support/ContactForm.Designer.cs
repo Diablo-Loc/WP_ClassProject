@@ -30,10 +30,8 @@
         {
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
@@ -44,15 +42,19 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges23 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             pnlHeader = new Guna.UI2.WinForms.Guna2Panel();
             lblTitle = new Label();
             label1 = new Label();
@@ -73,6 +75,8 @@
             txtSearch = new Guna.UI2.WinForms.Guna2TextBox();
             dgvContacts = new Guna.UI2.WinForms.Guna2DataGridView();
             lblDSPhanCongGiangDay = new Label();
+            cboGroups = new Guna.UI2.WinForms.Guna2ComboBox();
+            lblgroup = new Label();
             pnlHeader.SuspendLayout();
             pnlInfoRequest.SuspendLayout();
             pnlHistory.SuspendLayout();
@@ -116,6 +120,8 @@
             pnlInfoRequest.BackColor = Color.FromArgb(180, 200, 230);
             pnlInfoRequest.BorderRadius = 8;
             pnlInfoRequest.BorderThickness = 1;
+            pnlInfoRequest.Controls.Add(lblgroup);
+            pnlInfoRequest.Controls.Add(cboGroups);
             pnlInfoRequest.Controls.Add(txtEmail);
             pnlInfoRequest.Controls.Add(lblDiaChiEmail);
             pnlInfoRequest.Controls.Add(txtPhone);
@@ -126,23 +132,22 @@
             pnlInfoRequest.Controls.Add(lblTen);
             pnlInfoRequest.Controls.Add(lblSoDienThoai);
             pnlInfoRequest.Controls.Add(lblThongTinPhanCong);
-            pnlInfoRequest.CustomizableEdges = customizableEdges15;
+            pnlInfoRequest.CustomizableEdges = customizableEdges17;
             pnlInfoRequest.Dock = DockStyle.Top;
             pnlInfoRequest.FillColor = Color.White;
             pnlInfoRequest.Location = new Point(0, 97);
             pnlInfoRequest.Margin = new Padding(20);
             pnlInfoRequest.Name = "pnlInfoRequest";
             pnlInfoRequest.Padding = new Padding(20);
-            pnlInfoRequest.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            pnlInfoRequest.ShadowDecoration.CustomizableEdges = customizableEdges18;
             pnlInfoRequest.Size = new Size(1294, 165);
             pnlInfoRequest.TabIndex = 58;
             // 
             // txtEmail
             // 
-            txtEmail.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtEmail.BackColor = Color.Transparent;
             txtEmail.BorderRadius = 8;
-            txtEmail.CustomizableEdges = customizableEdges3;
+            txtEmail.CustomizableEdges = customizableEdges5;
             txtEmail.DefaultText = "";
             txtEmail.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
             txtEmail.DisabledState.FillColor = Color.FromArgb(226, 226, 226);
@@ -151,13 +156,13 @@
             txtEmail.FocusedState.BorderColor = Color.FromArgb(94, 148, 255);
             txtEmail.Font = new Font("Segoe UI", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             txtEmail.HoverState.BorderColor = Color.FromArgb(94, 148, 255);
-            txtEmail.Location = new Point(613, 101);
+            txtEmail.Location = new Point(519, 101);
             txtEmail.Margin = new Padding(3, 5, 3, 5);
             txtEmail.Name = "txtEmail";
             txtEmail.PlaceholderText = "Nhập số email...";
             txtEmail.SelectedText = "";
-            txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges4;
-            txtEmail.Size = new Size(265, 39);
+            txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            txtEmail.Size = new Size(155, 39);
             txtEmail.TabIndex = 62;
             // 
             // lblDiaChiEmail
@@ -165,7 +170,7 @@
             lblDiaChiEmail.AutoSize = true;
             lblDiaChiEmail.BackColor = Color.Transparent;
             lblDiaChiEmail.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblDiaChiEmail.Location = new Point(613, 61);
+            lblDiaChiEmail.Location = new Point(519, 61);
             lblDiaChiEmail.Name = "lblDiaChiEmail";
             lblDiaChiEmail.Size = new Size(98, 20);
             lblDiaChiEmail.TabIndex = 61;
@@ -175,7 +180,7 @@
             // 
             txtPhone.BackColor = Color.Transparent;
             txtPhone.BorderRadius = 8;
-            txtPhone.CustomizableEdges = customizableEdges5;
+            txtPhone.CustomizableEdges = customizableEdges7;
             txtPhone.DefaultText = "";
             txtPhone.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
             txtPhone.DisabledState.FillColor = Color.FromArgb(226, 226, 226);
@@ -189,15 +194,15 @@
             txtPhone.Name = "txtPhone";
             txtPhone.PlaceholderText = "Nhập số điện thoại...";
             txtPhone.SelectedText = "";
-            txtPhone.ShadowDecoration.CustomizableEdges = customizableEdges6;
-            txtPhone.Size = new Size(265, 39);
+            txtPhone.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            txtPhone.Size = new Size(181, 39);
             txtPhone.TabIndex = 60;
             // 
             // txtName
             // 
             txtName.BackColor = Color.Transparent;
             txtName.BorderRadius = 8;
-            txtName.CustomizableEdges = customizableEdges7;
+            txtName.CustomizableEdges = customizableEdges9;
             txtName.DefaultText = "";
             txtName.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
             txtName.DisabledState.FillColor = Color.FromArgb(226, 226, 226);
@@ -211,7 +216,7 @@
             txtName.Name = "txtName";
             txtName.PlaceholderText = "Nhập tên liên hệ...";
             txtName.SelectedText = "";
-            txtName.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            txtName.ShadowDecoration.CustomizableEdges = customizableEdges10;
             txtName.Size = new Size(265, 39);
             txtName.TabIndex = 59;
             // 
@@ -222,7 +227,7 @@
             btnClear.BorderColor = SystemColors.ScrollBar;
             btnClear.BorderRadius = 8;
             btnClear.BorderThickness = 1;
-            btnClear.CustomizableEdges = customizableEdges9;
+            btnClear.CustomizableEdges = customizableEdges11;
             btnClear.DisabledState.BorderColor = Color.DarkGray;
             btnClear.DisabledState.CustomBorderColor = Color.DarkGray;
             btnClear.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
@@ -233,7 +238,7 @@
             btnClear.Location = new Point(1107, 101);
             btnClear.Margin = new Padding(30, 20, 20, 20);
             btnClear.Name = "btnClear";
-            btnClear.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            btnClear.ShadowDecoration.CustomizableEdges = customizableEdges12;
             btnClear.Size = new Size(164, 41);
             btnClear.TabIndex = 57;
             btnClear.Text = "🔄 Làm mới";
@@ -246,7 +251,7 @@
             btnDelete.BorderColor = Color.FromArgb(220, 53, 69);
             btnDelete.BorderRadius = 8;
             btnDelete.BorderThickness = 1;
-            btnDelete.CustomizableEdges = customizableEdges11;
+            btnDelete.CustomizableEdges = customizableEdges13;
             btnDelete.DisabledState.BorderColor = Color.DarkGray;
             btnDelete.DisabledState.CustomBorderColor = Color.DarkGray;
             btnDelete.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
@@ -256,7 +261,7 @@
             btnDelete.ForeColor = Color.FromArgb(220, 53, 69);
             btnDelete.Location = new Point(915, 101);
             btnDelete.Name = "btnDelete";
-            btnDelete.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            btnDelete.ShadowDecoration.CustomizableEdges = customizableEdges14;
             btnDelete.Size = new Size(164, 41);
             btnDelete.TabIndex = 54;
             btnDelete.Text = "Xóa";
@@ -267,7 +272,7 @@
             btnInsert.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnInsert.BackColor = Color.Transparent;
             btnInsert.BorderRadius = 8;
-            btnInsert.CustomizableEdges = customizableEdges13;
+            btnInsert.CustomizableEdges = customizableEdges15;
             btnInsert.DisabledState.BorderColor = Color.DarkGray;
             btnInsert.DisabledState.CustomBorderColor = Color.DarkGray;
             btnInsert.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
@@ -277,7 +282,7 @@
             btnInsert.ForeColor = Color.White;
             btnInsert.Location = new Point(1107, 38);
             btnInsert.Name = "btnInsert";
-            btnInsert.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            btnInsert.ShadowDecoration.CustomizableEdges = customizableEdges16;
             btnInsert.Size = new Size(164, 41);
             btnInsert.TabIndex = 53;
             btnInsert.Text = "Thêm/Cập nhật";
@@ -290,9 +295,9 @@
             lblTen.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTen.Location = new Point(23, 59);
             lblTen.Name = "lblTen";
-            lblTen.Size = new Size(162, 20);
+            lblTen.Size = new Size(76, 20);
             lblTen.TabIndex = 45;
-            lblTen.Text = "Họ và tên/ Phòng ban";
+            lblTen.Text = "Họ và tên";
             // 
             // lblSoDienThoai
             // 
@@ -324,11 +329,11 @@
             pnlHistory.Controls.Add(txtSearch);
             pnlHistory.Controls.Add(dgvContacts);
             pnlHistory.Controls.Add(lblDSPhanCongGiangDay);
-            pnlHistory.CustomizableEdges = customizableEdges21;
+            pnlHistory.CustomizableEdges = customizableEdges23;
             pnlHistory.Dock = DockStyle.Fill;
             pnlHistory.Location = new Point(0, 262);
             pnlHistory.Name = "pnlHistory";
-            pnlHistory.ShadowDecoration.CustomizableEdges = customizableEdges22;
+            pnlHistory.ShadowDecoration.CustomizableEdges = customizableEdges24;
             pnlHistory.Size = new Size(1294, 437);
             pnlHistory.TabIndex = 59;
             // 
@@ -347,7 +352,7 @@
             // 
             btnSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnSearch.BorderRadius = 8;
-            btnSearch.CustomizableEdges = customizableEdges17;
+            btnSearch.CustomizableEdges = customizableEdges19;
             btnSearch.DisabledState.BorderColor = Color.DarkGray;
             btnSearch.DisabledState.CustomBorderColor = Color.DarkGray;
             btnSearch.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
@@ -358,7 +363,7 @@
             btnSearch.Location = new Point(1162, 11);
             btnSearch.Margin = new Padding(20, 20, 30, 20);
             btnSearch.Name = "btnSearch";
-            btnSearch.ShadowDecoration.CustomizableEdges = customizableEdges18;
+            btnSearch.ShadowDecoration.CustomizableEdges = customizableEdges20;
             btnSearch.Size = new Size(112, 46);
             btnSearch.TabIndex = 56;
             btnSearch.Text = "Tìm kiếm";
@@ -368,7 +373,7 @@
             // 
             txtSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             txtSearch.BorderRadius = 8;
-            txtSearch.CustomizableEdges = customizableEdges19;
+            txtSearch.CustomizableEdges = customizableEdges21;
             txtSearch.DefaultText = "";
             txtSearch.DisabledState.BorderColor = Color.FromArgb(208, 208, 208);
             txtSearch.DisabledState.FillColor = Color.FromArgb(226, 226, 226);
@@ -383,7 +388,7 @@
             txtSearch.PlaceholderForeColor = Color.FromArgb(170, 180, 190);
             txtSearch.PlaceholderText = "Tìm kiếm theo tên, số điện thoại...";
             txtSearch.SelectedText = "";
-            txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges20;
+            txtSearch.ShadowDecoration.CustomizableEdges = customizableEdges22;
             txtSearch.Size = new Size(293, 47);
             txtSearch.TabIndex = 55;
             txtSearch.TextChanged += txtSearch_TextChanged;
@@ -455,6 +460,38 @@
             lblDSPhanCongGiangDay.TabIndex = 53;
             lblDSPhanCongGiangDay.Text = "DANH SÁCH LIÊN HỆ";
             // 
+            // cboGroups
+            // 
+            cboGroups.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            cboGroups.BackColor = Color.Transparent;
+            cboGroups.BorderColor = Color.FromArgb(203, 213, 225);
+            cboGroups.BorderRadius = 4;
+            cboGroups.CustomizableEdges = customizableEdges3;
+            cboGroups.DrawMode = DrawMode.OwnerDrawFixed;
+            cboGroups.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboGroups.FocusedColor = Color.FromArgb(22, 101, 192);
+            cboGroups.FocusedState.BorderColor = Color.FromArgb(22, 101, 192);
+            cboGroups.Font = new Font("Segoe UI", 9F);
+            cboGroups.ForeColor = Color.FromArgb(15, 23, 42);
+            cboGroups.ItemHeight = 26;
+            cboGroups.Location = new Point(705, 101);
+            cboGroups.Margin = new Padding(3, 4, 3, 4);
+            cboGroups.Name = "cboGroups";
+            cboGroups.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            cboGroups.Size = new Size(190, 32);
+            cboGroups.TabIndex = 63;
+            // 
+            // lblgroup
+            // 
+            lblgroup.AutoSize = true;
+            lblgroup.BackColor = Color.Transparent;
+            lblgroup.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblgroup.Location = new Point(705, 61);
+            lblgroup.Name = "lblgroup";
+            lblgroup.Size = new Size(84, 20);
+            lblgroup.TabIndex = 64;
+            lblgroup.Text = "Phòng ban";
+            // 
             // ContactForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -498,5 +535,7 @@
         private Guna.UI2.WinForms.Guna2TextBox txtName;
         private Guna.UI2.WinForms.Guna2TextBox txtEmail;
         private Label lblDiaChiEmail;
+        private Guna.UI2.WinForms.Guna2ComboBox cboGroups;
+        private Label lblgroup;
     }
 }

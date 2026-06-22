@@ -487,7 +487,7 @@ namespace ClassProject.Presentation.Forms.Main
             OpenChildForm(new StatisticsForm(role, referenceId));
         }
         private void Report_Click(object sender, EventArgs e) => OpenChildForm(new ReportFormHR());
-        private void Contact_Click(object sender, EventArgs e) => OpenChildForm(new ContactForm());
+        private void Contact_Click(object sender, EventArgs e) => OpenChildForm(new ContactForm(new ContactRepository()));
         private void AIConnectivityMonitoringCenter_Click(object sender, EventArgs e) => OpenChildForm(new ConnectionMonitorForm());
 
         // --- ĐIỀU HƯỚNG SINH VIÊN & THÔNG TIN CÁ NHÂN ---
