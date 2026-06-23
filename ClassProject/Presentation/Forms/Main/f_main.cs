@@ -552,6 +552,10 @@ namespace ClassProject.Presentation.Forms.Main
             if (result == DialogResult.Yes)
             {
                 UserSession.Clear();
+
+                // 🌟 THÊM DÒNG NÀY: Đánh dấu đây là hành động ĐĂNG XUẤT
+                this.DialogResult = DialogResult.Retry;
+
                 this.Close();
             }
         }

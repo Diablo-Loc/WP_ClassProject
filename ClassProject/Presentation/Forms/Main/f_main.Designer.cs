@@ -41,7 +41,6 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
@@ -67,9 +66,9 @@
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges27 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             guna2PictureBox1 = new Guna.UI2.WinForms.Guna2PictureBox();
             guna2Panel1 = new Guna.UI2.WinForms.Guna2Panel();
-            guna2CircleButton1 = new Guna.UI2.WinForms.Guna2CircleButton();
             pnlinfor = new Panel();
             lblLogout = new Label();
             lblRole = new Label();
@@ -101,6 +100,7 @@
             btnCloseAiChat = new Guna.UI2.WinForms.Guna2CircleButton();
             lblAiStatus = new Label();
             txtAiSearch = new Guna.UI2.WinForms.Guna2TextBox();
+            guna2CircleButton1 = new Guna.UI2.WinForms.Guna2CircleButton();
             ((System.ComponentModel.ISupportInitialize)guna2PictureBox1).BeginInit();
             guna2Panel1.SuspendLayout();
             pnlinfor.SuspendLayout();
@@ -149,28 +149,6 @@
             guna2Panel1.ShadowDecoration.Enabled = true;
             guna2Panel1.Size = new Size(1128, 133);
             guna2Panel1.TabIndex = 1;
-            // 
-            // guna2CircleButton1
-            // 
-            guna2CircleButton1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            guna2CircleButton1.BackColor = Color.Transparent;
-            guna2CircleButton1.DisabledState.BorderColor = Color.DarkGray;
-            guna2CircleButton1.DisabledState.CustomBorderColor = Color.DarkGray;
-            guna2CircleButton1.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
-            guna2CircleButton1.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
-            guna2CircleButton1.FillColor = Color.FromArgb(243, 244, 246);
-            guna2CircleButton1.Font = new Font("Segoe UI", 10F);
-            guna2CircleButton1.ForeColor = Color.FromArgb(75, 85, 99);
-            guna2CircleButton1.HoverState.FillColor = Color.FromArgb(229, 231, 235);
-            guna2CircleButton1.HoverState.ForeColor = Color.FromArgb(0, 120, 212);
-            guna2CircleButton1.Location = new Point(542, 44);
-            guna2CircleButton1.Name = "guna2CircleButton1";
-            guna2CircleButton1.ShadowDecoration.CustomizableEdges = customizableEdges3;
-            guna2CircleButton1.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
-            guna2CircleButton1.Size = new Size(45, 45);
-            guna2CircleButton1.TabIndex = 8;
-            guna2CircleButton1.Text = "🔔";
-            guna2CircleButton1.Click += guna2CircleButton1_Click;
             // 
             // pnlinfor
             // 
@@ -656,6 +634,29 @@
             txtAiSearch.Size = new Size(324, 40);
             txtAiSearch.TabIndex = 2;
             txtAiSearch.KeyDown += txtAiSearch_KeyDown;
+            // 
+            // guna2CircleButton1
+            // 
+            guna2CircleButton1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            guna2CircleButton1.BackColor = Color.Transparent;
+            guna2CircleButton1.DisabledState.BorderColor = Color.DarkGray;
+            guna2CircleButton1.DisabledState.CustomBorderColor = Color.DarkGray;
+            guna2CircleButton1.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
+            guna2CircleButton1.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            guna2CircleButton1.FillColor = Color.FromArgb(243, 244, 246);
+            guna2CircleButton1.Font = new Font("Segoe UI", 10F);
+            guna2CircleButton1.ForeColor = Color.FromArgb(75, 85, 99);
+            guna2CircleButton1.HoverState.FillColor = Color.FromArgb(229, 231, 235);
+            guna2CircleButton1.HoverState.ForeColor = Color.FromArgb(0, 120, 212);
+            guna2CircleButton1.Location = new Point(542, 44);
+            guna2CircleButton1.Name = "guna2CircleButton1";
+            guna2CircleButton1.ShadowDecoration.CustomizableEdges = customizableEdges3;
+            guna2CircleButton1.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
+            guna2CircleButton1.Size = new Size(45, 45);
+            guna2CircleButton1.TabIndex = 8;
+            guna2CircleButton1.Text = "🔔";
+            guna2CircleButton1.Visible = false;
+            guna2CircleButton1.Click += guna2CircleButton1_Click;
             // 
             // f_main
             // 

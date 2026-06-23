@@ -240,14 +240,28 @@ namespace ClassProject
 
             // BƯỚC 4: ĐIỀU HƯỚNG SANG FORM CHÍNH NGOÀI CONNECTION POOL
             this.Hide();
+
+            DialogResult mainResult;
             using (f_main mainForm = new f_main())
             {
-                mainForm.ShowDialog();
+                // Hứng lấy kết quả trả về khi f_main đóng
+                mainResult = mainForm.ShowDialog();
             }
-            this.Dispose();
-            // THAY ĐỔI Ở ĐÂY: Khi mainForm đóng (ShowDialog kết thúc), thoát hẳn ứng dụng luôn
-            Application.Exit();
-            return; // Ngăn không cho chạy xuống đoạn code hiển thị lại LoginForm bên dưới
+
+            // 🌟 THAY ĐỔI LOGIC TẠI ĐÂY:
+            if (mainResult == DialogResult.Retry)
+            {
+                // Nếu là Đăng xuất -> Hiện lại chính Form đăng nhập này và xóa mật khẩu cũ (nếu cần)
+                this.Show();
+                txtPassword.Clear();
+            }
+            else
+            {
+                // Nếu thoát bằng dấu [X] hoặc nút Cancel -> Giải phóng bộ nhớ và Tắt hẳn App
+                this.Dispose();
+                Application.Exit();
+            }
+            return;
         }
 
         private string EncryptPassword(string plainText)
