@@ -77,7 +77,7 @@ namespace ClassProject.Presentation.Forms
             string confirmPassword = txtConfirm.Text.Trim();
 
             // 1. Validate mật khẩu an toàn
-            string passwordPattern = @"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
+            string passwordPattern = @"(?=.*\d)(?=.*[\W_]).{8,}$";
             if (!Regex.IsMatch(newPassword, passwordPattern))
             {
                 MessageBox.Show("Mật khẩu mới không đủ độ an toàn!\nYêu cầu: Tối thiểu 8 ký tự, chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt.",
@@ -468,9 +468,9 @@ namespace ClassProject.Presentation.Forms
 
             string[] quickQuestions = new string[]
             {
-        "1. Xem quy trình lấy lại mật khẩu",
-        "2. Lỗi không nhận được OTP",
-        "3. Tiêu chuẩn mật khẩu an toàn"
+        
+        "1. Lỗi không nhận được OTP",
+        "2. Tiêu chuẩn mật khẩu an toàn"
             };
 
             Panel pnlMenu = new Panel();

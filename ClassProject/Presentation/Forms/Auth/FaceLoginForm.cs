@@ -136,80 +136,111 @@ namespace ClassProject.Presentation.Forms.Auth
                 {
                     Rectangle[] facesDetected = _faceService.DetectFaces(grayFrame);
 
-                    // BIỆN PHÁP AN TOÀN: Nếu không tìm thấy mặt, cập nhật UI và thoát sớm
+                    // ----------------------------------------------------------------------
+                    // 🌟 PHÂN TÍCH VÀ XỬ LÝ SỐ LƯỢNG NGƯỜI TRONG KHUNG HÌNH (THEO Ý THẦY)
+                    // ----------------------------------------------------------------------
+
+                    // TRƯỜNG HỢP KHÔNG CÓ AI
                     if (facesDetected.Length == 0 && !IsRegisterMode)
                     {
                         this.BeginInvoke(new Action(() => {
                             lblStatus.Text = "Hệ thống đang chờ: Vui lòng đưa khuôn mặt vào chính diện khung hình...";
                         }));
                     }
-
-                    foreach (Rectangle faceRect in facesDetected)
+                    // ❌ TRƯỜNG HỢP PHÁT HIỆN GIAN LẬN / QUÁ NHIỀU NGƯỜI TRONG KHUNG HÌNH (TỪ 2 NGƯỜI TRỞ LÊN)
+                    else if (facesDetected.Length > 1 && !IsRegisterMode)
                     {
-                        currentFrame.Draw(faceRect, new Bgr(Color.LimeGreen), 2);
-
-                        // Thực hiện quét so khớp 1:1 sau mỗi 400ms
-                        if (!IsRegisterMode && (DateTime.Now - _lastPredictTime).TotalMilliseconds > 400)
+                        // Vẽ khung đỏ cảnh báo lên toàn bộ khuôn mặt phát hiện được ngoài camera
+                        foreach (Rectangle faceRect in facesDetected)
                         {
-                            _lastPredictTime = DateTime.Now;
+                            currentFrame.Draw(faceRect, new Bgr(Color.Red), 2);
+                        }
 
-                            using (Image<Gray, byte> trainedFaceResult = grayFrame.Copy(faceRect).Resize(200, 200, Inter.Cubic))
+                        // Cảnh báo an ninh ngầm liên tục (Tùy chọn) hoặc chỉ báo lỗi giao diện 
+                        _securityService.ProcessSecurityAudit(_loginUsername, isSuccess: false, method: "FACE_ID", userEmail: _cachedUserEmail, failureReason: "Phat hien nhieu nguoi cung luc");
+
+                        this.BeginInvoke(new Action(() => {
+                            lblStatus.Text = "⚠️ CẢNH BÁO AN NINH: Phát hiện nhiều người trong camera! Vui lòng chỉ một mình chủ tài khoản quét.";
+                        }));
+
+                        // Bẻ gãy luồng xử lý tại đây để KHÔNG thực hiện so khớp PredictOwner
+                        _isProcessingFrame = false;
+
+                        // Vẫn đẩy frame lỗi (vẽ khung đỏ) lên màn hình để user thấy trực quan
+                        HienThiFrameLenGiaoDien(currentFrame);
+                        return;
+                    }
+                    // KHỚP CHUẨN ĐÚNG 1 NGƯỜI -> TIẾN HÀNH XỬ LÝ SINH TRẮC HỌC BÌNH THƯỜNG
+                    else
+                    {
+                        foreach (Rectangle faceRect in facesDetected)
+                        {
+                            // Vẽ khung xanh an toàn biểu thị đang nhận diện
+                            currentFrame.Draw(faceRect, new Bgr(Color.LimeGreen), 2);
+
+                            // Thực hiện quét so khớp 1:1 sau mỗi 400ms
+                            if (!IsRegisterMode && (DateTime.Now - _lastPredictTime).TotalMilliseconds > 400)
                             {
-                                string matchedUsername = _faceService.PredictOwner(trainedFaceResult);
+                                _lastPredictTime = DateTime.Now;
 
-                                // TRƯỜNG HỢP 1: ĐỐI CHIẾU KHỚP KHUÔN MẶT CHÍNH XÁC
-                                if (matchedUsername != null && matchedUsername.Equals(_loginUsername, StringComparison.OrdinalIgnoreCase))
+                                using (Image<Gray, byte> trainedFaceResult = grayFrame.Copy(faceRect).Resize(200, 200, Inter.Cubic))
                                 {
-                                    // KIỂM TOÁN NGẦM: Ghi nhận thành công
-                                    _securityService.ProcessSecurityAudit(_loginUsername, isSuccess: true, method: "FACE_ID", userEmail: _cachedUserEmail);
+                                    string matchedUsername = _faceService.PredictOwner(trainedFaceResult);
 
-                                    this.Invoke(new Action(() =>
+                                    // TRƯỜNG HỢP 1: ĐỐI CHIẾU KHỚP KHUÔN MẶT CHÍNH XÁC
+                                    if (matchedUsername != null && matchedUsername.Equals(_loginUsername, StringComparison.OrdinalIgnoreCase))
                                     {
-                                        StopCamera();
-                                        ProcLoginWithFace(matchedUsername);
-                                    }));
+                                        _securityService.ProcessSecurityAudit(_loginUsername, isSuccess: true, method: "FACE_ID", userEmail: _cachedUserEmail);
 
-                                    // Ngắt toàn bộ luồng xử lý frame vì đã đăng nhập thành công
-                                    _isProcessingFrame = false;
-                                    return;
-                                }
-                                // TRƯỜNG HỢP 2: SAI KHUÔN MẶT HOẶC KHÔNG KHỚP TÀI KHOẢN ĐANG YÊU CẦU
-                                else
-                                {
-                                    // KIỂM TOÁN NGẦM: Ghi nhận thất bại Face ID
-                                    _securityService.ProcessSecurityAudit(_loginUsername, isSuccess: false, method: "FACE_ID", userEmail: _cachedUserEmail, failureReason: "Guong mat khong trung khop");
+                                        this.Invoke(new Action(() => {
+                                            StopCamera();
+                                            ProcLoginWithFace(matchedUsername);
+                                        }));
 
-                                    this.BeginInvoke(new Action(() =>
+                                        _isProcessingFrame = false;
+                                        return;
+                                    }
+                                    // TRƯỜNG HỢP 2: SAI KHUÔN MẶT HOẶC KHÔNG KHỚP TÀI KHOẢN ĐANG YÊU CẦU
+                                    else
                                     {
-                                        lblStatus.Text = $"⚠️ Cảnh báo: Khuôn mặt không trùng khớp với tài khoản [{_loginUsername}]!";
-                                    }));
+                                        _securityService.ProcessSecurityAudit(_loginUsername, isSuccess: false, method: "FACE_ID", userEmail: _cachedUserEmail, failureReason: "Guong mat khong trung khop");
 
-                                    // 🔥 SỬA LỖI QUAN TRỌNG: Phải bẻ gãy luồng xử lý tại đây để không cho chạy xuống dưới bừa bãi!
-                                    _isProcessingFrame = false;
-                                    return;
+                                        this.BeginInvoke(new Action(() => {
+                                            lblStatus.Text = $"⚠️ Cảnh báo: Khuôn mặt không trùng khớp với tài khoản [{_loginUsername}]!";
+                                        }));
+
+                                        _isProcessingFrame = false;
+                                        return;
+                                    }
                                 }
                             }
                         }
                     }
 
                     // Đẩy hình ảnh thực tế từ Webcam lên giao diện phần mềm
-                    if (picCamera.IsHandleCreated)
-                    {
-                        Bitmap bmp = currentFrame.ToBitmap();
-                        this.BeginInvoke(new Action(() =>
-                        {
-                            if (picCamera.Image != null)
-                            {
-                                var oldImg = picCamera.Image;
-                                picCamera.Image = bmp;
-                                oldImg.Dispose();
-                            }
-                            else picCamera.Image = bmp;
-                        }));
-                    }
+                    HienThiFrameLenGiaoDien(currentFrame);
                 }
             }
             _isProcessingFrame = false;
+        }
+
+        // Hàm phụ trợ gom nhóm tác vụ đẩy hình ảnh lên UI cho gọn code sạch sẽ
+        private void HienThiFrameLenGiaoDien(Image<Bgr, byte> currentFrame)
+        {
+            if (picCamera.IsHandleCreated)
+            {
+                Bitmap bmp = currentFrame.ToBitmap();
+                this.BeginInvoke(new Action(() =>
+                {
+                    if (picCamera.Image != null)
+                    {
+                        var oldImg = picCamera.Image;
+                        picCamera.Image = bmp;
+                        oldImg.Dispose();
+                    }
+                    else picCamera.Image = bmp;
+                }));
+            }
         }
 
         // Các hàm BtnRegisterFace_Click, ProcLoginWithFace, StopCamera giữ nguyên...

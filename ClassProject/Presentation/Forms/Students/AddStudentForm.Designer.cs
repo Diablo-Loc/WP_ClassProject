@@ -655,7 +655,6 @@
             btnVoiceInput.TabIndex = 30;
             btnVoiceInput.Text = "🎙️  Nhập giọng nói";
             btnVoiceInput.TextAlign = HorizontalAlignment.Left;
-            btnVoiceInput.Visible = false;
             btnVoiceInput.Click += btnVoiceInput_Click;
             // 
             // btnScanFullInfo

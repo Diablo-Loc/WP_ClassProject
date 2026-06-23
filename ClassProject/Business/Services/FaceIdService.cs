@@ -90,7 +90,7 @@ namespace ClassProject.Business.Services // Thay đổi namespace cho đúng pro
                     catch { continue; }
                 }
 
-                // 2. 🌟 QUAN TRỌNG: Lấy tối đa 5 tấm ảnh của người khác làm mẫu đối chứng (Nhãn: 1)
+                // 2. QUAN TRỌNG: Lấy tối đa 5 tấm ảnh của người khác làm mẫu đối chứng (Nhãn: 1)
                 int negativeCount = 0;
                 foreach (string file in negativeFiles)
                 {
