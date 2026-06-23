@@ -1,8 +1,0 @@
-[2026-06-22 18:02:42] [OPEN] 🟢 Conn: be25f596 tại LoginForm.cs (Dòng 64)
-[2026-06-22 18:02:42] [OPEN] 🟢 Conn: 9b4bae19 tại LoginLogRepository.cs (Dòng 29)
-[2026-06-22 18:02:43] [CLOSE] 🔴 Conn: 9b4bae19 | Thời gian mở: 0.02s
-[2026-06-22 18:02:43] [OPEN] 🟢 Conn: 2d4f101c tại LoginAnalyticsService.cs (Dòng 47)
-[2026-06-22 18:02:43] [CLOSE] 🔴 Conn: 2d4f101c | Thời gian mở: 0.01s
-[2026-06-22 18:02:43] [CLOSE] 🔴 Conn: be25f596 | Thời gian mở: 1.00s
-[2026-06-22 18:02:43] [OPEN] 🟢 Conn: 7745caea tại f_main.cs (Dòng 398)
-[2026-06-22 18:02:43] [OPEN] 🟢 Conn: 15143882 tại DashBoardForm.cs (Dòng 26)
